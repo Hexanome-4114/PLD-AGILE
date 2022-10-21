@@ -2,6 +2,7 @@ package com.github.hexanome4114.pldagile.controleur;
 
 import javafx.fxml.FXML;
 
+import org.dom4j.Document;
 import org.dom4j.DocumentException;
 
 import java.io.IOException;
@@ -15,13 +16,17 @@ public class Controller {
     @FXML
     protected void loadXML() {
         XMLParser parser = new XMLParser();
-        URL xmlFile = null;
         String xmlFileUrl = "";
+        URL xmlFileURL = null;
+        Document xmlFile = null;
         try {
-            xmlFileUrl = parser.getXmlFileUrl();
-            xmlFile = Path.of(xmlFileUrl).toUri().toURL();
-            System.out.println(parser.parse(xmlFile));
-        } catch (DocumentException | IOException e) {
+            xmlFileUrl = parser.getXMLFileUrl();
+            xmlFileURL = Path.of(xmlFileUrl).toUri().toURL();
+            xmlFile = parser.parse(xmlFileURL);
+            parser.getWarehouse(xmlFile);
+            parser.getIntersection(xmlFile);
+            parser.getSegment(xmlFile);
+        } catch (IOException | DocumentException e) {
             throw new RuntimeException(e);
         }
     }
