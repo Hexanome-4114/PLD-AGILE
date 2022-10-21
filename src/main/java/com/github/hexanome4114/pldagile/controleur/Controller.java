@@ -1,6 +1,7 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -12,20 +13,27 @@ import java.nio.file.Path;
 import com.github.hexanome4114.pldagile.modele.XMLParser;
 
 public class Controller {
+    private Stage stage;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @FXML
     protected void loadXML() {
         XMLParser parser = new XMLParser();
-        String xmlFileUrl = "";
+        String xmlFilePath;
         URL xmlFileURL = null;
         Document xmlFile = null;
         try {
-            xmlFileUrl = parser.getXMLFileUrl();
-            xmlFileURL = Path.of(xmlFileUrl).toUri().toURL();
-            xmlFile = parser.parse(xmlFileURL);
-            parser.getWarehouse(xmlFile);
-            parser.getIntersection(xmlFile);
-            parser.getSegment(xmlFile);
+            xmlFilePath = parser.getXMLFilePath(this.stage);
+            if (!xmlFilePath.equals("")) {
+                xmlFileURL = Path.of(xmlFilePath).toUri().toURL();
+                xmlFile = parser.parse(xmlFileURL);
+                parser.getWarehouse(xmlFile);
+                parser.getIntersection(xmlFile);
+                parser.getSegment(xmlFile);
+            }
         } catch (IOException | DocumentException e) {
             throw new RuntimeException(e);
         }

@@ -1,29 +1,34 @@
 package com.github.hexanome4114.pldagile.modele;
 
-import java.awt.FileDialog;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import javax.swing.*;
-
 public class XMLParser {
 
-    public String getXMLFileUrl() {
-        String xmlFileUrl = "";
-        FileDialog fileDialog = new FileDialog(new JFrame());
-        fileDialog.setVisible(true);
-        File[] file = fileDialog.getFiles();
-        if(file.length > 0){
-            xmlFileUrl = fileDialog.getFiles()[0].getAbsolutePath();
+    public String getXMLFilePath(Stage stage) {
+        String xmlFilePath = "";
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Selectionnez un fichier xml");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Fichiers XML", "*.xml")
+                );
+
+        File file = fileChooser.showOpenDialog(stage);
+
+        if (file != null) {
+            xmlFilePath = file.getPath();
         }
-        return xmlFileUrl;
+        return xmlFilePath;
     }
 
     public Document parse(URL url) throws DocumentException, IOException {
