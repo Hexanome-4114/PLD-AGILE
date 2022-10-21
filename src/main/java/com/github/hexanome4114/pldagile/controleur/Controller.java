@@ -1,12 +1,14 @@
 package com.github.hexanome4114.pldagile.controleur;
 
-import com.github.hexanome4114.pldagile.modele.XMLParser;
 import javafx.fxml.FXML;
+
 import org.dom4j.DocumentException;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+
+import com.github.hexanome4114.pldagile.modele.XMLParser;
 
 public class Controller {
 
@@ -14,10 +16,12 @@ public class Controller {
     protected void loadXML() {
         XMLParser parser = new XMLParser();
         URL xmlFile = null;
+        String xmlFileUrl = "";
         try {
-            xmlFile = Path.of("").toUri().toURL();
+            xmlFileUrl = parser.getXmlFileUrl();
+            xmlFile = Path.of(xmlFileUrl).toUri().toURL();
             System.out.println(parser.parse(xmlFile));
-        } catch (MalformedURLException | DocumentException e) {
+        } catch (DocumentException | IOException e) {
             throw new RuntimeException(e);
         }
     }
