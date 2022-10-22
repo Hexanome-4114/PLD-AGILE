@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 
 import com.github.hexanome4114.pldagile.modele.XMLParser;
 
@@ -56,12 +57,21 @@ public class Controller {
             Line line = new Line(doubles[0], doubles[1], doubles[0], doubles[1]);
             group.getChildren().add(line);
         });
+
+
+        List<Long[]> listSegments = parser.getSegment(xmlFile);
+        listSegments.forEach((longs) -> {
+            Double coordsDestination[] = mapCoordsPixel.get(longs[0]);
+            Double coordsOrigin[] = mapCoordsPixel.get(longs[1]);
+            Line line = new Line(coordsOrigin[0], coordsOrigin[1], coordsDestination[0], coordsDestination[1]);
+            group.getChildren().add(line);
+        });
+
         Scene scene = new Scene(group, width, height);
         Stage stage1 = new Stage();
         stage1.setScene(scene);
         this.setStage(stage1);
         stage1.show();
-
     }
 
     // Projection de Mercator https://fr.wikipedia.org/wiki/Projection_de_Mercator

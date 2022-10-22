@@ -3,6 +3,7 @@ package com.github.hexanome4114.pldagile.modele;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,15 +65,24 @@ public class XMLParser {
         return hashMap;
     }
 
-    public void getSegment(Document document) {
+    public List<Long[]> getSegment(Document document) {
         List<Node> nodes = document.selectNodes("//segment");
+        List<Long[]> listSegments = new ArrayList<>();
 
         for (Node node: nodes) {
-            System.out.println("Current element : " + node.getName()
-                    + " | origin : " + node.valueOf("@origin")
-                    + ", name : " + node.valueOf("@name")
-                    + ", length : " + node.valueOf("@length")
-                    + ", destination : " + node.valueOf("@destination"));
+            // TODO Les rues sont souvent à doubles sens. Or là j'enregistre seulement une des rues (id de la map sur le nom)
+            String name = node.valueOf("@name");
+            Long idDestOrigin[] = new Long[2];
+            idDestOrigin[0] = Long.parseLong(node.valueOf("@destination"));
+            idDestOrigin[1] = Long.parseLong(node.valueOf("@origin"));
+            listSegments.add(idDestOrigin);
+//            System.out.println("Current element : " + node.getName()
+//                    + " | origin : " + node.valueOf("@origin")
+//                    + ", name : " + node.valueOf("@name")
+//                    + ", length : " + node.valueOf("@length")
+//                    + ", destination : " + node.valueOf("@destination"));
+
         }
+        return listSegments;
     }
 }
