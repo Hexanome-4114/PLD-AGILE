@@ -3,6 +3,7 @@ package com.github.hexanome4114.pldagile.modele;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.stage.FileChooser;
@@ -37,22 +38,30 @@ public class XMLParser {
         return document;
     }
 
-    public void getWarehouse(Document document) {
+    public Long getWarehouse(Document document) {
         Node node = document.selectSingleNode("//warehouse");
 
-        System.out.println("Current element : " + node.getName()
-                + " | address : " + node.valueOf("@address"));
+        //System.out.println("Current element : " + node.getName()
+          //      + " | address : " + node.valueOf("@address"));
+        return Long.parseLong(node.valueOf("@address"));
     }
 
-    public void getIntersection(Document document) {
+    public HashMap<Long, Double[]> getIntersection(Document document) {
         List<Node> nodes = document.selectNodes("//intersection");
 
+        HashMap<Long, Double[]> hashMap = new HashMap<>();
         for (Node node: nodes) {
-            System.out.println("Current element : " + node.getName()
-                    + " | longitude : " + node.valueOf("@longitude")
-                    + ", latitude : " + node.valueOf("@latitude")
-                    + ", id : " + node.valueOf("@id"));
+//            System.out.println("Current element : " + node.getName()
+//                    + " | longitude : " + node.valueOf("@longitude")
+//                    + ", latitude : " + node.valueOf("@latitude")
+//                    + ", id : " + node.valueOf("@id"));
+            Long id = Long.parseLong(node.valueOf("@id"));
+            Double coords[] = new Double[2];
+            coords[0] = Double.parseDouble(node.valueOf("@longitude"));
+            coords[1] = Double.parseDouble(node.valueOf("@latitude"));
+            hashMap.put(id,coords);
         }
+        return hashMap;
     }
 
     public void getSegment(Document document) {
