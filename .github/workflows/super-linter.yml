@@ -25,5 +25,6 @@ jobs:
         uses: github/super-linter@v4
         env:
           VALIDATE_JSCPD: false
+          FILTER_REGEX_EXCLUDE: "mvnw.*"
           DEFAULT_BRANCH: "main"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
