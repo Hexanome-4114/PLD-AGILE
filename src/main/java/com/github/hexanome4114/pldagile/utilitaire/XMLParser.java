@@ -1,4 +1,4 @@
-package com.github.hexanome4114.pldagile.modele;
+package com.github.hexanome4114.pldagile.utilitaire;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,9 +41,6 @@ public class XMLParser {
 
     public Long getWarehouse(Document document) {
         Node node = document.selectSingleNode("//warehouse");
-
-        //System.out.println("Current element : " + node.getName()
-          //      + " | address : " + node.valueOf("@address"));
         return Long.parseLong(node.valueOf("@address"));
     }
 
@@ -52,10 +49,6 @@ public class XMLParser {
 
         HashMap<Long, Double[]> hashMap = new HashMap<>();
         for (Node node: nodes) {
-//            System.out.println("Current element : " + node.getName()
-//                    + " | longitude : " + node.valueOf("@longitude")
-//                    + ", latitude : " + node.valueOf("@latitude")
-//                    + ", id : " + node.valueOf("@id"));
             Long id = Long.parseLong(node.valueOf("@id"));
             Double coords[] = new Double[2];
             coords[0] = Double.parseDouble(node.valueOf("@longitude"));
@@ -76,12 +69,6 @@ public class XMLParser {
             idDestOrigin[0] = Long.parseLong(node.valueOf("@destination"));
             idDestOrigin[1] = Long.parseLong(node.valueOf("@origin"));
             listSegments.add(idDestOrigin);
-//            System.out.println("Current element : " + node.getName()
-//                    + " | origin : " + node.valueOf("@origin")
-//                    + ", name : " + node.valueOf("@name")
-//                    + ", length : " + node.valueOf("@length")
-//                    + ", destination : " + node.valueOf("@destination"));
-
         }
         return listSegments;
     }

@@ -10,6 +10,6 @@ module com.github.hexanome4114.pldagile.agile {
     exports com.github.hexanome4114.pldagile;
     exports com.github.hexanome4114.pldagile.controleur;
     opens com.github.hexanome4114.pldagile.controleur to javafx.fxml;
-    exports com.github.hexanome4114.pldagile.modele;
-    opens com.github.hexanome4114.pldagile.modele to javafx.fxml;
+    exports com.github.hexanome4114.pldagile.utilitaire;
+    opens com.github.hexanome4114.pldagile.utilitaire to javafx.fxml;
 }
