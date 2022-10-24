@@ -1,5 +1,6 @@
 package com.github.hexanome4114.pldagile;
 
+import com.github.hexanome4114.pldagile.controleur.Controller;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -13,6 +14,8 @@ public class Application extends javafx.application.Application {
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
         stage.setTitle("PLD-AGILE");
         stage.setScene(scene);
+        Controller controller = new Controller();
+        controller.setStage(stage);
         stage.show();
     }
 
