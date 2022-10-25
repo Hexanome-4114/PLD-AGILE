@@ -1,12 +1,16 @@
 package com.github.hexanome4114.pldagile.modele;
 
-public class Intersection {
-    private double latitude;
-    private double longitude;
+public final class Intersection {
 
-    public Intersection(double lat, double longi) {
-        this.latitude = lat;
-        this.longitude = longi;
+    private final double latitude;
+    private final double longitude;
+
+    private double x;
+    private double y;
+
+    public Intersection(final double latitude, final double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public double getLatitude() {
@@ -15,5 +19,21 @@ public class Intersection {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public void setX(final double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(final double y) {
+        this.y = y;
     }
 }

@@ -1,31 +1,35 @@
 package com.github.hexanome4114.pldagile.modele;
 
-public class Segment {
-    private String nom;
-    private Integer longueur;
-    private Intersection intersectionDebut;
-    private Intersection intersectionFin;
+public final class Segment {
 
-    public Segment(String nom, Integer longueur, Intersection intersectionDebut, Intersection intersectionFin) {
+    private final String nom;
+
+    /** Longueur du segment en centimètres. */
+    private final int longueur;
+    private final Intersection debut;
+    private final Intersection fin;
+
+    public Segment(final String nom, final int longueur,
+                   final Intersection debut, final Intersection fin) {
         this.nom = nom;
         this.longueur = longueur;
-        this.intersectionDebut = intersectionDebut;
-        this.intersectionFin = intersectionFin;
+        this.debut = debut;
+        this.fin = fin;
     }
 
     public String getNom() {
         return nom;
     }
 
-    public Integer getLongueur() {
+    public int getLongueur() {
         return longueur;
     }
 
-    public Intersection getIntersectionDebut() {
-        return intersectionDebut;
+    public Intersection getDebut() {
+        return debut;
     }
 
-    public Intersection getIntersectionFin() {
-        return intersectionFin;
+    public Intersection getFin() {
+        return fin;
     }
 }

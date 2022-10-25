@@ -1,10 +1,11 @@
 package com.github.hexanome4114.pldagile.modele;
 
-public class Livreur {
-    private int numero;
-    private  int vitesseMoyenne;
+public final class Livreur {
 
-    public Livreur(int numero, int vitesseMoyenne) {
+    private final int numero;
+    private final int vitesseMoyenne;
+
+    public Livreur(final int numero, final int vitesseMoyenne) {
         this.numero = numero;
         this.vitesseMoyenne = vitesseMoyenne;
     }
@@ -15,5 +16,12 @@ public class Livreur {
 
     public int getVitesseMoyenne() {
         return vitesseMoyenne;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Livreur{numero=%d, vitesseMoyenne=%d}", numero, vitesseMoyenne
+        );
     }
 }

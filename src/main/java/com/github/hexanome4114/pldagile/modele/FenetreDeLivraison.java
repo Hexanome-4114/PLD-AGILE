@@ -1,10 +1,11 @@
 package com.github.hexanome4114.pldagile.modele;
 
-public class FenetreDeLivraison {
-    private int debut;
-    private int fin;
+public final class FenetreDeLivraison {
 
-    public FenetreDeLivraison(int debut, int fin) {
+    private final int debut;
+    private final int fin;
+
+    public FenetreDeLivraison(final int debut, final int fin) {
         this.debut = debut;
         this.fin = fin;
     }
@@ -15,5 +16,10 @@ public class FenetreDeLivraison {
 
     public int getFin() {
         return fin;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%dh-%dh", debut, fin);
     }
 }
