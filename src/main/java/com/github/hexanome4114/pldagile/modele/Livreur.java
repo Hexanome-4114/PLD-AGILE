@@ -1,25 +1,19 @@
 package com.github.hexanome4114.pldagile.modele;
 
 public class Livreur {
-    private String nom;
-    private Tournee tournee;
-    private float vitesseMoyenne;
+    private int numero;
+    private  int vitesseMoyenne;
 
-    public Livreur(String nom, Tournee tournee, float vitesseMoyenne) {
-        this.nom = nom;
-        this.tournee = tournee;
+    public Livreur(int numero, int vitesseMoyenne) {
+        this.numero = numero;
         this.vitesseMoyenne = vitesseMoyenne;
     }
 
-    public String getNom() {
-        return nom;
+    public int getNumero() {
+        return numero;
     }
 
-    public Tournee getTournee() {
-        return tournee;
-    }
-
-    public float getVitesseMoyenne() {
+    public int getVitesseMoyenne() {
         return vitesseMoyenne;
     }
 }

@@ -1,5 +1,6 @@
 package com.github.hexanome4114.pldagile.controleur;
 
+import com.github.hexanome4114.pldagile.modele.*;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
@@ -18,6 +19,8 @@ import com.github.hexanome4114.pldagile.utilitaire.XMLParser;
 
 public class Controller {
     private Stage stage;
+    private int nbLivreurs;
+    private Plan plan;
 
     @FXML
     private Pane map;
@@ -26,6 +29,12 @@ public class Controller {
         this.stage = stage;
     }
 
+    public void ajouterLivraison (Livraison livraison) {
+    }
+    public void supprimerLivraison (Livraison livraison) {
+    }
+    public void afficherPlan (Plan plan) {
+    }
     @FXML
     protected void loadXML() {
         XMLParser parser = new XMLParser();
