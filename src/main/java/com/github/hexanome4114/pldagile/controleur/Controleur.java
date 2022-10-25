@@ -7,14 +7,21 @@ import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.modele.Segment;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.dom4j.DocumentException;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -23,6 +30,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.dom4j.DocumentException;
 
 /**
  * Contrôleur de l'application.
@@ -48,6 +57,24 @@ public final class Controleur {
     private Pane map;
 
     @FXML
+    private ComboBox<Livreur> comboBoxLivreur;
+
+    @FXML
+    private ComboBox<FenetreDeLivraison> comboBoxFenetreDeLivraison;
+
+    @FXML
+    private TableView<Livraison> tableauLivraison;
+
+    @FXML
+    private TableColumn<Livraison, Integer> numeroLivraison;
+
+    @FXML
+    private TableColumn<Livraison, Livreur> livreur;
+
+    @FXML
+    private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraison;
+
+    @FXML
     public void initialize() {
         this.livraisons = new ArrayList<>();
         this.genererLivreurs(NOMBRE_LIVREURS);
@@ -57,6 +84,14 @@ public final class Controleur {
                 new FenetreDeLivraison(10, 11),
                 new FenetreDeLivraison(11, 12)
         ));
+
+        ObservableList<FenetreDeLivraison> oListFenetreDeLivraison = FXCollections.observableArrayList(this.fenetresDeLivraison);
+        ObservableList<Livreur> oListLivreurs = FXCollections.observableArrayList(this.livreurs);
+
+        this.comboBoxLivreur.setPromptText("Livreur");
+        this.comboBoxLivreur.setItems(oListLivreurs);
+        this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
+        this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
     }
 
     /**
@@ -79,8 +114,21 @@ public final class Controleur {
         this.livreurs = livreurs;
     }
 
-    public void ajouterLivraison(final Livraison livraison) {
+    public void ajouterLivraison() {
+        Livraison livraison = new Livraison(
+                1,
+                this.comboBoxFenetreDeLivraison.getValue(),
+                this.comboBoxLivreur.getValue(),
+                new Intersection(4.857418, 45.75406));
         this.livraisons.add(livraison);
+
+        this.numeroLivraison.setCellValueFactory(new PropertyValueFactory<>("numero"));
+        this.livreur.setCellValueFactory(new PropertyValueFactory<>("livreur"));
+        this.fenetreDeLivraison.setCellValueFactory(new PropertyValueFactory<>("fenetreDeLivraison"));
+
+        ObservableList<Livraison> oListLivraison = FXCollections.observableArrayList(this.livraisons);
+
+        this.tableauLivraison.setItems(oListLivraison);
     }
 
     public void supprimerLivraison(final Livraison livraison) {
