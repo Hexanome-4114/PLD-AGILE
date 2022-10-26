@@ -11,7 +11,6 @@ import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -54,7 +53,7 @@ public final class Controleur {
     private Stage stage;
 
     @FXML
-    private Pane map;
+    private Pane carte;
 
     @FXML
     private ComboBox<Livreur> comboBoxLivreur;
@@ -85,8 +84,10 @@ public final class Controleur {
                 new FenetreDeLivraison(11, 12)
         ));
 
-        ObservableList<FenetreDeLivraison> oListFenetreDeLivraison = FXCollections.observableArrayList(this.fenetresDeLivraison);
-        ObservableList<Livreur> oListLivreurs = FXCollections.observableArrayList(this.livreurs);
+        ObservableList<FenetreDeLivraison> oListFenetreDeLivraison =
+                FXCollections.observableArrayList(this.fenetresDeLivraison);
+        ObservableList<Livreur> oListLivreurs =
+                FXCollections.observableArrayList(this.livreurs);
 
         this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
@@ -115,18 +116,25 @@ public final class Controleur {
     }
 
     public void ajouterLivraison() {
+        /* TODO vérifier que le livreur, la fenêtre et l'adresse
+            ne sont pas vides avant de créer l'objet = obliger
+            l'utilisateur à rentrer les infos */
         Livraison livraison = new Livraison(
-                1,
+                this.livraisons.size() + 1,
                 this.comboBoxFenetreDeLivraison.getValue(),
                 this.comboBoxLivreur.getValue(),
                 new Intersection(4.857418, 45.75406));
         this.livraisons.add(livraison);
 
-        this.numeroLivraison.setCellValueFactory(new PropertyValueFactory<>("numero"));
-        this.livreur.setCellValueFactory(new PropertyValueFactory<>("livreur"));
-        this.fenetreDeLivraison.setCellValueFactory(new PropertyValueFactory<>("fenetreDeLivraison"));
+        this.numeroLivraison.setCellValueFactory(
+                new PropertyValueFactory<>("numero"));
+        this.livreur.setCellValueFactory(
+                new PropertyValueFactory<>("livreur"));
+        this.fenetreDeLivraison.setCellValueFactory(
+                new PropertyValueFactory<>("fenetreDeLivraison"));
 
-        ObservableList<Livraison> oListLivraison = FXCollections.observableArrayList(this.livraisons);
+        ObservableList<Livraison> oListLivraison =
+                FXCollections.observableArrayList(this.livraisons);
 
         this.tableauLivraison.setItems(oListLivraison);
     }
@@ -172,7 +180,7 @@ public final class Controleur {
                     debut.getX(), debut.getY(), fin.getX(), fin.getY()
             );
 
-            this.map.getChildren().add(ligne);
+            this.carte.getChildren().add(ligne);
         }
 
         // entrepot
@@ -183,7 +191,7 @@ public final class Controleur {
         entrepot.setRadius(5);
         entrepot.setFill(Color.RED);
 
-        this.map.getChildren().add(entrepot);
+        this.carte.getChildren().add(entrepot);
     }
 
     public void setStage(final Stage stage) {
