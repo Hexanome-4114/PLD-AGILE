@@ -20,8 +20,6 @@ public final class Livreur {
 
     @Override
     public String toString() {
-        return String.format(
-                "Livreur{numero=%d, vitesseMoyenne=%d}", numero, vitesseMoyenne
-        );
+        return String.format("Livreur %d", numero);
     }
 }

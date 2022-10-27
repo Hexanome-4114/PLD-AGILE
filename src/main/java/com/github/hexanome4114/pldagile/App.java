@@ -19,10 +19,11 @@ public final class App extends Application {
     @Override
     public void start(final Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class
-                .getResource("view.fxml"));
+                .getResource("Vue.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), LARGEUR, HAUTEUR);
         stage.setTitle("PLD-AGILE");
         stage.setScene(scene);
+        stage.setMaximized(true);
 
         Controleur controleur = new Controleur();
         controleur.setStage(stage);
