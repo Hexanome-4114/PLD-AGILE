@@ -35,10 +35,10 @@ public final class Serialiseur {
         Document document = reader.read(url);
 
         // intersections
-        HashMap<Long, Intersection> intersections = new HashMap<>();
+        HashMap<String, Intersection> intersections = new HashMap<>();
 
-        for (Node noeudIntersection: document.selectNodes("//intersection")) {
-            Long id = Long.parseLong(noeudIntersection.valueOf("@id"));
+        for (Node noeudIntersection: document.selectNodes("/map/intersection")) {
+            String id = noeudIntersection.valueOf("@id");
             double latitude = Double.parseDouble(
                     noeudIntersection.valueOf("@latitude"));
             double longitude = Double.parseDouble(
@@ -48,14 +48,14 @@ public final class Serialiseur {
         }
 
         // entrepot
-        Node node = document.selectSingleNode("//warehouse");
+        Node node = document.selectSingleNode("/map/warehouse");
         Intersection entrepot = intersections.get(
-                Long.parseLong(node.valueOf("@address")));
+                node.valueOf("@address"));
 
         // segments
         List<Segment> segments = new ArrayList<>();
 
-        for (Node noeudSegment: document.selectNodes("//segment")) {
+        for (Node noeudSegment: document.selectNodes("/map/segment")) {
             // TODO Les rues sont souvent à doubles sens. Or là j'enregistre
             // seulement une des rues (id de la map sur le nom)
 
@@ -72,7 +72,7 @@ public final class Serialiseur {
                     nom, longueur, intersectionDebut, intersectionFin));
         }
 
-        return new Plan(segments, entrepot);
+        return new Plan(segments, intersections, entrepot);
     }
 
     /**

@@ -50,6 +50,8 @@ public final class Controleur {
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
+    private Circle pointClique;
+
     /** Vue de l'application. */
     private Stage stage;
 
@@ -192,9 +194,22 @@ public final class Controleur {
             Intersection debut = segment.getDebut();
             Intersection fin = segment.getFin();
 
-            calque.ajouterPoint(debut, new Circle(3, Color.BLUE));
-            calque.ajouterPoint(fin, new Circle(3, Color.BLUE));
+            calque.ajouterPoint(debut, new Circle(3, Color.GREY));
+            calque.ajouterPoint(fin, new Circle(3, Color.GREY));
         }
+
+        calque.getPoints().forEach(point -> {
+            // ajout d'un listener sur chaque point du calque
+            point.getValue().setOnMouseClicked(e -> {
+                e.consume();
+                if (this.pointClique != null) {
+                    this.pointClique.setFill(Color.GREY);
+                }
+                this.pointClique = (Circle) e.getTarget();
+                ((Circle) e.getTarget()).setFill(Color.BLUE);
+                this.comboBoxAdresse.setValue(point.getKey());
+            });
+        });
 
         // entrepot
         Intersection entrepot = plan.getEntrepot();
@@ -206,14 +221,6 @@ public final class Controleur {
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
         carteVue.addLayer(calque); // ajout du calque contenant les points
-
-        calque.getPoints().forEach(point -> {
-            // ajout d'un listener sur chaque point du calque
-            point.getValue().setOnMouseClicked(e -> {
-                e.consume();
-                this.comboBoxAdresse.setValue(point.getKey());
-            });
-        });
 
         StackPane sp = new StackPane();
         sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
