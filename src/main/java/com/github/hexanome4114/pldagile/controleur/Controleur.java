@@ -6,21 +6,24 @@ import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.modele.Segment;
+import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
-
+import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.dom4j.DocumentException;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -29,8 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.dom4j.DocumentException;
 
 /**
  * Contrôleur de l'application.
@@ -62,6 +63,9 @@ public final class Controleur {
     private ComboBox<FenetreDeLivraison> comboBoxFenetreDeLivraison;
 
     @FXML
+    private ComboBox<Intersection> comboBoxAdresse;
+
+    @FXML
     private TableView<Livraison> tableauLivraison;
 
     @FXML
@@ -74,7 +78,12 @@ public final class Controleur {
     private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraison;
 
     @FXML
+    private Label messageErreur;
+
+    @FXML
     public void initialize() {
+        System.setProperty("javafx.platform", "desktop");
+
         this.livraisons = new ArrayList<>();
         this.genererLivreurs(NOMBRE_LIVREURS);
         this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
@@ -115,28 +124,33 @@ public final class Controleur {
         this.livreurs = livreurs;
     }
 
+    @SuppressWarnings("checkstyle:NeedBraces")
     public void ajouterLivraison() {
-        /* TODO vérifier que le livreur, la fenêtre et l'adresse
-            ne sont pas vides avant de créer l'objet = obliger
-            l'utilisateur à rentrer les infos */
-        Livraison livraison = new Livraison(
-                this.livraisons.size() + 1,
-                this.comboBoxFenetreDeLivraison.getValue(),
-                this.comboBoxLivreur.getValue(),
-                new Intersection(4.857418, 45.75406));
-        this.livraisons.add(livraison);
+        if (this.comboBoxLivreur.getValue() != null
+                && this.comboBoxFenetreDeLivraison.getValue() != null
+                && this.comboBoxAdresse.getValue() != null) {
+            Livraison livraison = new Livraison(
+                    this.livraisons.size() + 1,
+                    this.comboBoxFenetreDeLivraison.getValue(),
+                    this.comboBoxLivreur.getValue(),
+                    this.comboBoxAdresse.getValue());
+            this.livraisons.add(livraison);
 
-        this.numeroLivraison.setCellValueFactory(
-                new PropertyValueFactory<>("numero"));
-        this.livreur.setCellValueFactory(
-                new PropertyValueFactory<>("livreur"));
-        this.fenetreDeLivraison.setCellValueFactory(
-                new PropertyValueFactory<>("fenetreDeLivraison"));
+            this.numeroLivraison.setCellValueFactory(
+                    new PropertyValueFactory<>("numero"));
+            this.livreur.setCellValueFactory(
+                    new PropertyValueFactory<>("livreur"));
+            this.fenetreDeLivraison.setCellValueFactory(
+                    new PropertyValueFactory<>("fenetreDeLivraison"));
 
-        ObservableList<Livraison> oListLivraison =
-                FXCollections.observableArrayList(this.livraisons);
+            ObservableList<Livraison> oListLivraison =
+                    FXCollections.observableArrayList(this.livraisons);
 
-        this.tableauLivraison.setItems(oListLivraison);
+            this.tableauLivraison.setItems(oListLivraison);
+            this.messageErreur.setText("");
+        } else {
+            this.messageErreur.setText("Veuillez renseigner tous les champs !");
+        }
     }
 
     public void supprimerLivraison(final Livraison livraison) {
@@ -171,27 +185,41 @@ public final class Controleur {
     }
 
     private void afficherPlan(final Plan plan) {
+        CalquePlan calque = new CalquePlan();
+
         // segments
         for (Segment segment : plan.getSegments()) {
             Intersection debut = segment.getDebut();
             Intersection fin = segment.getFin();
 
-            Line ligne = new Line(
-                    debut.getX(), debut.getY(), fin.getX(), fin.getY()
-            );
-
-            this.carte.getChildren().add(ligne);
+            calque.ajouterPoint(debut, new Circle(3, Color.BLUE));
+            calque.ajouterPoint(fin, new Circle(3, Color.BLUE));
         }
 
         // entrepot
-        Circle entrepot = new Circle();
+        Intersection entrepot = plan.getEntrepot();
+        calque.ajouterPoint(entrepot, new Circle(5, Color.RED));
 
-        entrepot.setCenterX(plan.getEntrepot().getX());
-        entrepot.setCenterY(plan.getEntrepot().getY());
-        entrepot.setRadius(5);
-        entrepot.setFill(Color.RED);
+        // config carte
+        MapView carteVue = new MapView();
 
-        this.carte.getChildren().add(entrepot);
+        carteVue.setZoom(14.5);
+        carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
+        carteVue.addLayer(calque); // ajout du calque contenant les points
+
+        calque.getPoints().forEach(point -> {
+            // ajout d'un listener sur chaque point du calque
+            point.getValue().setOnMouseClicked(e -> {
+                e.consume();
+                this.comboBoxAdresse.setValue(point.getKey());
+            });
+        });
+
+        StackPane sp = new StackPane();
+        sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
+        sp.getChildren().add(carteVue);
+
+        this.carte.getChildren().add(sp);
     }
 
     public void setStage(final Stage stage) {

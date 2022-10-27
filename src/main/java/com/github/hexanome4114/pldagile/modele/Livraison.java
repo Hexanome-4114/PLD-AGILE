@@ -31,4 +31,11 @@ public final class Livraison {
     public Intersection getAdresse() {
         return adresse;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Livraison{numero=%d, fenetreDeLivraison=%s, "
+                        + "livreur=%s, adresse=%s}",
+                numero, fenetreDeLivraison, livreur, adresse);
+    }
 }
