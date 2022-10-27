@@ -9,22 +9,45 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
     <HBox prefHeight="640.0" prefWidth="1280.0">
-        <Pane fx:id="carte" prefHeight="640.0" prefWidth="640.0" style="-fx-background-color: white;" />
+        <Pane fx:id="carte" prefHeight="640.0" prefWidth="640.0" style="-fx-background-color: white;">
+            <HBox.margin>
+                <Insets right="20.0" />
+            </HBox.margin>
+        </Pane>
         <VBox prefHeight="640.0" prefWidth="640.0">
             <HBox prefHeight="19.0" prefWidth="640.0">
-                <ComboBox fx:id="comboBoxLivreur" prefWidth="150.0" />
-                <ComboBox fx:id="comboBoxFenetreDeLivraison" layoutX="160.0" layoutY="10.0" prefWidth="150.0" />
+                <ComboBox fx:id="comboBoxLivreur" prefWidth="150.0">
+                   <HBox.margin>
+                      <Insets right="10.0" />
+                   </HBox.margin>
+                </ComboBox>
+                <ComboBox fx:id="comboBoxFenetreDeLivraison" layoutX="160.0" layoutY="10.0" prefWidth="150.0">
+                   <HBox.margin>
+                      <Insets right="10.0" />
+                   </HBox.margin>
+                </ComboBox>
                 <ComboBox fx:id="comboBoxAdresse" prefHeight="24.0" prefWidth="349.0" />
             </HBox>
-            <Button text="Adresse de livraison" />
-            <Button onAction="#ajouterLivraison" text="Ajouter une livraison" />
-         <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
-           <columns>
-             <TableColumn fx:id="numeroLivraison" prefWidth="213.3" text="Numéro de livraison" />
-             <TableColumn fx:id="livreur" prefWidth="213.3" text="Livreur" />
-             <TableColumn fx:id="fenetreDeLivraison" prefWidth="213.3" text="Fenêtre" />
-           </columns>
-         </TableView>
+            <Button onAction="#ajouterLivraison" text="Ajouter une livraison">
+                <VBox.margin>
+                   <Insets top="10.0" />
+                </VBox.margin>
+            </Button>
+            <Label fx:id="messageErreur" prefHeight="18.0" prefWidth="640.0" textFill="RED">
+                <VBox.margin>
+                   <Insets top="10.0" />
+                </VBox.margin>
+            </Label>
+            <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
+                <columns>
+                    <TableColumn fx:id="numeroLivraison" prefWidth="213.3" text="Numéro de livraison" />
+                    <TableColumn fx:id="livreur" prefWidth="213.3" text="Livreur" />
+                    <TableColumn fx:id="fenetreDeLivraison" prefWidth="213.3" text="Fenêtre" />
+                </columns>
+                <VBox.margin>
+                   <Insets top="10.0" />
+                </VBox.margin>
+            </TableView>
         </VBox>
     </HBox>
     <Button onAction="#chargerPlan" text="Charger le plan" />

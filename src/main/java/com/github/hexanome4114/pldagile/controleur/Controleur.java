@@ -12,9 +12,7 @@ import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -77,6 +75,9 @@ public final class Controleur {
     private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraison;
 
     @FXML
+    private Label messageErreur;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
@@ -120,28 +121,32 @@ public final class Controleur {
         this.livreurs = livreurs;
     }
 
+    @SuppressWarnings("checkstyle:NeedBraces")
     public void ajouterLivraison() {
-        /* TODO vérifier que le livreur, la fenêtre et l'adresse
-            ne sont pas vides avant de créer l'objet = obliger
-            l'utilisateur à rentrer les infos */
-        Livraison livraison = new Livraison(
-                this.livraisons.size() + 1,
-                this.comboBoxFenetreDeLivraison.getValue(),
-                this.comboBoxLivreur.getValue(),
-                this.comboBoxAdresse.getValue());
-        this.livraisons.add(livraison);
+        if (this.comboBoxLivreur.getValue() != null
+                && this.comboBoxFenetreDeLivraison.getValue() != null
+                && this.comboBoxAdresse.getValue() != null) {
+            Livraison livraison = new Livraison(
+                    this.livraisons.size() + 1,
+                    this.comboBoxFenetreDeLivraison.getValue(),
+                    this.comboBoxLivreur.getValue(),
+                    this.comboBoxAdresse.getValue());
+            this.livraisons.add(livraison);
 
-        this.numeroLivraison.setCellValueFactory(
-                new PropertyValueFactory<>("numero"));
-        this.livreur.setCellValueFactory(
-                new PropertyValueFactory<>("livreur"));
-        this.fenetreDeLivraison.setCellValueFactory(
-                new PropertyValueFactory<>("fenetreDeLivraison"));
+            this.numeroLivraison.setCellValueFactory(
+                    new PropertyValueFactory<>("numero"));
+            this.livreur.setCellValueFactory(
+                    new PropertyValueFactory<>("livreur"));
+            this.fenetreDeLivraison.setCellValueFactory(
+                    new PropertyValueFactory<>("fenetreDeLivraison"));
 
-        ObservableList<Livraison> oListLivraison =
-                FXCollections.observableArrayList(this.livraisons);
+            ObservableList<Livraison> oListLivraison =
+                    FXCollections.observableArrayList(this.livraisons);
 
-        this.tableauLivraison.setItems(oListLivraison);
+            this.tableauLivraison.setItems(oListLivraison);
+        } else {
+            this.messageErreur.setText("Veuillez renseigner tous les champs !");
+        }
     }
 
     public void supprimerLivraison(final Livraison livraison) {
