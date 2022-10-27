@@ -1,5 +1,7 @@
 package com.github.hexanome4114.pldagile.controleur;
 
+import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
+import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
@@ -29,9 +31,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Contrôleur de l'application.
@@ -159,7 +159,28 @@ public final class Controleur {
     public void calculerTournee() {
 
         // Dijkstra
-        // Creation de chaque noeud et ajout des sommets adjacents grâce aux segments
+        // Creation de chaque noeud et ajout dans le graphe
+        Graphe graphe = new Graphe();
+        for (Map.Entry<String,Intersection> intersection : this.plan.getIntersections().entrySet()) {
+            Sommet sommet = new Sommet(intersection.getKey());
+            graphe.ajouterSommet(sommet);
+        }
+
+        // ajout des sommets adjacents et de la distance grâce aux segments
+        for (Segment segment: this.plan.getSegments()) {
+            Intersection intersectionDebut = segment.getDebut();
+            Intersection intersectionFin = segment.getFin();
+            Sommet sommetOrigine = graphe.getSommets().get(intersectionDebut.getId());
+            Sommet sommetDestination = graphe.getSommets().get(intersectionFin.getId());
+            sommetOrigine.addDestination(sommetDestination, segment.getLongueur());
+        }
+
+        // TODO : faire une boucle sur toutes les livraisons pour calculer Dijkstra depuis chacune des adresses de livraisons
+        Intersection sommentIntersection = this.livraisons.get(0).getAdresse();
+        Sommet sommetSource = graphe.getSommets().get(sommentIntersection.getId());
+        graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource);
+        System.out.println(graphe.toString());
+
     }
 
 

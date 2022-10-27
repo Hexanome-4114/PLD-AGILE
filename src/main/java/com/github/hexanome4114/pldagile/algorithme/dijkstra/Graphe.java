@@ -1,15 +1,16 @@
 package com.github.hexanome4114.pldagile.algorithme.dijkstra;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Graphe {
-    private Set<Sommet> sommets = new HashSet<>();
+    private Map<String,Sommet> sommets = new HashMap<>();
+
+    public Map<String, Sommet> getSommets() {
+        return sommets;
+    }
 
     public void ajouterSommet(Sommet sommetA) {
-        sommets.add(sommetA);
+        sommets.put(sommetA.getNom(), sommetA);
     }
 
     public static Graphe calculerCheminplusCourtDepuisSource(Graphe graphe, Sommet source) {
