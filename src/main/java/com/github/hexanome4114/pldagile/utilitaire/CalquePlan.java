@@ -19,13 +19,7 @@ public final class CalquePlan extends MapLayer {
     public CalquePlan() { }
 
     public void ajouterPoint(final Intersection p, final Node icon) {
-        final Pair<Intersection, Node> pair = new Pair(p, icon);
-        icon.setOnMouseClicked(e -> {
-
-            e.consume();
-            System.out.println(pair.getKey());
-        });
-        points.add(pair);
+        points.add(new Pair(p, icon));
         this.getChildren().add(icon);
         this.markDirty();
     }
@@ -41,5 +35,9 @@ public final class CalquePlan extends MapLayer {
             icon.setTranslateX(mapPoint.getX());
             icon.setTranslateY(mapPoint.getY());
         }
+    }
+
+    public ObservableList<Pair<Intersection, Node>> getPoints() {
+        return points;
     }
 }

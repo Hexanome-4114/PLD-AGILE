@@ -14,6 +14,7 @@
             <HBox prefHeight="19.0" prefWidth="640.0">
                 <ComboBox fx:id="comboBoxLivreur" prefWidth="150.0" />
                 <ComboBox fx:id="comboBoxFenetreDeLivraison" layoutX="160.0" layoutY="10.0" prefWidth="150.0" />
+                <ComboBox fx:id="comboBoxAdresse" prefHeight="24.0" prefWidth="349.0" />
             </HBox>
             <Button text="Adresse de livraison" />
             <Button onAction="#ajouterLivraison" text="Ajouter une livraison" />

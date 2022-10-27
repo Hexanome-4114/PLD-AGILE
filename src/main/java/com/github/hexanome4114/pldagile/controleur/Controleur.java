@@ -62,6 +62,9 @@ public final class Controleur {
     private ComboBox<FenetreDeLivraison> comboBoxFenetreDeLivraison;
 
     @FXML
+    private ComboBox<Intersection> comboBoxAdresse;
+
+    @FXML
     private TableView<Livraison> tableauLivraison;
 
     @FXML
@@ -125,7 +128,7 @@ public final class Controleur {
                 this.livraisons.size() + 1,
                 this.comboBoxFenetreDeLivraison.getValue(),
                 this.comboBoxLivreur.getValue(),
-                new Intersection(4.857418, 45.75406));
+                this.comboBoxAdresse.getValue());
         this.livraisons.add(livraison);
 
         this.numeroLivraison.setCellValueFactory(
@@ -195,8 +198,16 @@ public final class Controleur {
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
         carteVue.addLayer(calque); // ajout du calque contenant les points
 
+        calque.getPoints().forEach(point -> {
+            // ajout d'un listener sur chaque point du calque
+            point.getValue().setOnMouseClicked(e -> {
+                e.consume();
+                this.comboBoxAdresse.setValue(point.getKey());
+            });
+        });
+
         StackPane sp = new StackPane();
-        sp.setPrefSize(640, 640);
+        sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
         sp.getChildren().add(carteVue);
 
         this.carte.getChildren().add(sp);
