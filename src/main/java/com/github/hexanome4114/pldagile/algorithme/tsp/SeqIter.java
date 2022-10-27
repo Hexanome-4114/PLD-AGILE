@@ -1,4 +1,4 @@
-package com.github.hexanome4114.pldagile.algorithme;
+package com.github.hexanome4114.pldagile.algorithme.tsp;
 
 
 import java.util.Collection;

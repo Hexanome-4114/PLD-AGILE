@@ -1,5 +1,4 @@
-package com.github.hexanome4114.pldagile.algorithme;
-
+package com.github.hexanome4114.pldagile.algorithme.tsp;
 
 public interface TSP {
 	/**

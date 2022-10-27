@@ -1,4 +1,4 @@
-package com.github.hexanome4114.pldagile.algorithme;
+package com.github.hexanome4114.pldagile.algorithme.tsp;
 
 public class CompleteGraph implements Graph {
 	private static final int MAX_COST = 40;
@@ -10,6 +10,11 @@ public class CompleteGraph implements Graph {
 	 * Create a complete directed graph such that each edge has a weight within [MIN_COST,MAX_COST]
 	 * @param nbVertices
 	 */
+
+	public CompleteGraph(int nbVertices, int[][] cost) {
+		this.nbVertices = nbVertices;
+		this.cost = cost;
+	}
 	public CompleteGraph(int nbVertices){
 		this.nbVertices = nbVertices;
 		int iseed = 1;
