@@ -51,6 +51,7 @@ public final class Controleur {
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
     private Circle pointClique;
+    private Plan plan;
 
     /** Vue de l'application. */
     private Stage stage;
@@ -155,6 +156,13 @@ public final class Controleur {
         }
     }
 
+    public void calculerTournee() {
+
+        // Dijkstra
+        // Creation de chaque noeud et ajout des sommets adjacents grâce aux segments
+    }
+
+
     public void supprimerLivraison(final Livraison livraison) {
         this.livraisons.remove(livraison);
     }
@@ -183,6 +191,7 @@ public final class Controleur {
             throw new RuntimeException(e); // TODO gérer les exceptions
         }
 
+        this.plan = plan;
         this.afficherPlan(plan);
     }
 

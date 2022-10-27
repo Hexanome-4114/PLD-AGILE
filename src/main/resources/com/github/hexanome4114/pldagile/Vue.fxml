@@ -48,6 +48,11 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </TableView>
+            <Button onAction="#calculerTournee" text="Calculer la tournee">
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+            </Button>
         </VBox>
     </HBox>
     <Button onAction="#chargerPlan" text="Charger le plan" />
