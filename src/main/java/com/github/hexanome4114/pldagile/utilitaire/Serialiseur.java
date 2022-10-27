@@ -72,7 +72,7 @@ public final class Serialiseur {
                     nom, longueur, intersectionDebut, intersectionFin));
         }
 
-        return new Plan(segments, entrepot);
+        return new Plan(segments, entrepot, intersections.size());
     }
 
     /**
