@@ -12,7 +12,10 @@ import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -144,7 +147,8 @@ public final class Controleur {
                     FXCollections.observableArrayList(this.livraisons);
 
             this.tableauLivraison.setItems(oListLivraison);
-        } else {
+        }
+else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
         }
     }
