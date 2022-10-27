@@ -44,7 +44,7 @@ public final class Serialiseur {
             double longitude = Double.parseDouble(
                     noeudIntersection.valueOf("@longitude"));
 
-            intersections.put(id, new Intersection(latitude, longitude));
+            intersections.put(id, new Intersection(id, latitude, longitude));
         }
 
         // entrepot

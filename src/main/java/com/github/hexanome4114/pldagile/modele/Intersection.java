@@ -4,8 +4,13 @@ import com.gluonhq.maps.MapPoint;
 
 public final class Intersection extends MapPoint {
 
-    public Intersection(final double latitude, final double longitude) {
+    private String id;
+    public Intersection(String id, final double latitude, final double longitude) {
         super(latitude, longitude);
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override
