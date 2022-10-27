@@ -6,8 +6,9 @@ import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.modele.Segment;
+import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
-
+import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,11 +17,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.dom4j.DocumentException;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -29,8 +31,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.dom4j.DocumentException;
 
 /**
  * Contrôleur de l'application.
@@ -75,6 +75,8 @@ public final class Controleur {
 
     @FXML
     public void initialize() {
+        System.setProperty("javafx.platform", "desktop");
+
         this.livraisons = new ArrayList<>();
         this.genererLivreurs(NOMBRE_LIVREURS);
         this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
@@ -171,27 +173,33 @@ public final class Controleur {
     }
 
     private void afficherPlan(final Plan plan) {
+        CalquePlan calque = new CalquePlan();
+
         // segments
         for (Segment segment : plan.getSegments()) {
             Intersection debut = segment.getDebut();
             Intersection fin = segment.getFin();
 
-            Line ligne = new Line(
-                    debut.getX(), debut.getY(), fin.getX(), fin.getY()
-            );
-
-            this.carte.getChildren().add(ligne);
+            calque.ajouterPoint(debut, new Circle(3, Color.BLUE));
+            calque.ajouterPoint(fin, new Circle(3, Color.BLUE));
         }
 
         // entrepot
-        Circle entrepot = new Circle();
+        Intersection entrepot = plan.getEntrepot();
+        calque.ajouterPoint(entrepot, new Circle(5, Color.RED));
 
-        entrepot.setCenterX(plan.getEntrepot().getX());
-        entrepot.setCenterY(plan.getEntrepot().getY());
-        entrepot.setRadius(5);
-        entrepot.setFill(Color.RED);
+        // config carte
+        MapView carteVue = new MapView();
 
-        this.carte.getChildren().add(entrepot);
+        carteVue.setZoom(14.5);
+        carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
+        carteVue.addLayer(calque); // ajout du calque contenant les points
+
+        StackPane sp = new StackPane();
+        sp.setPrefSize(640, 640);
+        sp.getChildren().add(carteVue);
+
+        this.carte.getChildren().add(sp);
     }
 
     public void setStage(final Stage stage) {

@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Sérialisation et désérialisation des données.
@@ -46,17 +45,6 @@ public final class Serialiseur {
                     noeudIntersection.valueOf("@longitude"));
 
             intersections.put(id, new Intersection(latitude, longitude));
-        }
-
-        // conversion des coordonnées en pixels pour l'affichage en 2D
-        HashMap<Long, Double[]> pixels = ConstructeurPlan.coordonneesVersPixels(
-                intersections, 640, 640);
-
-        for (Map.Entry<Long, Intersection> entry : intersections.entrySet()) {
-            Intersection intersection = entry.getValue();
-
-            intersection.setX(pixels.get(entry.getKey())[0]);
-            intersection.setY(pixels.get(entry.getKey())[1]);
         }
 
         // entrepot

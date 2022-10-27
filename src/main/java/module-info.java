@@ -4,6 +4,7 @@ module com.github.hexanome4114.pldagile.agile {
     requires dom4j;
     requires jaxen;
     requires java.desktop;
+    requires com.gluonhq.maps;
 
 
     opens com.github.hexanome4114.pldagile to javafx.fxml;
