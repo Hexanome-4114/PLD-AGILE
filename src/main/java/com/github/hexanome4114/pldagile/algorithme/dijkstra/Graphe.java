@@ -11,6 +11,7 @@ public class Graphe {
 
     public void ajouterSommet(Sommet sommetA) {
         sommets.put(sommetA.getNom(), sommetA);
+
     }
 
     public static Graphe calculerCheminplusCourtDepuisSource(Graphe graphe, Sommet source) {
