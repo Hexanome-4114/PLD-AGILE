@@ -147,8 +147,8 @@ public final class Controleur {
                     FXCollections.observableArrayList(this.livraisons);
 
             this.tableauLivraison.setItems(oListLivraison);
-        }
-else {
+            this.messageErreur.setText("");
+        } else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
         }
     }
