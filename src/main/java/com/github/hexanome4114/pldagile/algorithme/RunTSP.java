@@ -1,4 +1,5 @@
-package tsp;
+package com.github.hexanome4114.pldagile.algorithme;
+
 
 public class RunTSP {
 	public static void main(String[] args) {

@@ -1,4 +1,5 @@
-package tsp;
+package com.github.hexanome4114.pldagile.algorithme;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
