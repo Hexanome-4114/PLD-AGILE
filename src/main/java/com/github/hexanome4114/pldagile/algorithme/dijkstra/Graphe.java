@@ -11,9 +11,15 @@ public class Graphe {
 
     public void ajouterSommet(Sommet sommetA) {
         sommets.put(sommetA.getNom(), sommetA);
-
     }
 
+
+    public void reinitialiserSommetsGraphe(){
+        for (Sommet sommet: sommets.values()) {
+            sommet.setDistance(Integer.MAX_VALUE);
+            sommet.setCheminPlusCourt(new LinkedList<>());
+        }
+    }
     public static Graphe calculerCheminplusCourtDepuisSource(Graphe graphe, Sommet source) {
         source.setDistance(0);
 
