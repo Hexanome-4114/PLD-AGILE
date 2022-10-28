@@ -64,9 +64,9 @@ public final class Serialiseur {
                     noeudSegment.valueOf("@length")) * 100); // stockage en cm
 
             Intersection intersectionDebut = intersections.get(
-                    Long.parseLong(noeudSegment.valueOf("@origin")));
+                    noeudSegment.valueOf("@origin"));
             Intersection intersectionFin = intersections.get(
-                    Long.parseLong(noeudSegment.valueOf("@destination")));
+                    noeudSegment.valueOf("@destination"));
 
             segments.add(new Segment(
                     nom, longueur, intersectionDebut, intersectionFin));
