@@ -14,10 +14,6 @@ public final class Intersection extends MapPoint {
         return id;
     }
 
-    public String getId() {
-        return id;
-    }
-
     @Override
     public String toString() {
         return String.format("Intersection{latitude=%f, longitude=%f}",
