@@ -1,10 +1,27 @@
 package com.github.hexanome4114.pldagile.algorithme.tsp;
+import com.github.hexanome4114.pldagile.algorithme.dijkstra.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CompleteGraph implements Graph {
 	private static final int MAX_COST = 40;
 	private static final int MIN_COST = 10;
 	int nbVertices;
 	int[][] cost;
+
+	public Map<String, Integer> getMapNomSommetVersIndex() {
+		return mapNomSommetVersIndex;
+	}
+
+	private Map<String,Integer> mapNomSommetVersIndex;
+	//map entre nom des sommets et index dans le tableau utilisé par le TSP
+
+	public Map<Integer, String> getMapIndexVersSommet() {
+		return mapIndexVersSommet;
+	}
+
+	private Map<Integer,String> mapIndexVersSommet;
 	
 	/**
 	 * Create a complete directed graph such that each edge has a weight within [MIN_COST,MAX_COST]
@@ -15,20 +32,33 @@ public class CompleteGraph implements Graph {
 		this.nbVertices = nbVertices;
 		this.cost = cost;
 	}
-	public CompleteGraph(int nbVertices){
-		this.nbVertices = nbVertices;
-		int iseed = 1;
+
+	public CompleteGraph(Graphe completeGraph){
+		this.nbVertices = completeGraph.getSommets().size();
 		cost = new int[nbVertices][nbVertices];
-		for (int i=0; i<nbVertices; i++){
-		    for (int j=0; j<nbVertices; j++){
-		        if (i == j) cost[i][j] = -1;
-		        else {
-		            int it = 16807 * (iseed % 127773) - 2836 * (iseed / 127773);
-		            if (it > 0)	iseed = it;
-		            else iseed = 2147483647 + it;
-		            cost[i][j] = MIN_COST + iseed % (MAX_COST-MIN_COST+1);
-		        }
-		    }
+		Sommet unSommet;
+		int sommetOrigine;
+		int sommetDest;
+		mapNomSommetVersIndex = new HashMap<>();
+		mapIndexVersSommet = new HashMap<>();
+		int iter = 0;
+
+		for (String nom : completeGraph.getSommets().keySet()){
+			mapNomSommetVersIndex.put(nom,iter);
+			mapIndexVersSommet.put(iter,nom);
+			iter++;
+		}
+		//on itère sur les sommets du graphe
+		for (Map.Entry entry : completeGraph.getSommets().entrySet()) {
+			unSommet = (Sommet) entry.getValue();
+			//Pour chaque sommet, on récupére les arc associés et les ajoute dans la matrice des arcs
+			for (Map.Entry<Sommet, Integer> arc : unSommet.getSommetsAdjacents().entrySet()) {
+				sommetOrigine = mapNomSommetVersIndex.get(unSommet.getNom());
+				sommetDest = mapNomSommetVersIndex.get(arc.getKey().getNom());
+				cost[sommetOrigine][sommetDest] = arc.getValue();
+			}
+			for(int i=0; i<nbVertices; i++)
+				cost[i][i] = -1;
 		}
 	}
 
