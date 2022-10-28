@@ -2,6 +2,7 @@ package com.github.hexanome4114.pldagile.algorithme.tsp;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CompleteGraph implements Graph {
@@ -36,11 +37,16 @@ public class CompleteGraph implements Graph {
 	public CompleteGraph(Graphe completeGraph){
 		this.nbVertices = completeGraph.getSommets().size();
 		cost = new int[nbVertices][nbVertices];
+		for(int i=0; i<nbVertices; i++){
+			for(int j=0; j<nbVertices; j++){
+				cost[i][i] = -1;
+			}
+		}
 		Sommet unSommet;
 		int sommetOrigine;
 		int sommetDest;
-		mapNomSommetVersIndex = new HashMap<>();
-		mapIndexVersSommet = new HashMap<>();
+		mapNomSommetVersIndex = new LinkedHashMap<>();
+		mapIndexVersSommet = new LinkedHashMap<>();
 		int iter = 0;
 
 		for (String nom : completeGraph.getSommets().keySet()){
@@ -57,8 +63,6 @@ public class CompleteGraph implements Graph {
 				sommetDest = mapNomSommetVersIndex.get(arc.getKey().getNom());
 				cost[sommetOrigine][sommetDest] = arc.getValue();
 			}
-			for(int i=0; i<nbVertices; i++)
-				cost[i][i] = -1;
 		}
 	}
 

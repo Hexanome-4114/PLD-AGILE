@@ -3,7 +3,7 @@ package com.github.hexanome4114.pldagile.algorithme.dijkstra;
 import java.util.*;
 
 public class Graphe {
-    private Map<String,Sommet> sommets = new HashMap<>();
+    private Map<String,Sommet> sommets = new LinkedHashMap<>();
 
     public Map<String, Sommet> getSommets() {
         return sommets;

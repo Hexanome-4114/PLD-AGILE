@@ -2,6 +2,10 @@ package com.github.hexanome4114.pldagile.controleur;
 
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
+import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
+import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
+import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
+import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
@@ -175,11 +179,51 @@ public final class Controleur {
             sommetOrigine.addDestination(sommetDestination, segment.getLongueur());
         }
 
-        // TODO : faire une boucle sur toutes les livraisons pour calculer Dijkstra depuis chacune des adresses de livraisons
-        Intersection sommentIntersection = this.livraisons.get(0).getAdresse();
-        Sommet sommetSource = graphe.getSommets().get(sommentIntersection.getId());
-        graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource);
-        System.out.println(graphe.toString());
+
+        // Utilisation d'une liste itermédiaire pour prendre en compte l'entrepôt.
+        List<Intersection> pointsDePassage = new ArrayList<>(this.livraisons.size()+1);
+        pointsDePassage.add(this.plan.getEntrepot());
+        for(Livraison pointDeLivraison : this.livraisons){
+            pointsDePassage.add(pointDeLivraison.getAdresse());
+        }
+        int nbSommetsDansGrapheComplet = pointsDePassage.size();
+
+        // Graphe complet utilisé pour le TSP
+        Graphe grapheComplet = new Graphe();
+        for(Intersection intersection : pointsDePassage) {
+            grapheComplet.ajouterSommet(new Sommet(intersection.getId()));
+        }
+
+        // Calcul de distance entre chaque adresse de livraison
+        for(Intersection intersection : pointsDePassage){
+            // On calcul la distance entre 'livraison' et les autres adresse de livraisons
+            Sommet sommetSource = graphe.getSommets().get(intersection.getId());
+            // dans graphe on a la distance entre le sommet source et les autres sommets
+            graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource);
+
+            // Récupération des plus courts chemins
+            for(Intersection intersection1 : pointsDePassage){
+                if(intersection1.getId() != intersection.getId()){
+                    // Sommet correspondant au point de passage dans le graphe dijktra
+                    Sommet sommetDansGraphe = graphe.getSommets().get(intersection1.getId());
+
+                    // Sommets dans le graph complet
+                    Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
+                    Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetDansGraphe.getNom());
+                    sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
+                            sommetDansGraphe.getDistance());
+
+                }
+            }
+            // réinitialisation des sommets du graphe pour le nouvel appel
+            graphe.reinitialiserSommetsGraphe();
+        }
+
+        Graph g = new CompleteGraph(grapheComplet);
+        TSP tsp = new TSP1();
+        tsp.searchSolution(20000, g);
+        for (int i=0; i<nbSommetsDansGrapheComplet; i++)
+            System.out.print(tsp.getSolution(i)+" ");
 
     }
 
