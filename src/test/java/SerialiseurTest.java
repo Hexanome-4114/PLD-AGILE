@@ -3,11 +3,10 @@ import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import org.dom4j.DocumentException;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SerialiseurTest {
 
