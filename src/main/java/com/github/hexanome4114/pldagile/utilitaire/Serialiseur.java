@@ -3,14 +3,13 @@ package com.github.hexanome4114.pldagile.utilitaire;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Plan;
-import com.github.hexanome4114.pldagile.modele.Segment;
+import javafx.util.Pair;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,8 +51,6 @@ public final class Serialiseur {
         Intersection entrepot = intersections.get(
                 node.valueOf("@address"));
 
-        // segments
-        List<Segment> segments = new ArrayList<>();
 
         for (Node noeudSegment: document.selectNodes("/map/segment")) {
             // TODO Les rues sont souvent à doubles sens. Or là j'enregistre
@@ -68,11 +65,12 @@ public final class Serialiseur {
             Intersection intersectionFin = intersections.get(
                     noeudSegment.valueOf("@destination"));
 
-            segments.add(new Segment(
-                    nom, longueur, intersectionDebut, intersectionFin));
+        // Ajout dans l'intersection début du lien avec l'intersection de fin (modélisation du segment)
+            intersectionDebut.getIntersections()
+                    .put(intersectionFin, new Pair<Integer, String>(longueur, nom));
         }
 
-        return new Plan(segments, intersections, entrepot);
+        return new Plan(intersections, entrepot);
     }
 
     /**

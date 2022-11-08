@@ -11,7 +11,6 @@ import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
-import com.github.hexanome4114.pldagile.modele.Segment;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -29,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.dom4j.DocumentException;
 
 import java.io.File;
@@ -170,17 +170,17 @@ public final class Controleur {
             graphe.ajouterSommet(sommet);
         }
 
-        // ajout des sommets adjacents et de la distance grâce aux segments
-        for (Segment segment: this.plan.getSegments()) {
-            Intersection intersectionDebut = segment.getDebut();
-            Intersection intersectionFin = segment.getFin();
-            Sommet sommetOrigine = graphe.getSommets().get(intersectionDebut.getId());
-            Sommet sommetDestination = graphe.getSommets().get(intersectionFin.getId());
-            sommetOrigine.addDestination(sommetDestination, segment.getLongueur());
+        // ajout des sommets adjacents et de la distance
+        for (Intersection intersection: this.plan.getIntersections().values()) {
+            for (Map.Entry<Intersection, Pair<Integer, String>> set : intersection.getIntersections().entrySet())
+            {
+                Sommet sommetOrigine = graphe.getSommets().get(intersection.getId());
+                Sommet sommetDestination = graphe.getSommets().get(set.getKey().getId());
+                sommetOrigine.addDestination(sommetDestination, set.getValue().getKey());
+            }
         }
 
-
-        // Utilisation d'une liste itermédiaire pour prendre en compte l'entrepôt.
+        // Utilisation d'une liste itermédiaire pour prendre en compte l'entrepôt
         List<Intersection> pointsDePassage = new ArrayList<>(this.livraisons.size()+1);
         pointsDePassage.add(this.plan.getEntrepot());
         for(Livraison pointDeLivraison : this.livraisons){
@@ -195,6 +195,7 @@ public final class Controleur {
         }
 
         // Calcul de distance entre chaque adresse de livraison
+        // TODO créer et stocker les itinéraires (voir la feuille de françois pour la structure de données)
         for(Intersection intersection : pointsDePassage){
             // On calcul la distance entre 'livraison' et les autres adresse de livraisons
             Sommet sommetSource = graphe.getSommets().get(intersection.getId());
@@ -219,6 +220,8 @@ public final class Controleur {
             graphe.reinitialiserSommetsGraphe();
         }
 
+        // TODO créer les itinéraires pour la tournée
+        // TODO Créer la tournée
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
@@ -263,13 +266,9 @@ public final class Controleur {
     private void afficherPlan(final Plan plan) {
         CalquePlan calque = new CalquePlan();
 
-        // segments
-        for (Segment segment : plan.getSegments()) {
-            Intersection debut = segment.getDebut();
-            Intersection fin = segment.getFin();
-
-            calque.ajouterPoint(debut, new Circle(3, Color.GREY));
-            calque.ajouterPoint(fin, new Circle(3, Color.GREY));
+        // intersections
+        for (Intersection intersection : plan.getIntersections().values()) {
+            calque.ajouterPoint(intersection, new Circle(3, Color.GREY));
         }
 
         calque.getPoints().forEach(point -> {

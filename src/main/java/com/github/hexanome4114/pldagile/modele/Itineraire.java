@@ -4,5 +4,5 @@ import java.util.List;
 
 public final class Itineraire {
 
-    private List<Segment> segments;
+    private List<Intersection> intersections;
 }
