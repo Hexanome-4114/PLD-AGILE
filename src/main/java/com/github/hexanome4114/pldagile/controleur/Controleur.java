@@ -46,8 +46,6 @@ public final class Controleur {
     /** Nombre de livreurs disponibles par défaut. */
     private static final int NOMBRE_LIVREURS = 1;
 
-    private List<Livraison> livraisons;
-
     private List<Livreur> livreurs;
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
