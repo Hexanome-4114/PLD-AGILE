@@ -3,6 +3,7 @@ import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import org.dom4j.DocumentException;
 
+import java.io.File;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -17,7 +18,7 @@ class SerialiseurTest {
 
         try {
             url = this.getClass().getResource("/smallMap.xml");
-            plan = Serialiseur.chargerPlan(url);
+            plan = Serialiseur.chargerPlan(new File(url.getFile()));
         } catch (DocumentException e) {
             throw new RuntimeException(e);
         }
