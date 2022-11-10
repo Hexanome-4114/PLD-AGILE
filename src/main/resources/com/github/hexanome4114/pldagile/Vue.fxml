@@ -48,7 +48,7 @@
             <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraisonColonne" prefWidth="213.3" text="Numéro de livraison" />
-                    <TableColumn fx:id="livreur" prefWidth="213.3" text="Livreur" />
+                    <TableColumn fx:id="livreurColonne" prefWidth="213.3" text="Livreur" />
                     <TableColumn fx:id="fenetreDeLivraisonColonne" prefWidth="213.3" text="Fenêtre" />
                 </columns>
                 <VBox.margin>
@@ -68,7 +68,7 @@
                <Insets top="10.0" />
             </VBox.margin>
          </HBox>
-            <Button onAction="#calculerLesTournees" text="Calculer la tournee">
+            <Button onAction="#calculerLesTournees" text="Calculer les tournees">
                 <VBox.margin>
                     <Insets top="10.0" />
                 </VBox.margin>
