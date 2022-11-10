@@ -11,8 +11,12 @@ import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -28,6 +32,10 @@ import javafx.util.Pair;
 import org.dom4j.DocumentException;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -39,12 +47,10 @@ import java.util.*;
 public final class Controleur {
 
     /** Vitesse de déplacement d'un livreur. */
-    private static final int VITESSE_MOYENNE = 15;
+    public static final int VITESSE_MOYENNE = 15;
 
     /** Nombre de livreurs disponibles par défaut. */
     private static final int NOMBRE_LIVREURS = 1;
-
-    private List<Livraison> livraisons;
 
     private List<Livreur> livreurs;
 
@@ -84,10 +90,15 @@ public final class Controleur {
     private Label messageErreur;
 
     @FXML
+    private Button supprimerLivraisonBouton;
+
+    @FXML
+    private Button sauvegarderLivraisonsBouton;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
-        this.livraisons = new ArrayList<>();
         this.genererLivreurs(NOMBRE_LIVREURS);
         this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
                 new FenetreDeLivraison(8, 9),
@@ -105,6 +116,29 @@ public final class Controleur {
         this.comboBoxLivreur.setItems(oListLivreurs);
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+
+        this.numeroLivraison.setCellValueFactory(
+                new PropertyValueFactory<>("numero"));
+        this.livreur.setCellValueFactory(
+                new PropertyValueFactory<>("livreur"));
+        this.fenetreDeLivraison.setCellValueFactory(
+                new PropertyValueFactory<>("fenetreDeLivraison"));
+
+        tableauLivraison.getSelectionModel().selectedItemProperty().addListener(
+            (obs, ancienneSelection, nouvelleSelection) -> {
+                // bouton cliquable que lorsqu'une livraison est sélectionnée
+                this.supprimerLivraisonBouton.setDisable(
+                        nouvelleSelection == null);
+            }
+        );
+
+        tableauLivraison.getItems().addListener(
+                (ListChangeListener<Livraison>) (obs) -> {
+                    // bouton cliquable que lorsqu'il y a des livraisons
+                    this.sauvegarderLivraisonsBouton.setDisable(
+                            obs.getList().isEmpty());
+                }
+        );
     }
 
     /**
@@ -132,27 +166,92 @@ public final class Controleur {
         if (this.comboBoxLivreur.getValue() != null
                 && this.comboBoxFenetreDeLivraison.getValue() != null
                 && this.comboBoxAdresse.getValue() != null) {
+
+            List<Livraison> livraisons = this.tableauLivraison.getItems();
+
+            int numero;
+
+            if (livraisons.isEmpty()) {
+                numero = 1;
+            } else { // le numéro de la dernière livraison + 1
+                numero = livraisons.get(livraisons.size() - 1)
+                        .getNumero() + 1;
+            }
+
             Livraison livraison = new Livraison(
-                    this.livraisons.size() + 1,
+                    numero,
                     this.comboBoxFenetreDeLivraison.getValue(),
                     this.comboBoxLivreur.getValue(),
                     this.comboBoxAdresse.getValue());
-            this.livraisons.add(livraison);
 
-            this.numeroLivraison.setCellValueFactory(
-                    new PropertyValueFactory<>("numero"));
-            this.livreur.setCellValueFactory(
-                    new PropertyValueFactory<>("livreur"));
-            this.fenetreDeLivraison.setCellValueFactory(
-                    new PropertyValueFactory<>("fenetreDeLivraison"));
-
-            ObservableList<Livraison> oListLivraison =
-                    FXCollections.observableArrayList(this.livraisons);
-
-            this.tableauLivraison.setItems(oListLivraison);
+            livraisons.add(livraison);
             this.messageErreur.setText("");
         } else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
+        }
+    }
+
+    public void supprimerLivraison() {
+        Livraison livraison = this.tableauLivraison.getSelectionModel()
+                .getSelectedItem();
+        this.tableauLivraison.getItems().remove(livraison);
+    }
+
+    public void sauvegarderLivraisons() {
+        FileChooser selecteurFichier = new FileChooser();
+        selecteurFichier.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Fichiers XML", "*.xml")
+        );
+
+        File fichier = selecteurFichier.showSaveDialog(this.stage);
+
+        if (fichier == null) { // aucun fichier sélectionné
+            return;
+        }
+
+        try {
+            Serialiseur.sauvegarderLivraisons(
+                    fichier, this.tableauLivraison.getItems());
+        } catch (Exception e) {
+            this.messageErreur.setText(
+                    "Problème lors de la sauvegarde des livraisons.");
+        }
+    }
+
+    public void chargerLivraisons() {
+        if (!this.tableauLivraison.getItems().isEmpty()) {
+            // des livraisons sont déjà présentes, on avertit l'utilisateur
+            Alert alerte = new Alert(Alert.AlertType.CONFIRMATION);
+            alerte.setHeaderText("Les livraisons existantes seront écrasées,"
+                    + " êtes-vous sûr de vouloir continuer ?");
+
+            Optional<ButtonType> option = alerte.showAndWait();
+
+            if (option.get() != ButtonType.OK) {
+                return; // annulation du chargement
+            }
+        }
+
+        FileChooser selecteurFichier = new FileChooser();
+        selecteurFichier.setTitle("Sélectionnez un fichier XML");
+        selecteurFichier.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Fichiers XML", "*.xml")
+        );
+
+        File fichier = selecteurFichier.showOpenDialog(this.stage);
+
+        if (fichier == null) { // aucun fichier sélectionné
+            return;
+        }
+
+        try {
+            List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
+            // TODO valider les livraisons chargées
+            this.tableauLivraison.setItems(
+                    FXCollections.observableArrayList(livraisons));
+        } catch (Exception e) {
+            this.messageErreur.setText(
+                    "Problème lors du chargement des livraisons.");
         }
     }
 
@@ -177,9 +276,9 @@ public final class Controleur {
         }
 
         // Utilisation d'une liste itermédiaire pour prendre en compte l'entrepôt
-        List<Intersection> pointsDePassage = new ArrayList<>(this.livraisons.size()+1);
+        List<Intersection> pointsDePassage = new ArrayList<>(this.tableauLivraison.getItems().size()+1);
         pointsDePassage.add(this.plan.getEntrepot());
-        for(Livraison pointDeLivraison : this.livraisons){
+        for(Livraison pointDeLivraison : this.tableauLivraison.getItems()){
             pointsDePassage.add(pointDeLivraison.getAdresse());
         }
         int nbSommetsDansGrapheComplet = pointsDePassage.size();
@@ -246,15 +345,10 @@ public final class Controleur {
 
     }
 
-
-    public void supprimerLivraison(final Livraison livraison) {
-        this.livraisons.remove(livraison);
-    }
-
     @FXML
     private void chargerPlan() {
         FileChooser selecteurFichier = new FileChooser();
-        selecteurFichier.setTitle("Sélectionnez un fichier xml");
+        selecteurFichier.setTitle("Sélectionnez un fichier XML");
         selecteurFichier.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Fichiers XML", "*.xml")
         );
@@ -265,18 +359,13 @@ public final class Controleur {
             return;
         }
 
-        URL url;
-        Plan plan;
-
         try {
-            url = Path.of(fichier.getPath()).toUri().toURL();
-            plan = Serialiseur.chargerPlan(url);
-        } catch (MalformedURLException | DocumentException e) {
-            throw new RuntimeException(e); // TODO gérer les exceptions
+            Plan plan = Serialiseur.chargerPlan(fichier);
+            this.plan = plan;
+            this.afficherPlan(plan);
+        } catch (DocumentException e) {
+            this.messageErreur.setText("Problème lors du chargement du plan.");
         }
-
-        this.plan = plan;
-        this.afficherPlan(plan);
     }
 
     private void afficherPlan(final Plan plan) {
