@@ -1,11 +1,12 @@
 package com.github.hexanome4114.pldagile.controleur;
 
-import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
-import com.github.hexanome4114.pldagile.modele.Intersection;
-import com.github.hexanome4114.pldagile.modele.Livraison;
-import com.github.hexanome4114.pldagile.modele.Livreur;
-import com.github.hexanome4114.pldagile.modele.Plan;
-import com.github.hexanome4114.pldagile.modele.Segment;
+import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
+import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
+import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
+import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
+import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
+import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
+import com.github.hexanome4114.pldagile.modele.*;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -27,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.dom4j.DocumentException;
 
 import java.io.File;
@@ -34,23 +36,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Contrôleur de l'application.
  */
 public final class Controleur {
 
-    /** Vitesse de déplacement d'un livreur. */
+    /**
+     * Vitesse de déplacement d'un livreur.
+     */
     public static final int VITESSE_MOYENNE = 15;
 
-    /** Nombre de livreurs disponibles par défaut. */
+    /**
+     * Nombre de livreurs disponibles par défaut.
+     */
     private static final int NOMBRE_LIVREURS = 1;
 
     private List<Livreur> livreurs;
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
-    /** Vue de l'application. */
+    private Circle pointClique;
+    private Plan plan;
+
+    /**
+     * Vue de l'application.
+     */
     private Stage stage;
 
     @FXML
@@ -116,11 +131,12 @@ public final class Controleur {
                 new PropertyValueFactory<>("fenetreDeLivraison"));
 
         tableauLivraison.getSelectionModel().selectedItemProperty().addListener(
-            (obs, ancienneSelection, nouvelleSelection) -> {
-                // bouton cliquable que lorsqu'une livraison est sélectionnée
-                this.supprimerLivraisonBouton.setDisable(
-                        nouvelleSelection == null);
-            }
+                (obs, ancienneSelection, nouvelleSelection) -> {
+                    // bouton cliquable que lorsqu'une livraison est
+                    // sélectionnée
+                    this.supprimerLivraisonBouton.setDisable(
+                            nouvelleSelection == null);
+                }
         );
 
         tableauLivraison.getItems().addListener(
@@ -246,6 +262,105 @@ public final class Controleur {
         }
     }
 
+    public void calculerTournee() {
+
+        // Dijkstra
+        // Creation de chaque noeud et ajout dans le graphe
+        Graphe graphe = new Graphe();
+        for (String intersectionId : this.plan.getIntersections().keySet()) {
+            Sommet sommet = new Sommet(intersectionId);
+            graphe.ajouterSommet(sommet);
+        }
+
+        // ajout des sommets adjacents et de la distance
+        for (Intersection intersection : this.plan.getIntersections()
+                .values()) {
+            for (Map.Entry<Intersection, Pair<Integer, String>> set
+                    : intersection.getIntersections().entrySet()) {
+                Sommet sommetOrigine = graphe.getSommets()
+                        .get(intersection.getId());
+                Sommet sommetDestination = graphe.getSommets()
+                        .get(set.getKey().getId());
+                sommetOrigine.addDestination(sommetDestination,
+                        set.getValue().getKey());
+            }
+        }
+
+        // Utilisation d'une liste itermédiaire pour prendre en compte
+        // l'entrepôt
+        List<Intersection> pointsDePassage = new ArrayList<>(
+                this.tableauLivraison.getItems().size() + 1);
+        pointsDePassage.add(this.plan.getEntrepot());
+        for (Livraison pointDeLivraison : this.tableauLivraison.getItems()) {
+            pointsDePassage.add(pointDeLivraison.getAdresse());
+        }
+        int nbSommetsDansGrapheComplet = pointsDePassage.size();
+
+        // Graphe complet utilisé pour le TSP
+        Graphe grapheComplet = new Graphe();
+        for (Intersection intersection : pointsDePassage) {
+            grapheComplet.ajouterSommet(new Sommet(intersection.getId()));
+        }
+
+        // Calcul de distance entre chaque adresse de livraison pour la
+        // création d'un graphe complet
+        // TODO créer et stocker les itinéraires (voir la feuille de François
+        // pour la structure de données)
+        // itineraireMap stocke l'itinéraire entre intersection1
+        // vers intersection2
+        // key est de la sorte "intersection1.id_intersection2.id"
+
+        Map<String, Itineraire> itineraireMap = new HashMap<>();
+        for (Intersection addresseLivraisonCourante : pointsDePassage) {
+            // On calcul la distance entre l'adresse de livraison courante et
+            // les autres adresse de livraisons
+            Sommet sommetSource = graphe.getSommets().get(addresseLivraisonCourante.getId()); // adresse de livraison courante
+            // Calcul des plus courts chemins (pcc)
+            graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource); // contient les pcc entre le sommet source et les autres sommets
+
+            // Récupération des pcc pour créer le graphe complet et construire les intinéraires correspondants.
+            for (Intersection adresseLivraison : pointsDePassage) {
+                // TODO supprimer les arcs entre une livraison à 9h10h et une à 8h9h. Voir feuille François
+                if (adresseLivraison.getId() != addresseLivraisonCourante.getId()) {
+                    // Sommet correspondant au point de passage dans le graphe dijktra
+                    Sommet sommetLivraison = graphe.getSommets().get(adresseLivraison.getId());
+                    // Création de l'itinéraire
+                    List<Intersection> intersectionsItineraire = new ArrayList<>(sommetLivraison.getCheminPlusCourt().size());
+                    List<Sommet> cheminAdresseLivraisonCouranteVersAdresseLivraison = sommetLivraison.getCheminPlusCourt();
+
+                    // S'il n'y a pas de chemin plus court entre les 2, on n'ajotue pas
+                    if (!cheminAdresseLivraisonCouranteVersAdresseLivraison.isEmpty()) {
+                        for (Sommet sommet : cheminAdresseLivraisonCouranteVersAdresseLivraison) {
+                            Intersection intersectionDuPcc = this.plan.getIntersections().get(sommet.getNom());
+                            intersectionsItineraire.add(intersectionDuPcc);
+                        }
+                        intersectionsItineraire.add(adresseLivraison); // On doit ajouter l'intersection destination
+                        itineraireMap.put(addresseLivraisonCourante.getId() + "_" + adresseLivraison.getId(), new Itineraire(intersectionsItineraire));
+
+                        // Sommets dans le graph complet
+                        // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
+                        // TODO Il faudrait un helper pour la traduction dijstra vers TSP
+                        Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
+                        Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetLivraison.getNom());
+                        sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
+                                sommetLivraison.getDistance());
+                    }
+                }
+            }
+            // réinitialisation des sommets du graphe pour le nouvel appel
+            graphe.reinitialiserSommetsGraphe();
+        }
+
+        // DEBUG affichage des itinéraires de toute les livraison
+        // TODO Créer la tournée
+        Graph g = new CompleteGraph(grapheComplet);
+        TSP tsp = new TSP1();
+        tsp.searchSolution(20000, g);
+        for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
+            System.out.print(tsp.getSolution(i) + " ");
+
+    }
+
     @FXML
     private void chargerPlan() {
         FileChooser selecteurFichier = new FileChooser();
@@ -262,6 +377,7 @@ public final class Controleur {
 
         try {
             Plan plan = Serialiseur.chargerPlan(fichier);
+            this.plan = plan;
             this.afficherPlan(plan);
         } catch (DocumentException e) {
             this.messageErreur.setText("Problème lors du chargement du plan.");
@@ -271,14 +387,23 @@ public final class Controleur {
     private void afficherPlan(final Plan plan) {
         CalquePlan calque = new CalquePlan();
 
-        // segments
-        for (Segment segment : plan.getSegments()) {
-            Intersection debut = segment.getDebut();
-            Intersection fin = segment.getFin();
-
-            calque.ajouterPoint(debut, new Circle(3, Color.BLUE));
-            calque.ajouterPoint(fin, new Circle(3, Color.BLUE));
+        // intersections
+        for (Intersection intersection : plan.getIntersections().values()) {
+            calque.ajouterPoint(intersection, new Circle(3, Color.GREY));
         }
+
+        calque.getPoints().forEach(point -> {
+            // ajout d'un listener sur chaque point du calque
+            point.getValue().setOnMouseClicked(e -> {
+                e.consume();
+                if (this.pointClique != null) {
+                    this.pointClique.setFill(Color.GREY);
+                }
+                this.pointClique = (Circle) e.getTarget();
+                ((Circle) e.getTarget()).setFill(Color.BLUE);
+                this.comboBoxAdresse.setValue(point.getKey());
+            });
+        });
 
         // entrepot
         Intersection entrepot = plan.getEntrepot();
@@ -290,14 +415,6 @@ public final class Controleur {
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
         carteVue.addLayer(calque); // ajout du calque contenant les points
-
-        calque.getPoints().forEach(point -> {
-            // ajout d'un listener sur chaque point du calque
-            point.getValue().setOnMouseClicked(e -> {
-                e.consume();
-                this.comboBoxAdresse.setValue(point.getKey());
-            });
-        });
 
         StackPane sp = new StackPane();
         sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());

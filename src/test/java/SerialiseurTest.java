@@ -39,7 +39,7 @@ class SerialiseurTest {
             () -> assertEquals(4.875720, entrepot.getLongitude())
         );
 
-        assertEquals(616, plan.getSegments().size());
+        assertEquals(308, plan.getIntersections().size());
     }
 
     @Test
@@ -50,11 +50,11 @@ class SerialiseurTest {
         Livreur livreur = new Livreur(1, Controleur.VITESSE_MOYENNE);
 
         livraisons.add(new Livraison(1, fenetre, livreur,
-                new Intersection(45.759335, 4.877039)
+                new Intersection("1", 45.759335, 4.877039)
         ));
 
         livraisons.add(new Livraison(3, fenetre, livreur,
-                new Intersection(45.756004, 4.8742256)
+                new Intersection("2", 45.756004, 4.8742256)
         ));
 
         try {

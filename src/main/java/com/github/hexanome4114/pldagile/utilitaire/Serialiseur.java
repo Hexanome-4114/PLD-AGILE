@@ -6,7 +6,7 @@ import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
-import com.github.hexanome4114.pldagile.modele.Segment;
+import javafx.util.Pair;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,44 +46,40 @@ public final class Serialiseur {
         Document document = reader.read(fichier);
 
         // intersections
-        HashMap<Long, Intersection> intersections = new HashMap<>();
+        HashMap<String, Intersection> intersections = new HashMap<>();
 
-        for (Node noeudIntersection : document.selectNodes("//intersection")) {
-            Long id = Long.parseLong(noeudIntersection.valueOf("@id"));
+        for (Node noeudIntersection: document.selectNodes("/map/intersection")) {
+            String id = noeudIntersection.valueOf("@id");
             double latitude = Double.parseDouble(
                     noeudIntersection.valueOf("@latitude"));
             double longitude = Double.parseDouble(
                     noeudIntersection.valueOf("@longitude"));
 
-            intersections.put(id, new Intersection(latitude, longitude));
+            intersections.put(id, new Intersection(id, latitude, longitude));
         }
 
         // entrepot
-        Node node = document.selectSingleNode("//warehouse");
+        Node node = document.selectSingleNode("/map/warehouse");
         Intersection entrepot = intersections.get(
-                Long.parseLong(node.valueOf("@address")));
+                node.valueOf("@address"));
 
-        // segments
-        List<Segment> segments = new ArrayList<>();
 
-        for (Node noeudSegment : document.selectNodes("//segment")) {
-            // TODO Les rues sont souvent à doubles sens. Or là j'enregistre
-            // seulement une des rues (id de la map sur le nom)
-
+        for (Node noeudSegment: document.selectNodes("/map/segment")) {
             String nom = noeudSegment.valueOf("@name");
             int longueur = (int) Math.round(Double.parseDouble(
                     noeudSegment.valueOf("@length")) * 100); // stockage en cm
 
             Intersection intersectionDebut = intersections.get(
-                    Long.parseLong(noeudSegment.valueOf("@origin")));
+                    noeudSegment.valueOf("@origin"));
             Intersection intersectionFin = intersections.get(
-                    Long.parseLong(noeudSegment.valueOf("@destination")));
+                    noeudSegment.valueOf("@destination"));
 
-            segments.add(new Segment(
-                    nom, longueur, intersectionDebut, intersectionFin));
+        // Ajout dans l'intersection début du lien avec l'intersection de fin (modélisation du segment)
+            intersectionDebut.getIntersections()
+                    .put(intersectionFin, new Pair<Integer, String>(longueur, nom));
         }
 
-        return new Plan(segments, entrepot);
+        return new Plan(intersections, entrepot);
     }
 
     /**
@@ -120,6 +117,8 @@ public final class Serialiseur {
             // adresse
             Intersection adresse = livraison.getAdresse();
             Element adresseElement = livraisonElement.addElement("adresse");
+            adresseElement.addElement("id")
+                    .addText(adresse.getId());
             adresseElement.addElement("latitude")
                     .addText(String.valueOf(adresse.getLatitude()));
             adresseElement.addElement("longitude")
@@ -165,11 +164,12 @@ public final class Serialiseur {
             );
 
             Node noeudAdresse = noeudLivraison.selectSingleNode("adresse");
+            String id = noeudAdresse.selectSingleNode("id").getText();
             double latitude = Double.parseDouble(
                     noeudAdresse.selectSingleNode("latitude").getText());
             double longitude = Double.parseDouble(
                     noeudAdresse.selectSingleNode("longitude").getText());
-            Intersection adresse = new Intersection(latitude, longitude);
+            Intersection adresse = new Intersection(id, latitude, longitude);
 
             livraisons.add(new Livraison(numero, fenetre, livreur, adresse));
         }
