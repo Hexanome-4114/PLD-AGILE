@@ -40,7 +40,7 @@ public final class CompleteGraph implements Graph {
         cost = new int[nbVertices][nbVertices];
         for (int i = 0; i < nbVertices; i++) {
             for (int j = 0; j < nbVertices; j++) {
-                cost[i][i] = -1;
+                cost[i][j] = -1;
             }
         }
         Sommet unSommet;
