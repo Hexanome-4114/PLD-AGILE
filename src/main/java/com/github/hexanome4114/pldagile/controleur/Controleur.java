@@ -3,7 +3,6 @@ package com.github.hexanome4114.pldagile.controleur;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
 import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
-import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
 import com.github.hexanome4114.pldagile.modele.*;
@@ -370,13 +369,16 @@ public final class Controleur {
         if(tsp.getSolutionCost() != Integer.MAX_VALUE){ // s'il y a une solution
             // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
             for(int i=0; i<nbSommetsDansGrapheComplet-1;++i){
-                String idSommet = g.getMapIndexVersSommet().get(tsp.getSolution(i));
-                String idSommet1 = g.getMapIndexVersSommet().get(tsp.getSolution(i+1));
+                String idSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(i));
+                String idSommet1 = g.getMapIndexVersNomSommet().get(tsp.getSolution(i+1));
                 Itineraire itineraire = itineraireMap.get(idSommet+"_"+idSommet1);
                 itinerairesFinaux.add(itineraire);
                //System.out.println("tsp.getSolution(i) = " + tsp.getSolution(i));
             }
-            // TODO ajouter l'entrepot (si possible
+            // Ajout du dernier itinéraire entre la dernière adresse de livraison visité et la première (l'entrepôt)
+            String idPremierSommet = g.getMapIndexVersNomSommet().get(0);
+            String idDernierSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(nbSommetsDansGrapheComplet-1));
+            itinerairesFinaux.add(itineraireMap.get(idDernierSommet+"_"+idPremierSommet));
         }
         Tournee tournee = new Tournee(livreur, livraisons, itinerairesFinaux);
 
