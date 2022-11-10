@@ -362,17 +362,22 @@ public final class Controleur {
             graphe.reinitialiserSommetsGraphe();
         }
 
-        Graph g = new CompleteGraph(grapheComplet);
+        CompleteGraph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
 
-        // DEBUG
-        for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
-            System.out.print(tsp.getSolution(i) + " ");
-
-        // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
         List<Itineraire> itinerairesFinaux = new ArrayList<>();
-        // TODO : a remplir
+        if(tsp.getSolutionCost() != Integer.MAX_VALUE){ // s'il y a une solution
+            // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
+            for(int i=0; i<nbSommetsDansGrapheComplet-1;++i){
+                String idSommet = g.getMapIndexVersSommet().get(tsp.getSolution(i));
+                String idSommet1 = g.getMapIndexVersSommet().get(tsp.getSolution(i+1));
+                Itineraire itineraire = itineraireMap.get(idSommet+"_"+idSommet1);
+                itinerairesFinaux.add(itineraire);
+               //System.out.println("tsp.getSolution(i) = " + tsp.getSolution(i));
+            }
+            // TODO ajouter l'entrepot (si possible
+        }
         Tournee tournee = new Tournee(livreur, livraisons, itinerairesFinaux);
 
         return tournee;
