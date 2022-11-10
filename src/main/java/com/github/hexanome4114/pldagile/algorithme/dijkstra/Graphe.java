@@ -68,4 +68,11 @@ public class Graphe {
             sommetEvalue.setCheminPlusCourt(cheminPlusCourt);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Graphe{" +
+                "sommets=" + sommets +
+                '}';
+    }
 }

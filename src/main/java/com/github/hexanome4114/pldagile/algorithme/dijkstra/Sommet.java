@@ -44,4 +44,12 @@ public class Sommet {
     public void setCheminPlusCourt(List<Sommet> cheminPlusCourt) {
         this.cheminPlusCourt = cheminPlusCourt;
     }
+
+    public String toString (){
+        String result = "";
+        for(Map.Entry<Sommet,Integer> sommetsAdjacents : this.sommetsAdjacents.entrySet()) {
+            result += "{" + sommetsAdjacents.getKey().getNom() + ";" + sommetsAdjacents.getValue() + "}";
+        }
+        return result;
+    }
 }
