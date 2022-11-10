@@ -117,6 +117,8 @@ public final class Serialiseur {
             // adresse
             Intersection adresse = livraison.getAdresse();
             Element adresseElement = livraisonElement.addElement("adresse");
+            adresseElement.addElement("id")
+                    .addText(adresse.getId());
             adresseElement.addElement("latitude")
                     .addText(String.valueOf(adresse.getLatitude()));
             adresseElement.addElement("longitude")
@@ -162,11 +164,12 @@ public final class Serialiseur {
             );
 
             Node noeudAdresse = noeudLivraison.selectSingleNode("adresse");
+            String id = noeudAdresse.selectSingleNode("id").getText();
             double latitude = Double.parseDouble(
                     noeudAdresse.selectSingleNode("latitude").getText());
             double longitude = Double.parseDouble(
                     noeudAdresse.selectSingleNode("longitude").getText());
-            Intersection adresse = new Intersection("id",latitude, longitude);
+            Intersection adresse = new Intersection(id, latitude, longitude);
 
             livraisons.add(new Livraison(numero, fenetre, livreur, adresse));
         }

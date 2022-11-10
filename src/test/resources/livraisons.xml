@@ -11,6 +11,7 @@
             <fin>9</fin>
         </fenetre>
         <adresse>
+            <id>1</id>
             <latitude>45.759335</latitude>
             <longitude>4.877039</longitude>
         </adresse>
@@ -25,6 +26,7 @@
             <fin>9</fin>
         </fenetre>
         <adresse>
+            <id>2</id>
             <latitude>45.756004</latitude>
             <longitude>4.8742256</longitude>
         </adresse>
