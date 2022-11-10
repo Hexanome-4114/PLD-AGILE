@@ -36,10 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Contrôleur de l'application.
@@ -84,13 +82,13 @@ public final class Controleur {
     private TableView<Livraison> tableauLivraison;
 
     @FXML
-    private TableColumn<Livraison, Integer> numeroLivraison;
+    private TableColumn<Livraison, Integer> numeroLivraisonColonne;
 
     @FXML
-    private TableColumn<Livraison, Livreur> livreur;
+    private TableColumn<Livraison, Livreur> livreurColonne;
 
     @FXML
-    private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraison;
+    private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraisonColonne;
 
     @FXML
     private Label messageErreur;
@@ -123,11 +121,11 @@ public final class Controleur {
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
 
-        this.numeroLivraison.setCellValueFactory(
+        this.numeroLivraisonColonne.setCellValueFactory(
                 new PropertyValueFactory<>("numero"));
-        this.livreur.setCellValueFactory(
+        this.livreurColonne.setCellValueFactory(
                 new PropertyValueFactory<>("livreur"));
-        this.fenetreDeLivraison.setCellValueFactory(
+        this.fenetreDeLivraisonColonne.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
 
         tableauLivraison.getSelectionModel().selectedItemProperty().addListener(
@@ -262,7 +260,23 @@ public final class Controleur {
         }
     }
 
-    public void calculerTournee() {
+    public List<Tournee> calculerLesTournees() {
+        List<Tournee> tournees = new ArrayList<>();
+        // Pour chaque livreur, on appelle "calculerTournee"
+        for(Livreur livreur : this.livreurs) {
+            // on récupère les livraisons du livreur
+            List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
+                    livraison -> livraison.getLivreur().equals(livreur))
+                    .collect(Collectors.toList());
+
+            tournees.add(calculerTournee(livreur, livraisons));
+        }
+
+        return tournees;
+    }
+
+    // TODO Il faudrait un helper pour la traduction dijstra vers TSP
+    public Tournee calculerTournee(Livreur livreur, List<Livraison> livraisons) {
 
         // Dijkstra
         // Creation de chaque noeud et ajout dans le graphe
@@ -304,8 +318,6 @@ public final class Controleur {
 
         // Calcul de distance entre chaque adresse de livraison pour la
         // création d'un graphe complet
-        // TODO créer et stocker les itinéraires (voir la feuille de François
-        // pour la structure de données)
         // itineraireMap stocke l'itinéraire entre intersection1
         // vers intersection2
         // key est de la sorte "intersection1.id_intersection2.id"
@@ -320,7 +332,6 @@ public final class Controleur {
 
             // Récupération des pcc pour créer le graphe complet et construire les intinéraires correspondants.
             for (Intersection adresseLivraison : pointsDePassage) {
-                // TODO supprimer les arcs entre une livraison à 9h10h et une à 8h9h. Voir feuille François
                 if (adresseLivraison.getId() != addresseLivraisonCourante.getId()) {
                     // Sommet correspondant au point de passage dans le graphe dijktra
                     Sommet sommetLivraison = graphe.getSommets().get(adresseLivraison.getId());
@@ -339,7 +350,7 @@ public final class Controleur {
 
                         // Sommets dans le graph complet
                         // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
-                        // TODO Il faudrait un helper pour la traduction dijstra vers TSP
+
                         Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
                         Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetLivraison.getNom());
                         sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
@@ -351,14 +362,20 @@ public final class Controleur {
             graphe.reinitialiserSommetsGraphe();
         }
 
-        // DEBUG affichage des itinéraires de toute les livraison
-        // TODO Créer la tournée
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
+
+        // DEBUG
         for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
             System.out.print(tsp.getSolution(i) + " ");
 
+        // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
+        List<Itineraire> itinerairesFinaux = new ArrayList<>();
+        // TODO : a remplir
+        Tournee tournee = new Tournee(livreur, livraisons, itinerairesFinaux);
+
+        return tournee;
     }
 
     @FXML
