@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<livraisons>
+    <livraison>
+        <numero>1</numero>
+        <livreur>
+            <numero>1</numero>
+        </livreur>
+        <fenetre>
+            <debut>8</debut>
+            <fin>9</fin>
+        </fenetre>
+        <adresse>
+            <latitude>45.759335</latitude>
+            <longitude>4.877039</longitude>
+        </adresse>
+    </livraison>
+    <livraison>
+        <numero>3</numero>
+        <livreur>
+            <numero>1</numero>
+        </livreur>
+        <fenetre>
+            <debut>8</debut>
+            <fin>9</fin>
+        </fenetre>
+        <adresse>
+            <latitude>45.756004</latitude>
+            <longitude>4.8742256</longitude>
+        </adresse>
+    </livraison>
+</livraisons>

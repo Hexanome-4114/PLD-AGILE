@@ -28,11 +28,18 @@
                 </ComboBox>
                 <ComboBox fx:id="comboBoxAdresse" prefHeight="24.0" prefWidth="349.0" />
             </HBox>
-            <Button onAction="#ajouterLivraison" text="Ajouter une livraison">
-                <VBox.margin>
-                   <Insets top="10.0" />
-                </VBox.margin>
-            </Button>
+         <HBox>
+            <children>
+                  <Button onAction="#ajouterLivraison" text="Ajouter une livraison">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin></Button>
+               <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
+            </children>
+            <VBox.margin>
+               <Insets top="10.0" />
+            </VBox.margin>
+         </HBox>
             <Label fx:id="messageErreur" prefHeight="18.0" prefWidth="640.0" textFill="RED">
                 <VBox.margin>
                    <Insets top="10.0" />
@@ -48,6 +55,19 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </TableView>
+         <HBox>
+            <children>
+               <Button fx:id="sauvegarderLivraisonsBouton" disable="true" onAction="#sauvegarderLivraisons" text="Sauvegarder les livraisons">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </Button>
+               <Button mnemonicParsing="false" onAction="#chargerLivraisons" text="Charger des livraisons" />
+            </children>
+            <VBox.margin>
+               <Insets top="10.0" />
+            </VBox.margin>
+         </HBox>
         </VBox>
     </HBox>
     <Button onAction="#chargerPlan" text="Charger le plan" />
