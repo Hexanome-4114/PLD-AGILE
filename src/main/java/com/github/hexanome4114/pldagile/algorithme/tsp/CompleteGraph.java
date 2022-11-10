@@ -17,11 +17,11 @@ public final class CompleteGraph implements Graph {
     private Map<String, Integer> mapNomSommetVersIndex;
     //map entre nom des sommets et index dans le tableau utilisé par le TSP
 
-    public Map<Integer, String> getMapIndexVersSommet() {
-        return mapIndexVersSommet;
+    public Map<Integer, String> getMapIndexVersNomSommet() {
+        return mapIndexVersNomSommet;
     }
 
-    private Map<Integer, String> mapIndexVersSommet;
+    private Map<Integer, String> mapIndexVersNomSommet;
 
     /**
      * Create a complete directed graph such that each edge has a
@@ -47,12 +47,12 @@ public final class CompleteGraph implements Graph {
         int sommetOrigine;
         int sommetDest;
         mapNomSommetVersIndex = new LinkedHashMap<>();
-        mapIndexVersSommet = new LinkedHashMap<>();
+        mapIndexVersNomSommet = new LinkedHashMap<>();
         int iter = 0;
 
         for (String nom : completeGraph.getSommets().keySet()) {
             mapNomSommetVersIndex.put(nom, iter);
-            mapIndexVersSommet.put(iter, nom);
+            mapIndexVersNomSommet.put(iter, nom);
             iter++;
         }
         //on itère sur les sommets du graphe
