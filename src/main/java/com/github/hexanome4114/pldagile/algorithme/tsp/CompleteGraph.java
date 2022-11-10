@@ -58,6 +58,8 @@ public class CompleteGraph implements Graph {
 		for (Map.Entry entry : completeGraph.getSommets().entrySet()) {
 			unSommet = (Sommet) entry.getValue();
 			//Pour chaque sommet, on récupére les arc associés et les ajoute dans la matrice des arcs
+			// TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
+			// TODO Il faudrait un helper pour la traduction dijstra vers TSS
 			for (Map.Entry<Sommet, Integer> arc : unSommet.getSommetsAdjacents().entrySet()) {
 				sommetOrigine = mapNomSommetVersIndex.get(unSommet.getNom());
 				sommetDest = mapNomSommetVersIndex.get(arc.getKey().getNom());

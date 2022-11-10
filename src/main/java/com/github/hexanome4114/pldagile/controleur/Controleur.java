@@ -6,11 +6,7 @@ import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
-import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
-import com.github.hexanome4114.pldagile.modele.Intersection;
-import com.github.hexanome4114.pldagile.modele.Livraison;
-import com.github.hexanome4114.pldagile.modele.Livreur;
-import com.github.hexanome4114.pldagile.modele.Plan;
+import com.github.hexanome4114.pldagile.modele.*;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -165,8 +161,8 @@ public final class Controleur {
         // Dijkstra
         // Creation de chaque noeud et ajout dans le graphe
         Graphe graphe = new Graphe();
-        for (Map.Entry<String,Intersection> intersection : this.plan.getIntersections().entrySet()) {
-            Sommet sommet = new Sommet(intersection.getKey());
+        for (String intersectionId : this.plan.getIntersections().keySet()) {
+            Sommet sommet = new Sommet(intersectionId);
             graphe.ajouterSommet(sommet);
         }
 
@@ -194,33 +190,53 @@ public final class Controleur {
             grapheComplet.ajouterSommet(new Sommet(intersection.getId()));
         }
 
-        // Calcul de distance entre chaque adresse de livraison
-        // TODO créer et stocker les itinéraires (voir la feuille de françois pour la structure de données)
-        for(Intersection intersection : pointsDePassage){
-            // On calcul la distance entre 'livraison' et les autres adresse de livraisons
-            Sommet sommetSource = graphe.getSommets().get(intersection.getId());
-            // dans graphe on a la distance entre le sommet source et les autres sommets
-            graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource);
+        // Calcul de distance entre chaque adresse de livraison pour la création d'un graphe complet
+        // TODO créer et stocker les itinéraires (voir la feuille de François pour la structure de données)
+        /**
+         * itineraireMap stocke l'itinéraire entre intersection1 vers intersection2
+         *  key est de la sorte "intersection1.id_intersection2.id"
+         */
+        Map<String, Itineraire> itineraireMap = new HashMap<>();
+        for(Intersection addresseLivraisonCourante : pointsDePassage){
+            // On calcul la distance entre l'adresse de livraison courante et les autres adresse de livraisons
+            Sommet sommetSource = graphe.getSommets().get(addresseLivraisonCourante.getId()); // adresse de livraison courante
+            // Calcul des plus courts chemins (pcc)
+            graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource); // contient les pcc entre le sommet source et les autres sommets
 
-            // Récupération des plus courts chemins
-            for(Intersection intersection1 : pointsDePassage){
-                if(intersection1.getId() != intersection.getId()){
+            // Récupération des pcc pour créer le graphe complet et construire les intinéraires correspondants.
+            for(Intersection adresseLivraison : pointsDePassage){
+                // TODO supprimer les arcs entre une livraison à 9h10h et une à 8h9h. Voir feuille François
+                if(adresseLivraison.getId() != addresseLivraisonCourante.getId()){
                     // Sommet correspondant au point de passage dans le graphe dijktra
-                    Sommet sommetDansGraphe = graphe.getSommets().get(intersection1.getId());
+                    Sommet sommetLivraison = graphe.getSommets().get(adresseLivraison.getId());
+                    // Création de l'itinéraire
+                    List<Intersection> intersectionsItineraire = new ArrayList<>(sommetLivraison.getCheminPlusCourt().size());
+                    List<Sommet> cheminAdresseLivraisonCouranteVersAdresseLivraison = sommetLivraison.getCheminPlusCourt();
 
-                    // Sommets dans le graph complet
-                    Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
-                    Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetDansGraphe.getNom());
-                    sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
-                            sommetDansGraphe.getDistance());
+                    // S'il n'y a pas de chemin plus court entre les 2, on n'ajotue pas
+                    if(!cheminAdresseLivraisonCouranteVersAdresseLivraison.isEmpty()){
+                        for(Sommet sommet : cheminAdresseLivraisonCouranteVersAdresseLivraison){
+                            Intersection intersectionDuPcc = this.plan.getIntersections().get(sommet.getNom());
+                            intersectionsItineraire.add(intersectionDuPcc);
+                        }
+                        intersectionsItineraire.add(adresseLivraison); // On doit ajouter l'intersection destination
+                        itineraireMap.put(addresseLivraisonCourante.getId()+"_"+adresseLivraison.getId(), new Itineraire(intersectionsItineraire));
 
+                        // Sommets dans le graph complet
+                        // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
+                        // TODO Il faudrait un helper pour la traduction dijstra vers TSP
+                        Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
+                        Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetLivraison.getNom());
+                        sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
+                                sommetLivraison.getDistance());
+                    }
                 }
             }
             // réinitialisation des sommets du graphe pour le nouvel appel
             graphe.reinitialiserSommetsGraphe();
         }
 
-        // TODO créer les itinéraires pour la tournée
+        // DEBUG affichage des itinéraires de toute les livraison
         // TODO Créer la tournée
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();

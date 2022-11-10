@@ -53,9 +53,6 @@ public final class Serialiseur {
 
 
         for (Node noeudSegment: document.selectNodes("/map/segment")) {
-            // TODO Les rues sont souvent à doubles sens. Or là j'enregistre
-            // seulement une des rues (id de la map sur le nom)
-
             String nom = noeudSegment.valueOf("@name");
             int longueur = (int) Math.round(Double.parseDouble(
                     noeudSegment.valueOf("@length")) * 100); // stockage en cm

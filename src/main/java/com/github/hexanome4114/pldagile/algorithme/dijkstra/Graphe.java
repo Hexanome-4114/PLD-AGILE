@@ -58,14 +58,14 @@ public class Graphe {
         return SommetLePlusProche;
     }
 
-    private static void calculDistanceMinimum(Sommet evaluationNode,
+    private static void calculDistanceMinimum(Sommet sommetEvalue/*un sommet adjacent à la source*/,
                                                  Integer coutArc, Sommet sommetSource) {
         Integer sourceDistance = sommetSource.getDistance();
-        if (sourceDistance + coutArc < evaluationNode.getDistance()) {
-            evaluationNode.setDistance(sourceDistance + coutArc);
+        if (sourceDistance + coutArc < sommetEvalue.getDistance()) {
+            sommetEvalue.setDistance(sourceDistance + coutArc);
             LinkedList<Sommet> cheminPlusCourt = new LinkedList<>(sommetSource.getCheminPlusCourt());
             cheminPlusCourt.add(sommetSource);
-            evaluationNode.setCheminPlusCourt(cheminPlusCourt);
+            sommetEvalue.setCheminPlusCourt(cheminPlusCourt);
         }
     }
 }
