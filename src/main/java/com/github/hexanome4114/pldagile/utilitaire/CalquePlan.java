@@ -19,10 +19,13 @@ import javafx.util.Pair;
 public final class CalquePlan extends MapLayer {
 
     private static final int TAILLE_POINT = 4;
+
     private static final Color COULEUR_POINT = Color.GREY;
+
     private static final Image IMAGE_ENTREPOT = new Image(
             CalquePlan.class.getResource("/images/entrepot.png").toString(),
             25, 25, false, false);
+
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
@@ -46,14 +49,14 @@ public final class CalquePlan extends MapLayer {
 
     /**
      * Ajoute un point sur le calque.
-     * @param p
+     * @param point
      */
-    public void ajouterPoint(final Intersection p) {
+    public void ajouterPoint(final Intersection point) {
         Circle cercle = new Circle(TAILLE_POINT, COULEUR_POINT);
         cercle.setVisible(false); // les points sont masqués par défaut
         cercle.setCursor(Cursor.HAND);
 
-        points.add(new Pair(p, cercle));
+        points.add(new Pair(point, cercle));
         this.getChildren().add(cercle);
         this.markDirty();
     }
