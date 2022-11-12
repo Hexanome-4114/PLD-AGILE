@@ -6,7 +6,12 @@ import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
-import com.github.hexanome4114.pldagile.modele.*;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.Livreur;
+import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -15,7 +20,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
+import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -26,23 +31,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.dom4j.DocumentException;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.*;
 
 /**
  * Contrôleur de l'application.
@@ -382,8 +382,7 @@ public final class Controleur {
         }
 
         try {
-            Plan plan = Serialiseur.chargerPlan(fichier);
-            this.plan = plan;
+            this.plan = Serialiseur.chargerPlan(fichier);
             this.afficherPlan(plan);
         } catch (Exception e) {
             this.messageErreur.setText("Problème lors du chargement du plan.");
@@ -395,27 +394,12 @@ public final class Controleur {
 
         // intersections
         for (Intersection intersection : plan.getIntersections().values()) {
-            Circle cercle = new Circle(3, Color.GREY);
-            cercle.setVisible(false);
-            calquePlan.ajouterPoint(intersection, cercle);
+            calquePlan.ajouterPoint(intersection);
         }
-
-        calquePlan.getPoints().forEach(point -> {
-            // ajout d'un listener sur chaque point du calque
-            point.getValue().setOnMouseClicked(e -> {
-                e.consume();
-                if (this.pointClique != null) {
-                    this.pointClique.setFill(Color.GREY);
-                }
-                this.pointClique = (Circle) e.getTarget();
-                ((Circle) e.getTarget()).setFill(Color.BLUE);
-                this.comboBoxAdresse.setValue(point.getKey());
-            });
-        });
 
         // entrepot
         Intersection entrepot = plan.getEntrepot();
-        calquePlan.ajouterPoint(entrepot, new Circle(5, Color.RED));
+        calquePlan.setEntrepot(entrepot);
 
         // config carte
         MapView carteVue = new MapView();
@@ -423,14 +407,15 @@ public final class Controleur {
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
         carteVue.addLayer(calquePlan); // ajout du calque contenant les points
-        carteVue.setPrefHeight(carte.getHeight());
-        carteVue.setPrefWidth(carte.getWidth());
+        carteVue.setPrefSize(carte.getWidth(), carte.getHeight());
+        carteVue.setCursor(Cursor.CROSSHAIR);
 
         carteVue.setOnMouseClicked(e -> {
-            Pair<Intersection, Circle> minPoint = calquePlan.trouverPointPlusProche(e.getX(), e.getY());
-            Circle circle = minPoint.getValue();
-            circle.setFill(Color.GREEN);
-            circle.setVisible(true);
+            Pair<Intersection, Circle> point = calquePlan.
+                    trouverPointPlusProche(e.getX(), e.getY());
+
+            this.calquePlan.setPointSelectionne(point.getValue());
+            this.comboBoxAdresse.setValue(point.getKey());
         });
 
         this.carte.getChildren().add(carteVue);
@@ -440,7 +425,7 @@ public final class Controleur {
         this.stage = stage;
     }
 
-    public void afficherPointsDeLivraison(ActionEvent actionEvent) {
+    public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
         CheckBox checkBox = (CheckBox) actionEvent.getSource();
         this.calquePlan.afficherPoints(checkBox.isSelected());
     }
