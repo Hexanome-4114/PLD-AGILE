@@ -382,6 +382,7 @@ public final class Controleur {
             Plan plan = Serialiseur.chargerPlan(fichier);
             this.plan = plan;
             this.afficherPlan(plan);
+            this.testAffichageTournee();
         } catch (DocumentException e) {
             this.messageErreur.setText("Problème lors du chargement du plan.");
         }
@@ -453,5 +454,27 @@ public final class Controleur {
 
     public void setStage(final Stage stage) {
         this.stage = stage;
+    }
+
+    public void testAffichageTournee(){ //destinée à créer une tournée en dur pour essayer l'affichage (à charger avec au moins la medium map)
+        List<Intersection> listeInter1= new LinkedList<Intersection>();
+        List<Intersection> listeInter2= new LinkedList<Intersection>();
+        listeInter1.add(plan.getIntersections().get("1850080438"));
+        listeInter1.add(plan.getIntersections().get("251049182"));
+        listeInter1.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("249725346"));
+        listeInter2.add(plan.getIntersections().get("25611395"));
+        Itineraire unItineraire1 = new Itineraire(listeInter1);
+        Itineraire unItineraire2 = new Itineraire(listeInter2);
+        Livraison livraison1 = new Livraison(1,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("251049182"));
+        Livraison livraison2 = new Livraison(2,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("249725346"));
+        List<Livraison> listeLivraisons = new LinkedList<Livraison>();
+        listeLivraisons.add(livraison1);
+        listeLivraisons.add(livraison2);
+        List<Itineraire> listeItineraire  = new LinkedList<Itineraire>();
+        listeItineraire.add(unItineraire1);
+        listeItineraire.add(unItineraire2);
+        Tournee uneTournee = new Tournee(livreurs.get(0),listeLivraisons,listeItineraire);
     }
 }
