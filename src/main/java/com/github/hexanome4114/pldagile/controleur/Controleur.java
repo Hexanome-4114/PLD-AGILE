@@ -26,6 +26,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+// TODO AJOUT DE javafx.scene.shape.Line;
+import javafx.scene.shape.Line;
+// TODO FIN AJOUT
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -286,7 +289,7 @@ public final class Controleur {
             }
         }
 
-        // Utilisation d'une liste itermédiaire pour prendre en compte
+        // Utilisation d'une liste intermédiaire pour prendre en compte
         // l'entrepôt
         List<Intersection> pointsDePassage = new ArrayList<>(
                 this.tableauLivraison.getItems().size() + 1);
@@ -415,6 +418,31 @@ public final class Controleur {
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
         carteVue.addLayer(calque); // ajout du calque contenant les points
+
+        StackPane sp = new StackPane();
+        sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
+        sp.getChildren().add(carteVue);
+
+        this.carte.getChildren().add(sp);
+    }
+
+    // TODO EN COURS DE MODIF
+    private void afficherTournee(Tournee tournee, final Plan plan){
+        CalquePlan calque = new CalquePlan();
+
+        for (Itineraire itineraire : tournee.getItineraires()){
+            for (int i = 1; i<itineraire.getIntersections().size(); i++){
+                calque.ajouterSegment(itineraire.getIntersections().get(i-1),
+                        itineraire.getIntersections().get(i),
+                        new Line(itineraire.getIntersections().get(i-1).getLongitude(),
+                                itineraire.getIntersections().get(i).getLongitude(),
+                                itineraire.getIntersections().get(i-1).getLatitude(),
+                                itineraire.getIntersections().get(i).getLatitude()));
+            }
+        }
+
+        MapView carteVue = new MapView();
+        carteVue.addLayer(calque);
 
         StackPane sp = new StackPane();
         sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
