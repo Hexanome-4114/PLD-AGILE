@@ -268,15 +268,28 @@ public final class Controleur {
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
 
+            // Ajout de l'entrepôt comme départ(et arrivée) de la tournée.
+            // TODO Est ce ok de créer une "fausse" livraison pour l'entrepôt ?
+            Livraison livraisonEntrepot = new Livraison(Integer.MAX_VALUE, new FenetreDeLivraison(8, 9),
+                    livreur, this.plan.getEntrepot());
+            livraisons.add(0, livraisonEntrepot);
             tournees.add(calculerTournee(livreur, livraisons));
         }
 
         return tournees;
     }
 
-    // TODO Il faudrait un helper pour la traduction dijstra vers TSP
+    /**
+     * Calcule une Tournée qui part et revient sur la première livraison
+     *
+     * @param livreur livreur qui effectue les livraisons
+     * @param livraisons liste des livraisons à effectuer, la première livraison est le point de départ et d'arrivée.
+     * @return Tournée
+     */
     public Tournee calculerTournee(Livreur livreur, List<Livraison> livraisons) {
-
+        // TODO Il faudrait un helper pour :
+        //  * la traduction des Intersection vers un graphe Dijkstra
+        //  * la traduction Graphe dijkstra vers CompleteGraph (qui remplacerait le constructeur dans CompleteGraph de tsp)
         // Dijkstra
         // Creation de chaque noeud et ajout dans le graphe
         Graphe graphe = new Graphe();
@@ -301,15 +314,13 @@ public final class Controleur {
 
         // Utilisation d'une liste itermédiaire pour prendre en compte
         // l'entrepôt
-        List<Intersection> pointsDePassage = new ArrayList<>(
-                livraisons.size() + 1);
-        pointsDePassage.add(this.plan.getEntrepot());
+        List<Intersection> pointsDePassage = new ArrayList<>(livraisons.size());
         for (Livraison pointDeLivraison : livraisons) {
             pointsDePassage.add(pointDeLivraison.getAdresse());
         }
-        int nbSommetsDansGrapheComplet = pointsDePassage.size();
 
         // Graphe complet utilisé pour le TSP
+        int nbSommetsDansGrapheComplet = pointsDePassage.size();
         Graphe grapheComplet = new Graphe();
         for (Intersection intersection : pointsDePassage) {
             grapheComplet.ajouterSommet(new Sommet(intersection.getId()));
