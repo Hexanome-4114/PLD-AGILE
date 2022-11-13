@@ -312,18 +312,11 @@ public final class Controleur {
             }
         }
 
-        // Utilisation d'une liste itermédiaire pour prendre en compte
-        // l'entrepôt
-        List<Intersection> pointsDePassage = new ArrayList<>(livraisons.size());
-        for (Livraison pointDeLivraison : livraisons) {
-            pointsDePassage.add(pointDeLivraison.getAdresse());
-        }
-
         // Graphe complet utilisé pour le TSP
-        int nbSommetsDansGrapheComplet = pointsDePassage.size();
+        int nbSommetsDansGrapheComplet = livraisons.size();
         Graphe grapheComplet = new Graphe();
-        for (Intersection intersection : pointsDePassage) {
-            grapheComplet.ajouterSommet(new Sommet(intersection.getId()));
+        for (Livraison livraison : livraisons) {
+            grapheComplet.ajouterSommet(new Sommet(livraison.getAdresse().getId()));
         }
 
         // Calcul de distance entre chaque adresse de livraison pour la
@@ -333,18 +326,18 @@ public final class Controleur {
         // key est de la sorte "intersection1.id_intersection2.id"
 
         Map<String, Itineraire> itineraireMap = new HashMap<>();
-        for (Intersection addresseLivraisonCourante : pointsDePassage) {
+        for (Livraison livraisonCourante : livraisons) {
             // On calcul la distance entre l'adresse de livraison courante et
             // les autres adresse de livraisons
-            Sommet sommetSource = graphe.getSommets().get(addresseLivraisonCourante.getId()); // adresse de livraison courante
+            Sommet sommetSource = graphe.getSommets().get(livraisonCourante.getAdresse().getId()); // adresse de livraison courante
             // Calcul des plus courts chemins (pcc)
             graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource); // contient les pcc entre le sommet source et les autres sommets
 
             // Récupération des pcc pour créer le graphe complet et construire les intinéraires correspondants.
-            for (Intersection adresseLivraison : pointsDePassage) {
-                if (adresseLivraison.getId() != addresseLivraisonCourante.getId()) {
+            for (Livraison autreLivraison : livraisons) {
+                if (autreLivraison.getNumero() != livraisonCourante.getNumero()) {
                     // Sommet correspondant au point de passage dans le graphe dijktra
-                    Sommet sommetLivraison = graphe.getSommets().get(adresseLivraison.getId());
+                    Sommet sommetLivraison = graphe.getSommets().get(autreLivraison.getAdresse().getId());
                     // Création de l'itinéraire
                     List<Intersection> intersectionsItineraire = new ArrayList<>(sommetLivraison.getCheminPlusCourt().size());
                     List<Sommet> cheminAdresseLivraisonCouranteVersAdresseLivraison = sommetLivraison.getCheminPlusCourt();
@@ -355,8 +348,9 @@ public final class Controleur {
                             Intersection intersectionDuPcc = this.plan.getIntersections().get(sommet.getNom());
                             intersectionsItineraire.add(intersectionDuPcc);
                         }
-                        intersectionsItineraire.add(adresseLivraison); // On doit ajouter l'intersection destination
-                        itineraireMap.put(addresseLivraisonCourante.getId() + "_" + adresseLivraison.getId(), new Itineraire(intersectionsItineraire));
+                        intersectionsItineraire.add(autreLivraison.getAdresse()); // On doit ajouter l'intersection destination
+                        itineraireMap.put(livraisonCourante.getAdresse().getId() + "_" + autreLivraison.getAdresse().getId(),
+                                new Itineraire(intersectionsItineraire));
 
                         // Sommets dans le graph complet
                         // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
