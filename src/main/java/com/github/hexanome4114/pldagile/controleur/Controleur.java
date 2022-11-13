@@ -302,9 +302,9 @@ public final class Controleur {
         // Utilisation d'une liste itermédiaire pour prendre en compte
         // l'entrepôt
         List<Intersection> pointsDePassage = new ArrayList<>(
-                this.tableauLivraison.getItems().size() + 1);
+                livraisons.size() + 1);
         pointsDePassage.add(this.plan.getEntrepot());
-        for (Livraison pointDeLivraison : this.tableauLivraison.getItems()) {
+        for (Livraison pointDeLivraison : livraisons) {
             pointsDePassage.add(pointDeLivraison.getAdresse());
         }
         int nbSommetsDansGrapheComplet = pointsDePassage.size();
