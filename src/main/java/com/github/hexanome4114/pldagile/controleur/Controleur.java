@@ -318,6 +318,17 @@ public final class Controleur {
         for (Livraison livraison : livraisons) {
             grapheComplet.ajouterSommet(new Sommet(livraison.getAdresse().getId()));
         }
+        // Numérotation des FenetreDeLivraison
+        Map<Integer, FenetreDeLivraison> entierVersFenetreDeLivraison = new HashMap<>();
+        Map<FenetreDeLivraison, Integer> fenetreDeLivraisonVersEntier = new HashMap<>();
+        int compteur = 0;
+        for(Livraison livraison : livraisons){
+            if(fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null){
+                entierVersFenetreDeLivraison.put(compteur, livraison.getFenetreDeLivraison());
+                fenetreDeLivraisonVersEntier.put(livraison.getFenetreDeLivraison(), compteur);
+                compteur += 1;
+            }
+        }
 
         // Calcul de distance entre chaque adresse de livraison pour la
         // création d'un graphe complet
@@ -327,38 +338,43 @@ public final class Controleur {
 
         Map<String, Itineraire> itineraireMap = new HashMap<>();
         for (Livraison livraisonCourante : livraisons) {
+            int numFdLCourante = fenetreDeLivraisonVersEntier.get(livraisonCourante.getFenetreDeLivraison());
             // On calcul la distance entre l'adresse de livraison courante et
             // les autres adresse de livraisons
             Sommet sommetSource = graphe.getSommets().get(livraisonCourante.getAdresse().getId()); // adresse de livraison courante
             // Calcul des plus courts chemins (pcc)
             graphe = Graphe.calculerCheminplusCourtDepuisSource(graphe, sommetSource); // contient les pcc entre le sommet source et les autres sommets
-
             // Récupération des pcc pour créer le graphe complet et construire les intinéraires correspondants.
             for (Livraison autreLivraison : livraisons) {
                 if (autreLivraison.getNumero() != livraisonCourante.getNumero()) {
-                    // Sommet correspondant au point de passage dans le graphe dijktra
-                    Sommet sommetLivraison = graphe.getSommets().get(autreLivraison.getAdresse().getId());
-                    // Création de l'itinéraire
-                    List<Intersection> intersectionsItineraire = new ArrayList<>(sommetLivraison.getCheminPlusCourt().size());
-                    List<Sommet> cheminAdresseLivraisonCouranteVersAdresseLivraison = sommetLivraison.getCheminPlusCourt();
+                    int numAutreFdL = fenetreDeLivraisonVersEntier.get(autreLivraison.getFenetreDeLivraison());
+                    // On garde les arcs uniquement si les livraison sont dans la même FdL
+                    // ou si autreLivraison est dans la FdL directement subséquente.
+                    if(numFdLCourante == numAutreFdL || numAutreFdL == numFdLCourante +1){
+                        // Sommet correspondant au point de passage dans le graphe dijktra
+                        Sommet sommetLivraison = graphe.getSommets().get(autreLivraison.getAdresse().getId());
+                        // Création de l'itinéraire
+                        List<Intersection> intersectionsItineraire = new ArrayList<>(sommetLivraison.getCheminPlusCourt().size());
+                        List<Sommet> cheminAdresseLivraisonCouranteVersAdresseLivraison = sommetLivraison.getCheminPlusCourt();
 
-                    // S'il n'y a pas de chemin plus court entre les 2, on n'ajotue pas
-                    if (!cheminAdresseLivraisonCouranteVersAdresseLivraison.isEmpty()) {
-                        for (Sommet sommet : cheminAdresseLivraisonCouranteVersAdresseLivraison) {
-                            Intersection intersectionDuPcc = this.plan.getIntersections().get(sommet.getNom());
-                            intersectionsItineraire.add(intersectionDuPcc);
+                        // S'il n'y a pas de chemin plus court entre les 2, on n'ajotue pas
+                        if (!cheminAdresseLivraisonCouranteVersAdresseLivraison.isEmpty()) {
+                            for (Sommet sommet : cheminAdresseLivraisonCouranteVersAdresseLivraison) {
+                                Intersection intersectionDuPcc = this.plan.getIntersections().get(sommet.getNom());
+                                intersectionsItineraire.add(intersectionDuPcc);
+                            }
+                            intersectionsItineraire.add(autreLivraison.getAdresse()); // On doit ajouter l'intersection destination
+                            itineraireMap.put(livraisonCourante.getAdresse().getId() + "_" + autreLivraison.getAdresse().getId(),
+                                    new Itineraire(intersectionsItineraire));
+
+                            // Sommets dans le graph complet
+                            // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
+
+                            Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
+                            Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetLivraison.getNom());
+                            sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
+                                    sommetLivraison.getDistance());
                         }
-                        intersectionsItineraire.add(autreLivraison.getAdresse()); // On doit ajouter l'intersection destination
-                        itineraireMap.put(livraisonCourante.getAdresse().getId() + "_" + autreLivraison.getAdresse().getId(),
-                                new Itineraire(intersectionsItineraire));
-
-                        // Sommets dans le graph complet
-                        // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
-
-                        Sommet sommetSourceDansGrapheComplet = grapheComplet.getSommets().get(sommetSource.getNom());
-                        Sommet sommetDestDansGrapheComplet = grapheComplet.getSommets().get(sommetLivraison.getNom());
-                        sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
-                                sommetLivraison.getDistance());
                     }
                 }
             }
@@ -371,6 +387,8 @@ public final class Controleur {
         tsp.searchSolution(20000, g);
 
         List<Itineraire> itinerairesFinaux = new ArrayList<>();
+        // TODO réordonner les livraisons dans l'ordre des livraisons pour le TSP
+        List<Livraison> livraisonsTSP = new ArrayList<>(livraisons.size());
         if(tsp.getSolutionCost() != Integer.MAX_VALUE){ // s'il y a une solution
             // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
             for(int i=0; i<nbSommetsDansGrapheComplet-1;++i){
@@ -385,6 +403,7 @@ public final class Controleur {
             String idDernierSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(nbSommetsDansGrapheComplet-1));
             itinerairesFinaux.add(itineraireMap.get(idDernierSommet+"_"+idPremierSommet));
         }
+        // TODO tournee = new Tournee(livreur, livraisonsTSP, itinerairesFinaux)
         Tournee tournee = new Tournee(livreur, livraisons, itinerairesFinaux);
 
         return tournee;
