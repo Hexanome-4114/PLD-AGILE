@@ -25,6 +25,7 @@ public final class EtatInitial implements Etat {
                         || c.getComboBoxFenetreDeLivraison().getValue() == null
                         || c.getComboBoxAdresse().getValue() == null));
         c.getChargerLivraisonBouton().setDisable(false);
+        c.getAfficherPointsCheckBox().setDisable(false);
         c.setCurrentState(c.getEtatPlanCharge());
     }
 }

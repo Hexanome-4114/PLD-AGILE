@@ -17,30 +17,32 @@ import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+
 import org.dom4j.DocumentException;
 import java.io.File;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * Contrôleur de l'application.
@@ -61,12 +63,10 @@ public final class Controleur {
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
-    private Circle pointClique;
     private Plan plan;
 
-    /**
-     * Vue de l'application.
-     */
+    private CalquePlan calquePlan;
+
     private Etat etatCourant;
 
     /** Instances associées aux différents états du controleur. */
@@ -74,7 +74,9 @@ public final class Controleur {
     private final EtatPlanCharge etatPlanCharge = new EtatPlanCharge();
     private final EtatLivraison etatLivraison = new EtatLivraison();
 
-    /** Vue de l'application. */
+    /**
+     * Vue de l'application.
+     */
     private Stage stage;
 
     @FXML
@@ -123,6 +125,9 @@ public final class Controleur {
     private Button calculerTourneeBouton;
 
     @FXML
+    private CheckBox afficherPointsCheckBox;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
@@ -150,6 +155,7 @@ public final class Controleur {
         this.sauvegarderLivraisonsBouton.setDisable(true);
         this.chargerLivraisonBouton.setDisable(true);
         this.calculerTourneeBouton.setDisable(true);
+        this.afficherPointsCheckBox.setDisable(true);
         this.etatCourant = etatInitial;
 
         this.numeroLivraison.setCellValueFactory(
@@ -389,52 +395,49 @@ public final class Controleur {
         }
 
         try {
-            Plan plan = Serialiseur.chargerPlan(fichier);
-            this.plan = plan;
+            this.plan = Serialiseur.chargerPlan(fichier);
             this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
-        } catch (DocumentException e) {
+        } catch (Exception e) {
             this.messageErreur.setText("Problème lors du chargement du plan.");
         }
     }
 
     private void afficherPlan(final Plan plan) {
-        CalquePlan calque = new CalquePlan();
+        this.calquePlan = new CalquePlan();
 
         // intersections
         for (Intersection intersection : plan.getIntersections().values()) {
-            calque.ajouterPoint(intersection, new Circle(3, Color.GREY));
+            calquePlan.ajouterPoint(intersection);
         }
-
-        calque.getPoints().forEach(point -> {
-            // ajout d'un listener sur chaque point du calque
-            point.getValue().setOnMouseClicked(e -> {
-                e.consume();
-                if (this.pointClique != null) {
-                    this.pointClique.setFill(Color.GREY);
-                }
-                this.pointClique = (Circle) e.getTarget();
-                ((Circle) e.getTarget()).setFill(Color.BLUE);
-                this.comboBoxAdresse.setValue(point.getKey());
-            });
-        });
 
         // entrepot
         Intersection entrepot = plan.getEntrepot();
-        calque.ajouterPoint(entrepot, new Circle(5, Color.RED));
+        calquePlan.setEntrepot(entrepot);
 
         // config carte
         MapView carteVue = new MapView();
 
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
-        carteVue.addLayer(calque); // ajout du calque contenant les points
+        carteVue.addLayer(calquePlan); // ajout du calque contenant les points
+        carteVue.setPrefSize(carte.getWidth(), carte.getHeight());
+        carteVue.setCursor(Cursor.CROSSHAIR);
 
-        StackPane sp = new StackPane();
-        sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
-        sp.getChildren().add(carteVue);
+        carteVue.setOnMouseClicked(e -> {
+            Pair<Intersection, Circle> point = calquePlan.
+                    trouverPointPlusProche(e.getX(), e.getY());
 
-        this.carte.getChildren().add(sp);
+            this.calquePlan.setPointSelectionne(point.getValue());
+            this.comboBoxAdresse.setValue(point.getKey());
+        });
+
+        this.carte.getChildren().add(carteVue);
+    }
+
+    public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
+        this.afficherPointsCheckBox = (CheckBox) actionEvent.getSource();
+        this.calquePlan.afficherPoints(this.afficherPointsCheckBox.isSelected());
     }
 
     public ComboBox<Livreur> getComboBoxLivreur() {
@@ -483,6 +486,10 @@ public final class Controleur {
 
     public EtatLivraison getEtatLivraison() {
         return this.etatLivraison;
+    }
+
+    public CheckBox getAfficherPointsCheckBox() {
+        return this.afficherPointsCheckBox;
     }
 
     public void setStage(final Stage stage) {

@@ -1,6 +1,8 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
+
 public final class EtatLivraison implements Etat {
 
     @Override
@@ -14,6 +16,7 @@ public final class EtatLivraison implements Etat {
         c.getSupprimerLivraisonBouton().setDisable(true);
         c.getSauvegarderLivraisonsBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
+        c.getAfficherPointsCheckBox().setSelected(false);
         c.setCurrentState(c.getEtatPlanCharge());
     }
 }
