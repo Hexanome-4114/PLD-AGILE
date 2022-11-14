@@ -87,7 +87,7 @@ public final class CompleteGraph implements Graph {
 
     @Override
     public boolean isArc(final int i, final int j) {
-        if (i < 0 || i >= nbVertices || j < 0 || j >= nbVertices) {
+        if (i < 0 || i >= nbVertices || j < 0 || j >= nbVertices || cost[i][j] < 0) {
             return false;
         }
         return i != j;

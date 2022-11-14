@@ -321,12 +321,12 @@ public final class Controleur {
         // Numérotation des FenetreDeLivraison
         Map<Integer, FenetreDeLivraison> entierVersFenetreDeLivraison = new HashMap<>();
         Map<FenetreDeLivraison, Integer> fenetreDeLivraisonVersEntier = new HashMap<>();
-        int compteur = 0;
-        for(Livraison livraison : livraisons){
+        int compteurFdL = 0;
+        for(Livraison livraison : livraisons){ // On assigne un numéro à chaque fenêtre de livraison
             if(fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null){
-                entierVersFenetreDeLivraison.put(compteur, livraison.getFenetreDeLivraison());
-                fenetreDeLivraisonVersEntier.put(livraison.getFenetreDeLivraison(), compteur);
-                compteur += 1;
+                compteurFdL += 1;
+                entierVersFenetreDeLivraison.put(compteurFdL, livraison.getFenetreDeLivraison());
+                fenetreDeLivraisonVersEntier.put(livraison.getFenetreDeLivraison(), compteurFdL);
             }
         }
 
@@ -350,7 +350,9 @@ public final class Controleur {
                     int numAutreFdL = fenetreDeLivraisonVersEntier.get(autreLivraison.getFenetreDeLivraison());
                     // On garde les arcs uniquement si les livraison sont dans la même FdL
                     // ou si autreLivraison est dans la FdL directement subséquente.
-                    if(numFdLCourante == numAutreFdL || numAutreFdL == numFdLCourante +1){
+                    // ou si c'est la dernière FdL et que c'est un chemin vers le point de départ (aka l'entrepot)
+                    if(numFdLCourante == numAutreFdL || numAutreFdL == (numFdLCourante +1)
+                            || (numFdLCourante == compteurFdL && autreLivraison.getNumero() == livraisons.get(0).getNumero())){
                         // Sommet correspondant au point de passage dans le graphe dijktra
                         Sommet sommetLivraison = graphe.getSommets().get(autreLivraison.getAdresse().getId());
                         // Création de l'itinéraire
