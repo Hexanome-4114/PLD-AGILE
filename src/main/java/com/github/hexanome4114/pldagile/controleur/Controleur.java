@@ -35,8 +35,6 @@ import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import org.dom4j.DocumentException;
 import java.io.File;
 import java.util.Map;
 import java.util.List;
@@ -412,9 +410,9 @@ public final class Controleur {
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
-        for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
+        for (int i = 0; i < nbSommetsDansGrapheComplet; i++) {
             System.out.print(tsp.getSolution(i) + " ");
-
+        }
     }
 
     @FXML
@@ -474,7 +472,9 @@ public final class Controleur {
 
     public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
         this.afficherPointsCheckBox = (CheckBox) actionEvent.getSource();
-        this.calquePlan.afficherPoints(this.afficherPointsCheckBox.isSelected());
+        this.calquePlan.afficherPoints(
+                this.afficherPointsCheckBox.isSelected()
+        );
     }
 
     public ComboBox<Livreur> getComboBoxLivreur() {
