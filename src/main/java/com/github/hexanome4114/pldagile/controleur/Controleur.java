@@ -12,6 +12,9 @@ import com.github.hexanome4114.pldagile.modele.Itineraire;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
+// TODO IMPORT
+import com.github.hexanome4114.pldagile.modele.Tournee;
+// FIN TODO
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -42,6 +45,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
+//TODO IMPORT
+import java.util.LinkedList;
+//FIN TODO
 
 /**
  * Contrôleur de l'application.
@@ -467,6 +473,41 @@ public final class Controleur {
         this.calquePlan.afficherPoints(
                 this.afficherPointsCheckBox.isSelected()
         );
+    }
+
+    private void afficherTournee(Tournee tournee){
+
+        for (Itineraire itineraire : tournee.getItineraires()){
+            for (int i = 1; i<itineraire.getIntersections().size(); i++){
+                this.calquePlan.ajouterSegment(itineraire.getIntersections().get(i-1),
+                        itineraire.getIntersections().get(i));
+            }
+        }
+
+    }
+
+    @FXML
+    private void calculerTourneeEnDur(){
+        List<Intersection> listeInter1= new LinkedList<Intersection>();
+        List<Intersection> listeInter2= new LinkedList<Intersection>();
+        listeInter1.add(plan.getIntersections().get("1850080438"));
+        listeInter1.add(plan.getIntersections().get("251049182"));
+        listeInter1.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("249725346"));
+        listeInter2.add(plan.getIntersections().get("25611395"));
+        Itineraire unItineraire1 = new Itineraire(listeInter1);
+        Itineraire unItineraire2 = new Itineraire(listeInter2);
+        Livraison livraison1 = new Livraison(1,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("251049182"));
+        Livraison livraison2 = new Livraison(2,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("249725346"));
+        List<Livraison> listeLivraisons = new LinkedList<Livraison>();
+        listeLivraisons.add(livraison1);
+        listeLivraisons.add(livraison2);
+        List<Itineraire> listeItineraire  = new LinkedList<Itineraire>();
+        listeItineraire.add(unItineraire1);
+        listeItineraire.add(unItineraire2);
+        Tournee uneTournee = new Tournee(livreurs.get(0),listeLivraisons,listeItineraire);
+        afficherTournee(uneTournee);
     }
 
     public ComboBox<Livreur> getComboBoxLivreur() {

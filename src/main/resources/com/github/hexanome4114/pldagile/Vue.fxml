@@ -68,7 +68,7 @@
                     <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
-            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerTournee" text="Calculer la tournee">
+            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerTourneeEnDur" text="Calculer la tournee">
                 <VBox.margin>
                     <Insets top="10.0" />
                 </VBox.margin>

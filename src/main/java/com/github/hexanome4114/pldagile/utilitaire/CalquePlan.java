@@ -11,7 +11,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+//TODO IMPORT
+import javafx.scene.shape.Line;
+//FIN TODO
 import javafx.util.Pair;
+//TODO IMPORT
+import java.util.List;
+import java.util.ArrayList;
+//FIN TODO
 
 /**
  * Calque du plan contenant les intersections.
@@ -29,6 +36,10 @@ public final class CalquePlan extends MapLayer {
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
+    private static final int TAILLE_SEGMENT = 5;
+
+    private static final Color COULEUR_SEGMENT = Color.RED;
+
     /**
      * Liste contenant les points de livraison et leur objet Icon associé.
      */
@@ -45,6 +56,11 @@ public final class CalquePlan extends MapLayer {
      */
     private Pair<Intersection, ImageView> entrepot;
 
+    /**
+     * Liste contenant les segments de la tournee et leur objet Icon associé.
+     */
+    private final ObservableList<Pair<List<Intersection>, Line>> segments =
+            FXCollections.observableArrayList();
     public CalquePlan() { }
 
     /**
@@ -143,10 +159,31 @@ public final class CalquePlan extends MapLayer {
      * @return la distance euclidienne entre deux points
      */
     private double calculerDistanceEuclidienne(final double x1, final double y1,
-            final double x2, final double y2) {
+                                               final double x2, final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return diffX * diffX + diffY * diffY;
+    }
+
+    /**
+     * Ajoute un segment sur le calque.
+     * @param point1
+     * @param point2
+     */
+    public void ajouterSegment(final Intersection point1, final Intersection point2) {
+        Line ligne = new Line();
+        ligne.setVisible(true);
+        ligne.setFill(COULEUR_SEGMENT);
+        ligne.setStroke(COULEUR_SEGMENT);
+        ligne.setStrokeWidth(TAILLE_SEGMENT);
+
+        ArrayList intersections = new ArrayList();
+        intersections.add(point1);
+        intersections.add(point2);
+
+        segments.add(new Pair(intersections, ligne));
+        this.getChildren().add(ligne);
+        this.markDirty();
     }
 
     @Override
@@ -168,9 +205,28 @@ public final class CalquePlan extends MapLayer {
                 point.getLongitude());
         icon.setTranslateX(mapPoint.getX());
         icon.setTranslateY(mapPoint.getY());
+
+        for (Pair<List<Intersection>, Line> candidate : segments) {
+            Intersection point1 = candidate.getKey().get(0);
+            Intersection point2 = candidate.getKey().get(1);
+            Line line = candidate.getValue();
+
+            Point2D mapPoint1 = getMapPoint(
+                    point1.getLatitude(), point1.getLongitude());
+            Point2D mapPoint2 = getMapPoint(
+                    point2.getLatitude(), point2.getLongitude());
+            line.setStartX(mapPoint1.getX());
+            line.setStartY(mapPoint1.getY());
+            line.setEndX(mapPoint2.getX());
+            line.setEndY(mapPoint2.getY());
+        }
     }
 
     public ObservableList<Pair<Intersection, Circle>> getPoints() {
         return points;
+    }
+    
+    public ObservableList<Pair<List<Intersection>, Line>> getSegments() {
+        return segments;
     }
 }
