@@ -15,8 +15,10 @@ import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +32,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
@@ -42,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Contrôleur de l'application.
@@ -65,6 +70,8 @@ public final class Controleur {
     private Plan plan;
 
     private CalquePlan calquePlan;
+
+    private ListDeCommandes listeDeCommandes;
 
     private Etat etatCourant;
 
@@ -109,6 +116,9 @@ public final class Controleur {
     private Button supprimerLivraisonBouton;
 
     @FXML
+    private Button annulerBouton;
+
+    @FXML
     private Button sauvegarderLivraisonsBouton;
 
     @FXML
@@ -130,6 +140,8 @@ public final class Controleur {
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
+        this.listeDeCommandes = new ListDeCommandes();
+
         this.genererLivreurs(NOMBRE_LIVREURS);
         this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
                 new FenetreDeLivraison(8, 9),
@@ -147,6 +159,12 @@ public final class Controleur {
         this.comboBoxLivreur.setItems(oListLivreurs);
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+        Image annulerImage = new Image(
+                Objects.requireNonNull(getClass().getResourceAsStream(
+                        "/images/annuler.png")
+                )
+        );
+        this.annulerBouton.setGraphic(new ImageView(annulerImage));
         this.etatCourant = etatInitial;
 
         this.numeroLivraison.setCellValueFactory(
@@ -171,7 +189,10 @@ public final class Controleur {
                                     obs.getList().isEmpty());
                             this.calculerTourneeBouton.setDisable(
                                     obs.getList().isEmpty());
-                        }
+                            this.getAnnulerBouton().setDisable(
+                                    listeDeCommandes.getIndexCourant() == -1
+                            );
+                }
                 );
         this.comboBoxLivreur.valueProperty().
                 addListener((obs, ancienneSelection, nouvelleSelection) ->
@@ -235,18 +256,23 @@ public final class Controleur {
                     this.comboBoxLivreur.getValue(),
                     this.comboBoxAdresse.getValue());
 
-            livraisons.add(livraison);
-            this.messageErreur.setText("");
+            this.listeDeCommandes.add(new AjouterCommande(this, livraison));
+
             this.etatCourant.ajouterLivraison(this);
-        } else {
-            this.messageErreur.setText("Veuillez renseigner tous les champs !");
         }
     }
 
     public void supprimerLivraison() {
         Livraison livraison = this.tableauLivraison.getSelectionModel()
                 .getSelectedItem();
-        this.tableauLivraison.getItems().remove(livraison);
+
+        this.listeDeCommandes.add(
+                new AnnulerCommande(new AjouterCommande(this, livraison))
+        );
+    }
+
+    public void annuler() {
+        this.listeDeCommandes.undo();
     }
 
     public void sauvegarderLivraisons() {
@@ -469,6 +495,14 @@ public final class Controleur {
         );
     }
 
+    public void ajouterLivraison(final Livraison l) {
+        this.tableauLivraison.getItems().add(l);
+    }
+
+    public void supprimerLivraison(final Livraison l) {
+        this.tableauLivraison.getItems().remove(l);
+    }
+
     public ComboBox<Livreur> getComboBoxLivreur() {
         return this.comboBoxLivreur;
     }
@@ -483,6 +517,10 @@ public final class Controleur {
 
     public Button getChargerPlanBouton() {
         return this.chargerPlanBouton;
+    }
+
+    public Button getAnnulerBouton() {
+        return this.annulerBouton;
     }
 
     public Button getSauvegarderLivraisonsBouton() {
@@ -515,6 +553,10 @@ public final class Controleur {
 
     public EtatLivraison getEtatLivraison() {
         return this.etatLivraison;
+    }
+
+    public ListDeCommandes getListeDeCommandes() {
+        return this.listeDeCommandes;
     }
 
     public CheckBox getAfficherPointsCheckBox() {

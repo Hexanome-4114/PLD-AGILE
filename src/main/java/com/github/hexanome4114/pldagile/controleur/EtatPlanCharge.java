@@ -22,6 +22,8 @@ public final class EtatPlanCharge implements Etat {
         c.getSauvegarderLivraisonsBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getAfficherPointsCheckBox().setSelected(false);
+        c.getListeDeCommandes().reset();
+        c.getAnnulerBouton().setDisable(true);
         c.setEtatCourant(c.getEtatPlanCharge());
     }
 }

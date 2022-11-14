@@ -47,6 +47,11 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </Label>
+            <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+            </Button>
             <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraison" prefWidth="213.3" text="Numéro de livraison" />
