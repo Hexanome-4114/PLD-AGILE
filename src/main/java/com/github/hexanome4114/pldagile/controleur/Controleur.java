@@ -16,6 +16,7 @@ import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -164,6 +165,42 @@ public final class Controleur {
                 new PropertyValueFactory<>("livreur"));
         this.fenetreDeLivraison.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
+
+        // EventListener de la vue
+        this.tableauLivraison.getSelectionModel().selectedItemProperty()
+                // bouton cliquable que lorsqu'une livraison est sélectionnée
+                .addListener((obs, ancienneSelection, nouvelleSelection)
+                        -> this.supprimerLivraisonBouton.setDisable(
+                        nouvelleSelection == null)
+                );
+        this.tableauLivraison.getItems()
+                // bouton cliquable que lorsqu'il y a des livraisons
+                .addListener((ListChangeListener<Livraison>) (obs)
+                                -> {
+                            this.sauvegarderLivraisonsBouton.setDisable(
+                                    obs.getList().isEmpty());
+                            this.calculerTourneeBouton.setDisable(
+                                    obs.getList().isEmpty());
+                        }
+                );
+        this.comboBoxLivreur.valueProperty().
+                addListener((obs, ancienneSelection, nouvelleSelection) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxFenetreDeLivraison.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxAdresse.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
     }
 
     /**

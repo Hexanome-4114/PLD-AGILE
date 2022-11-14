@@ -1,8 +1,6 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
-import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
-
 public final class EtatLivraison implements Etat {
 
     @Override
