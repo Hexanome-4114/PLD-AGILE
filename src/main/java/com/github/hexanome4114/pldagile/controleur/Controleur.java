@@ -35,13 +35,12 @@ import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
 import java.io.File;
+import java.util.Map;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -63,11 +62,16 @@ public final class Controleur {
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
-    private Circle pointClique;
-
     private Plan plan;
 
     private CalquePlan calquePlan;
+
+    private Etat etatCourant;
+
+    /** Instances associées aux différents états du controleur. */
+    private final EtatInitial etatInitial = new EtatInitial();
+    private final EtatPlanCharge etatPlanCharge = new EtatPlanCharge();
+    private final EtatLivraison etatLivraison = new EtatLivraison();
 
     /**
      * Vue de l'application.
@@ -108,6 +112,21 @@ public final class Controleur {
     private Button sauvegarderLivraisonsBouton;
 
     @FXML
+    private Button ajouterLivraisonBouton;
+
+    @FXML
+    private Button chargerLivraisonBouton;
+
+    @FXML
+    private Button chargerPlanBouton;
+
+    @FXML
+    private Button calculerTourneeBouton;
+
+    @FXML
+    private CheckBox afficherPointsCheckBox;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
@@ -128,6 +147,7 @@ public final class Controleur {
         this.comboBoxLivreur.setItems(oListLivreurs);
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+        this.etatCourant = etatInitial;
 
         this.numeroLivraison.setCellValueFactory(
                 new PropertyValueFactory<>("numero"));
@@ -136,22 +156,41 @@ public final class Controleur {
         this.fenetreDeLivraison.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
 
-        tableauLivraison.getSelectionModel().selectedItemProperty().addListener(
-                (obs, ancienneSelection, nouvelleSelection) -> {
-                    // bouton cliquable que lorsqu'une livraison est
-                    // sélectionnée
-                    this.supprimerLivraisonBouton.setDisable(
-                            nouvelleSelection == null);
-                }
-        );
-
-        tableauLivraison.getItems().addListener(
-                (ListChangeListener<Livraison>) (obs) -> {
-                    // bouton cliquable que lorsqu'il y a des livraisons
-                    this.sauvegarderLivraisonsBouton.setDisable(
-                            obs.getList().isEmpty());
-                }
-        );
+        // EventListener de la vue
+        this.tableauLivraison.getSelectionModel().selectedItemProperty()
+                // bouton cliquable que lorsqu'une livraison est sélectionnée
+                .addListener((obs, ancienneSelection, nouvelleSelection)
+                        -> this.supprimerLivraisonBouton.setDisable(
+                        nouvelleSelection == null)
+                );
+        this.tableauLivraison.getItems()
+                // bouton cliquable que lorsqu'il y a des livraisons
+                .addListener((ListChangeListener<Livraison>) (obs)
+                                -> {
+                            this.sauvegarderLivraisonsBouton.setDisable(
+                                    obs.getList().isEmpty());
+                            this.calculerTourneeBouton.setDisable(
+                                    obs.getList().isEmpty());
+                        }
+                );
+        this.comboBoxLivreur.valueProperty().
+                addListener((obs, ancienneSelection, nouvelleSelection) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxFenetreDeLivraison.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxAdresse.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
     }
 
     /**
@@ -174,7 +213,6 @@ public final class Controleur {
         this.livreurs = livreurs;
     }
 
-    @SuppressWarnings("checkstyle:NeedBraces")
     public void ajouterLivraison() {
         if (this.comboBoxLivreur.getValue() != null
                 && this.comboBoxFenetreDeLivraison.getValue() != null
@@ -199,6 +237,7 @@ public final class Controleur {
 
             livraisons.add(livraison);
             this.messageErreur.setText("");
+            this.etatCourant.ajouterLivraison(this);
         } else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
         }
@@ -262,6 +301,7 @@ public final class Controleur {
             // TODO valider les livraisons chargées
             this.tableauLivraison.setItems(
                     FXCollections.observableArrayList(livraisons));
+            this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             this.messageErreur.setText(
                     "Problème lors du chargement des livraisons.");
@@ -362,9 +402,9 @@ public final class Controleur {
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
-        for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
+        for (int i = 0; i < nbSommetsDansGrapheComplet; i++) {
             System.out.print(tsp.getSolution(i) + " ");
-
+        }
     }
 
     @FXML
@@ -384,6 +424,7 @@ public final class Controleur {
         try {
             this.plan = Serialiseur.chargerPlan(fichier);
             this.afficherPlan(plan);
+            this.etatCourant.chargerPlan(this);
         } catch (Exception e) {
             this.messageErreur.setText("Problème lors du chargement du plan.");
         }
@@ -421,12 +462,70 @@ public final class Controleur {
         this.carte.getChildren().add(carteVue);
     }
 
+    public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
+        this.afficherPointsCheckBox = (CheckBox) actionEvent.getSource();
+        this.calquePlan.afficherPoints(
+                this.afficherPointsCheckBox.isSelected()
+        );
+    }
+
+    public ComboBox<Livreur> getComboBoxLivreur() {
+        return this.comboBoxLivreur;
+    }
+
+    public ComboBox<FenetreDeLivraison> getComboBoxFenetreDeLivraison() {
+        return this.comboBoxFenetreDeLivraison;
+    }
+
+    public Button getAjouterLivraisonBouton() {
+        return this.ajouterLivraisonBouton;
+    }
+
+    public Button getChargerPlanBouton() {
+        return this.chargerPlanBouton;
+    }
+
+    public Button getSauvegarderLivraisonsBouton() {
+        return this.sauvegarderLivraisonsBouton;
+    }
+
+    public Button getSupprimerLivraisonBouton() {
+        return this.supprimerLivraisonBouton;
+    }
+
+    public Button getChargerLivraisonBouton() {
+        return this.chargerLivraisonBouton;
+    }
+
+    public Button getCalculerTourneeBouton() {
+        return this.calculerTourneeBouton;
+    }
+
+    public TableView<Livraison> getTableauLivraison() {
+        return this.tableauLivraison;
+    }
+
+    public ComboBox<Intersection> getComboBoxAdresse() {
+        return this.comboBoxAdresse;
+    }
+
+    public EtatPlanCharge getEtatPlanCharge() {
+        return this.etatPlanCharge;
+    }
+
+    public EtatLivraison getEtatLivraison() {
+        return this.etatLivraison;
+    }
+
+    public CheckBox getAfficherPointsCheckBox() {
+        return this.afficherPointsCheckBox;
+    }
+
     public void setStage(final Stage stage) {
         this.stage = stage;
     }
 
-    public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
-        CheckBox checkBox = (CheckBox) actionEvent.getSource();
-        this.calquePlan.afficherPoints(checkBox.isSelected());
+    public void setEtatCourant(final Etat etat) {
+        this.etatCourant = etat;
     }
 }
