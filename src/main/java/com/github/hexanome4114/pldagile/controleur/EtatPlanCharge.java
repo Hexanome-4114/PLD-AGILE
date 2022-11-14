@@ -7,7 +7,7 @@ public final class EtatPlanCharge implements Etat {
     public void ajouterLivraison(final Controleur c) {
         c.getSauvegarderLivraisonsBouton().setDisable(false);
         c.getCalculerTourneeBouton().setDisable(false);
-        c.setCurrentState(c.getEtatLivraison());
+        c.setEtatCourant(c.getEtatLivraison());
     }
 
     @Override
@@ -22,6 +22,6 @@ public final class EtatPlanCharge implements Etat {
         c.getSauvegarderLivraisonsBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getAfficherPointsCheckBox().setSelected(false);
-        c.setCurrentState(c.getEtatPlanCharge());
+        c.setEtatCourant(c.getEtatPlanCharge());
     }
 }

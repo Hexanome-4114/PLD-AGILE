@@ -15,6 +15,6 @@ public final class EtatLivraison implements Etat {
         c.getSauvegarderLivraisonsBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getAfficherPointsCheckBox().setSelected(false);
-        c.setCurrentState(c.getEtatPlanCharge());
+        c.setEtatCourant(c.getEtatPlanCharge());
     }
 }

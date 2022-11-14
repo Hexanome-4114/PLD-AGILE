@@ -8,6 +8,6 @@ public final class EtatInitial implements Etat {
         c.getComboBoxFenetreDeLivraison().setDisable(false);
         c.getChargerLivraisonBouton().setDisable(false);
         c.getAfficherPointsCheckBox().setDisable(false);
-        c.setCurrentState(c.getEtatPlanCharge());
+        c.setEtatCourant(c.getEtatPlanCharge());
     }
 }

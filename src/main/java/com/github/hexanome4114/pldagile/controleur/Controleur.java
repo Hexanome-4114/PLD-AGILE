@@ -147,14 +147,6 @@ public final class Controleur {
         this.comboBoxLivreur.setItems(oListLivreurs);
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
-        this.comboBoxLivreur.setDisable(true);
-        this.comboBoxFenetreDeLivraison.setDisable(true);
-        this.ajouterLivraisonBouton.setDisable(true);
-        this.supprimerLivraisonBouton.setDisable(true);
-        this.sauvegarderLivraisonsBouton.setDisable(true);
-        this.chargerLivraisonBouton.setDisable(true);
-        this.calculerTourneeBouton.setDisable(true);
-        this.afficherPointsCheckBox.setDisable(true);
         this.etatCourant = etatInitial;
 
         this.numeroLivraison.setCellValueFactory(
@@ -533,7 +525,7 @@ public final class Controleur {
         this.stage = stage;
     }
 
-    public void setCurrentState(final Etat etat) {
+    public void setEtatCourant(final Etat etat) {
         this.etatCourant = etat;
     }
 }
