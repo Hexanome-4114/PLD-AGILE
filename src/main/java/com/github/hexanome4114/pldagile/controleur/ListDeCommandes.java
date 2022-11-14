@@ -1,7 +1,5 @@
 package com.github.hexanome4114.pldagile.controleur;
 
-import javafx.beans.value.ObservableNumberValue;
-
 import java.util.LinkedList;
 
 public final class ListDeCommandes {

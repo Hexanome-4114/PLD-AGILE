@@ -1,5 +1,6 @@
 package com.github.hexanome4114.pldagile.controleur;
 
+
 public final class AnnulerCommande implements Commande {
 
     private final Commande commande;
