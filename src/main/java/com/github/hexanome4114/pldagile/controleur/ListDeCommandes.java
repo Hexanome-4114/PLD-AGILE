@@ -15,7 +15,7 @@ public final class ListDeCommandes {
      * Ajoute la commande c à l'instance.
      * @param c La commande à ajouter
      */
-    public void add(final Commande c) {
+    public void ajouter(final Commande c) {
         int i = this.indexCourant + 1;
         while (i < this.listeDeCommande.size()) {
             this.listeDeCommande.remove(i);
@@ -28,7 +28,7 @@ public final class ListDeCommandes {
     /**
      * Supprime temporairement la dernière commande ajouté.
      */
-    public void undo() {
+    public void annuler() {
         if (this.indexCourant >= 0) {
             Commande commande = listeDeCommande.get(indexCourant);
             this.indexCourant--;
@@ -39,7 +39,7 @@ public final class ListDeCommandes {
     /**
      * Supprime définitivement les commandes de la liste.
      */
-    public void reset() {
+    public void reinitialiser() {
         this.indexCourant = -1;
         this.listeDeCommande.clear();
     }

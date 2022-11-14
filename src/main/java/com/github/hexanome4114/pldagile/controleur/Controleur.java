@@ -254,7 +254,7 @@ public final class Controleur {
                     this.comboBoxLivreur.getValue(),
                     this.comboBoxAdresse.getValue());
 
-            this.listeDeCommandes.add(new AjouterCommande(this, livraison));
+            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
 
             this.etatCourant.ajouterLivraison(this);
         }
@@ -264,13 +264,13 @@ public final class Controleur {
         Livraison livraison = this.tableauLivraison.getSelectionModel()
                 .getSelectedItem();
 
-        this.listeDeCommandes.add(
+        this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
     }
 
     public void annuler() {
-        this.listeDeCommandes.undo();
+        this.listeDeCommandes.annuler();
     }
 
     public void sauvegarderLivraisons() {
