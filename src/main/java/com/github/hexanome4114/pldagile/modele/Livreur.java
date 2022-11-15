@@ -10,6 +10,21 @@ public final class Livreur {
         this.vitesseMoyenne = vitesseMoyenne;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Livreur livreur = (Livreur) o;
+
+        return numero == livreur.numero;
+    }
+
+    @Override
+    public int hashCode() {
+        return numero;
+    }
+
     public int getNumero() {
         return numero;
     }
