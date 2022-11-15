@@ -9,37 +9,44 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
     <HBox prefHeight="640.0" prefWidth="1280.0">
-        <Pane fx:id="carte" prefHeight="640.0" prefWidth="640.0" style="-fx-background-color: white;">
-            <HBox.margin>
-                <Insets right="20.0" />
-            </HBox.margin>
-        </Pane>
+        <VBox>
+            <Pane fx:id="carte" prefHeight="640.0" prefWidth="640.0" style="-fx-background-color: white;" />
+            <CheckBox fx:id="afficherPointsCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherPointsDeLivraison" text="Afficher les points de livraison">
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+            </CheckBox>
+        </VBox>
         <VBox prefHeight="640.0" prefWidth="640.0">
             <HBox prefHeight="19.0" prefWidth="640.0">
-                <ComboBox fx:id="comboBoxLivreur" prefWidth="150.0">
+                <ComboBox fx:id="comboBoxLivreur" disable="true" prefWidth="150.0">
                    <HBox.margin>
                       <Insets right="10.0" />
                    </HBox.margin>
                 </ComboBox>
-                <ComboBox fx:id="comboBoxFenetreDeLivraison" layoutX="160.0" layoutY="10.0" prefWidth="150.0">
+                <ComboBox fx:id="comboBoxFenetreDeLivraison" disable="true" layoutX="160.0" layoutY="10.0" prefWidth="150.0">
                    <HBox.margin>
                       <Insets right="10.0" />
                    </HBox.margin>
                 </ComboBox>
                 <ComboBox fx:id="comboBoxAdresse" prefHeight="24.0" prefWidth="349.0" />
             </HBox>
-         <HBox>
-            <children>
-                  <Button onAction="#ajouterLivraison" text="Ajouter une livraison">
-                  <HBox.margin>
-                     <Insets right="10.0" />
-                  </HBox.margin></Button>
-               <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
-            </children>
-            <VBox.margin>
-               <Insets top="10.0" />
-            </VBox.margin>
-         </HBox>
+            <HBox>
+                <Button fx:id="ajouterLivraisonBouton" disable="true" onAction="#ajouterLivraison" text="Ajouter une livraison">
+                    <HBox.margin>
+                        <Insets right="10.0" />
+                    </HBox.margin>
+                </Button>
+                <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
+                <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
+                   <HBox.margin>
+                       <Insets left="10.0" />
+                   </HBox.margin>
+                </Button>
+                <VBox.margin>
+                   <Insets top="10.0" />
+                </VBox.margin>
+            </HBox>
             <Label fx:id="messageErreur" prefHeight="18.0" prefWidth="640.0" textFill="RED">
                 <VBox.margin>
                    <Insets top="10.0" />
@@ -55,25 +62,26 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </TableView>
-         <HBox>
-            <children>
-               <Button fx:id="sauvegarderLivraisonsBouton" disable="true" onAction="#sauvegarderLivraisons" text="Sauvegarder les livraisons">
-                  <HBox.margin>
-                     <Insets right="10.0" />
-                  </HBox.margin>
-               </Button>
-               <Button mnemonicParsing="false" onAction="#chargerLivraisons" text="Charger des livraisons" />
-            </children>
-            <VBox.margin>
-               <Insets top="10.0" />
-            </VBox.margin>
-         </HBox>
-            <Button onAction="#calculerLesTournees" text="Calculer les tournees">
+            <HBox>
+                <Button fx:id="sauvegarderLivraisonsBouton" disable="true" onAction="#sauvegarderLivraisons" text="Sauvegarder les livraisons">
+                    <HBox.margin>
+                        <Insets right="10.0" />
+                    </HBox.margin>
+                </Button>
+                <Button fx:id="chargerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#chargerLivraisons" text="Charger des livraisons" />
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+            </HBox>
+            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer la tournee">
                 <VBox.margin>
                     <Insets top="10.0" />
                 </VBox.margin>
             </Button>
+            <HBox.margin>
+                <Insets left="20.0" />
+            </HBox.margin>
         </VBox>
     </HBox>
-    <Button onAction="#chargerPlan" text="Charger le plan" />
+    <Button fx:id="chargerPlanBouton" onAction="#chargerPlan" text="Charger le plan" />
 </VBox>
