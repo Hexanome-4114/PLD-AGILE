@@ -6,6 +6,7 @@ import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.modele.Tournee;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -296,7 +297,7 @@ public final class Controleur {
     public void calculerLesTournees() {
         // Pour chaque livreur, on appelle "calculerTournee" pour calcule la tournée qui lui est associé
         this.tournees = new ArrayList<>();
-        for(Livreur livreur : this.livreurs) {
+        for(Livreur livreur : this.comboBoxLivreur.getItems()) {
 
             // on récupère les livraisons du livreur courant
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
@@ -304,7 +305,7 @@ public final class Controleur {
                     .collect(Collectors.toList());
 
             Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
-            tournee.calculerTournee(this.plan.getEntrepot(), new FenetreDeLivraison(8,9));
+            tournee.calculerTournee(this.plan.getEntrepot(), FenetreDeLivraison.H8_H9);
             this.tournees.add(tournee);
             afficherTournee(tournee);
         }
