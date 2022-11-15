@@ -9,9 +9,9 @@ public final class EtatInitial implements Etat {
         c.getChargerLivraisonBouton().setDisable(false);
         c.getAfficherPointsCheckBox().setDisable(false);
         c.getInstructionLabel().setText(
-                "Pour ajouter une livraison :"
-                        + "\nséléctionnez un livreur, une fenêtre "
-                        + "horaire et une adresse en cliquant sur la carte."
+                "Pour ajouter une livraison, veuillez séléctionner un livreur,"
+                        + "une fenêtre horaire et une adresse de livraison"
+                        + " en cliquant sur la carte."
         );
         c.setEtatCourant(c.getEtatPlanCharge());
     }

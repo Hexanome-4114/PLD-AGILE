@@ -332,7 +332,7 @@ public final class Controleur {
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             Alert alerte = new Alert(Alert.AlertType.ERROR);
-            alerte.setHeaderText("\"Problème lors du chargement des livraisons.");
+            alerte.setHeaderText("Problème lors du chargement des livraisons.");
             alerte.show();
         }
     }
