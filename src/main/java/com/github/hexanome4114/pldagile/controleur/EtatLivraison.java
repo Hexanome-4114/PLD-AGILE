@@ -17,6 +17,11 @@ public final class EtatLivraison implements Etat {
         c.getAfficherPointsCheckBox().setSelected(false);
         c.getListeDeCommandes().reinitialiser();
         c.getAnnulerBouton().setDisable(true);
+        c.getInstructionLabel().setText(
+                "Pour ajouter une livraison :"
+                        + "\nséléctionnez un livreur, une fenêtre "
+                        + "horaire et une adresse en cliquant sur la carte."
+        );
         c.setEtatCourant(c.getEtatPlanCharge());
     }
 }
