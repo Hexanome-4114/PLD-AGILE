@@ -6,25 +6,34 @@ import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.Graph;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
 import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
-import com.github.hexanome4114.pldagile.modele.*;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.Livreur;
+import com.github.hexanome4114.pldagile.modele.Plan;
+// TODO IMPORT
+import com.github.hexanome4114.pldagile.modele.Tournee;
+// FIN TODO
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 // TODO AJOUT DE javafx.scene.shape.Line;
 import javafx.scene.shape.Line;
@@ -32,17 +41,16 @@ import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.dom4j.DocumentException;
-
 import java.io.File;
+import java.util.Map;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Optional;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.*;
+//TODO IMPORT
+import java.util.LinkedList;
+//FIN TODO
 
 /**
  * Contrôleur de l'application.
@@ -63,8 +71,16 @@ public final class Controleur {
 
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
-    private Circle pointClique;
     private Plan plan;
+
+    private CalquePlan calquePlan;
+
+    private Etat etatCourant;
+
+    /** Instances associées aux différents états du controleur. */
+    private final EtatInitial etatInitial = new EtatInitial();
+    private final EtatPlanCharge etatPlanCharge = new EtatPlanCharge();
+    private final EtatLivraison etatLivraison = new EtatLivraison();
 
     /**
      * Vue de l'application.
@@ -105,6 +121,21 @@ public final class Controleur {
     private Button sauvegarderLivraisonsBouton;
 
     @FXML
+    private Button ajouterLivraisonBouton;
+
+    @FXML
+    private Button chargerLivraisonBouton;
+
+    @FXML
+    private Button chargerPlanBouton;
+
+    @FXML
+    private Button calculerTourneeBouton;
+
+    @FXML
+    private CheckBox afficherPointsCheckBox;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
@@ -125,6 +156,7 @@ public final class Controleur {
         this.comboBoxLivreur.setItems(oListLivreurs);
         this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+        this.etatCourant = etatInitial;
 
         this.numeroLivraison.setCellValueFactory(
                 new PropertyValueFactory<>("numero"));
@@ -133,22 +165,41 @@ public final class Controleur {
         this.fenetreDeLivraison.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
 
-        tableauLivraison.getSelectionModel().selectedItemProperty().addListener(
-                (obs, ancienneSelection, nouvelleSelection) -> {
-                    // bouton cliquable que lorsqu'une livraison est
-                    // sélectionnée
-                    this.supprimerLivraisonBouton.setDisable(
-                            nouvelleSelection == null);
-                }
-        );
-
-        tableauLivraison.getItems().addListener(
-                (ListChangeListener<Livraison>) (obs) -> {
-                    // bouton cliquable que lorsqu'il y a des livraisons
-                    this.sauvegarderLivraisonsBouton.setDisable(
-                            obs.getList().isEmpty());
-                }
-        );
+        // EventListener de la vue
+        this.tableauLivraison.getSelectionModel().selectedItemProperty()
+                // bouton cliquable que lorsqu'une livraison est sélectionnée
+                .addListener((obs, ancienneSelection, nouvelleSelection)
+                        -> this.supprimerLivraisonBouton.setDisable(
+                        nouvelleSelection == null)
+                );
+        this.tableauLivraison.getItems()
+                // bouton cliquable que lorsqu'il y a des livraisons
+                .addListener((ListChangeListener<Livraison>) (obs)
+                                -> {
+                            this.sauvegarderLivraisonsBouton.setDisable(
+                                    obs.getList().isEmpty());
+                            this.calculerTourneeBouton.setDisable(
+                                    obs.getList().isEmpty());
+                        }
+                );
+        this.comboBoxLivreur.valueProperty().
+                addListener((obs, ancienneSelection, nouvelleSelection) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxFenetreDeLivraison.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
+        this.comboBoxAdresse.valueProperty().
+                addListener((options, oldValue, newValue) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null));
     }
 
     /**
@@ -171,7 +222,6 @@ public final class Controleur {
         this.livreurs = livreurs;
     }
 
-    @SuppressWarnings("checkstyle:NeedBraces")
     public void ajouterLivraison() {
         if (this.comboBoxLivreur.getValue() != null
                 && this.comboBoxFenetreDeLivraison.getValue() != null
@@ -196,6 +246,7 @@ public final class Controleur {
 
             livraisons.add(livraison);
             this.messageErreur.setText("");
+            this.etatCourant.ajouterLivraison(this);
         } else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
         }
@@ -259,6 +310,7 @@ public final class Controleur {
             // TODO valider les livraisons chargées
             this.tableauLivraison.setItems(
                     FXCollections.observableArrayList(livraisons));
+            this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             this.messageErreur.setText(
                     "Problème lors du chargement des livraisons.");
@@ -359,9 +411,9 @@ public final class Controleur {
         Graph g = new CompleteGraph(grapheComplet);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
-        for (int i = 0; i < nbSommetsDansGrapheComplet; i++)
+        for (int i = 0; i < nbSommetsDansGrapheComplet; i++) {
             System.out.print(tsp.getSolution(i) + " ");
-
+        }
     }
 
     @FXML
@@ -379,52 +431,143 @@ public final class Controleur {
         }
 
         try {
-            Plan plan = Serialiseur.chargerPlan(fichier);
-            this.plan = plan;
+            this.plan = Serialiseur.chargerPlan(fichier);
             this.afficherPlan(plan);
+<<<<<<< HEAD
             this.testAffichageTournee();
         } catch (DocumentException e) {
+=======
+            this.etatCourant.chargerPlan(this);
+        } catch (Exception e) {
+>>>>>>> 1db203584511a23c7ccf47f0e67708f60a6cebd6
             this.messageErreur.setText("Problème lors du chargement du plan.");
         }
     }
 
     private void afficherPlan(final Plan plan) {
-        CalquePlan calque = new CalquePlan();
+        this.calquePlan = new CalquePlan();
 
         // intersections
         for (Intersection intersection : plan.getIntersections().values()) {
-            calque.ajouterPoint(intersection, new Circle(3, Color.GREY));
+            calquePlan.ajouterPoint(intersection);
         }
-
-        calque.getPoints().forEach(point -> {
-            // ajout d'un listener sur chaque point du calque
-            point.getValue().setOnMouseClicked(e -> {
-                e.consume();
-                if (this.pointClique != null) {
-                    this.pointClique.setFill(Color.GREY);
-                }
-                this.pointClique = (Circle) e.getTarget();
-                ((Circle) e.getTarget()).setFill(Color.BLUE);
-                this.comboBoxAdresse.setValue(point.getKey());
-            });
-        });
 
         // entrepot
         Intersection entrepot = plan.getEntrepot();
-        calque.ajouterPoint(entrepot, new Circle(5, Color.RED));
+        calquePlan.setEntrepot(entrepot);
 
         // config carte
         MapView carteVue = new MapView();
 
         carteVue.setZoom(14.5);
         carteVue.flyTo(0, entrepot, 0.1); // centre la carte sur l'entrepot
-        carteVue.addLayer(calque); // ajout du calque contenant les points
+        carteVue.addLayer(calquePlan); // ajout du calque contenant les points
+        carteVue.setPrefSize(carte.getWidth(), carte.getHeight());
+        carteVue.setCursor(Cursor.CROSSHAIR);
 
-        StackPane sp = new StackPane();
-        sp.setPrefSize(carte.getPrefWidth(), carte.getPrefHeight());
-        sp.getChildren().add(carteVue);
+        carteVue.setOnMouseClicked(e -> {
+            Pair<Intersection, Circle> point = calquePlan.
+                    trouverPointPlusProche(e.getX(), e.getY());
 
-        this.carte.getChildren().add(sp);
+            this.calquePlan.setPointSelectionne(point.getValue());
+            this.comboBoxAdresse.setValue(point.getKey());
+        });
+
+        this.carte.getChildren().add(carteVue);
+    }
+
+    public void afficherPointsDeLivraison(final ActionEvent actionEvent) {
+        this.afficherPointsCheckBox = (CheckBox) actionEvent.getSource();
+        this.calquePlan.afficherPoints(
+                this.afficherPointsCheckBox.isSelected()
+        );
+    }
+
+    private void afficherTournee(Tournee tournee){
+
+        for (Itineraire itineraire : tournee.getItineraires()){
+            for (int i = 1; i<itineraire.getIntersections().size(); i++){
+                this.calquePlan.ajouterSegment(itineraire.getIntersections().get(i-1),
+                        itineraire.getIntersections().get(i));
+            }
+        }
+
+    }
+
+    @FXML
+    private void calculerTourneeEnDur(){
+        List<Intersection> listeInter1= new LinkedList<Intersection>();
+        List<Intersection> listeInter2= new LinkedList<Intersection>();
+        listeInter1.add(plan.getIntersections().get("1850080438"));
+        listeInter1.add(plan.getIntersections().get("251049182"));
+        listeInter1.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("1835868027"));
+        listeInter2.add(plan.getIntersections().get("249725346"));
+        listeInter2.add(plan.getIntersections().get("25611395"));
+        Itineraire unItineraire1 = new Itineraire(listeInter1);
+        Itineraire unItineraire2 = new Itineraire(listeInter2);
+        Livraison livraison1 = new Livraison(1,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("251049182"));
+        Livraison livraison2 = new Livraison(2,new FenetreDeLivraison(8, 9),livreurs.get(0),plan.getIntersections().get("249725346"));
+        List<Livraison> listeLivraisons = new LinkedList<Livraison>();
+        listeLivraisons.add(livraison1);
+        listeLivraisons.add(livraison2);
+        List<Itineraire> listeItineraire  = new LinkedList<Itineraire>();
+        listeItineraire.add(unItineraire1);
+        listeItineraire.add(unItineraire2);
+        Tournee uneTournee = new Tournee(livreurs.get(0),listeLivraisons,listeItineraire);
+        afficherTournee(uneTournee);
+    }
+
+    public ComboBox<Livreur> getComboBoxLivreur() {
+        return this.comboBoxLivreur;
+    }
+
+    public ComboBox<FenetreDeLivraison> getComboBoxFenetreDeLivraison() {
+        return this.comboBoxFenetreDeLivraison;
+    }
+
+    public Button getAjouterLivraisonBouton() {
+        return this.ajouterLivraisonBouton;
+    }
+
+    public Button getChargerPlanBouton() {
+        return this.chargerPlanBouton;
+    }
+
+    public Button getSauvegarderLivraisonsBouton() {
+        return this.sauvegarderLivraisonsBouton;
+    }
+
+    public Button getSupprimerLivraisonBouton() {
+        return this.supprimerLivraisonBouton;
+    }
+
+    public Button getChargerLivraisonBouton() {
+        return this.chargerLivraisonBouton;
+    }
+
+    public Button getCalculerTourneeBouton() {
+        return this.calculerTourneeBouton;
+    }
+
+    public TableView<Livraison> getTableauLivraison() {
+        return this.tableauLivraison;
+    }
+
+    public ComboBox<Intersection> getComboBoxAdresse() {
+        return this.comboBoxAdresse;
+    }
+
+    public EtatPlanCharge getEtatPlanCharge() {
+        return this.etatPlanCharge;
+    }
+
+    public EtatLivraison getEtatLivraison() {
+        return this.etatLivraison;
+    }
+
+    public CheckBox getAfficherPointsCheckBox() {
+        return this.afficherPointsCheckBox;
     }
 
     // TODO EN COURS DE MODIF
@@ -456,6 +599,7 @@ public final class Controleur {
         this.stage = stage;
     }
 
+<<<<<<< HEAD
     public void testAffichageTournee(){ //destinée à créer une tournée en dur pour essayer l'affichage (à charger avec au moins la medium map)
         List<Intersection> listeInter1= new LinkedList<Intersection>();
         List<Intersection> listeInter2= new LinkedList<Intersection>();
@@ -476,5 +620,9 @@ public final class Controleur {
         listeItineraire.add(unItineraire1);
         listeItineraire.add(unItineraire2);
         Tournee uneTournee = new Tournee(livreurs.get(0),listeLivraisons,listeItineraire);
+
+    public void setEtatCourant(final Etat etat) {
+        this.etatCourant = etat;
+
     }
 }
