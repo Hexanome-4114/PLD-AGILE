@@ -27,7 +27,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -43,25 +42,10 @@ import java.util.stream.Collectors;
  * Contrôleur de l'application.
  */
 public final class Controleur {
-
-    /**
-     * Vitesse de déplacement d'un livreur.
-     */
-    public static final int VITESSE_MOYENNE = 15;
-
     /**
      * Temps passé pour effectuer chaque livraison
      */
     public static final int TEMPS_PAR_LIVRAISON = 5;
-
-    /**
-     * Nombre de livreurs disponibles par défaut.
-     */
-    private static final int NOMBRE_LIVREURS = 1;
-
-    private List<Livreur> livreurs;
-
-    private List<FenetreDeLivraison> fenetresDeLivraison;
 
     private Plan plan;
 
@@ -108,7 +92,7 @@ public final class Controleur {
     private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraisonColonne;
 
     @FXML
-    private Label messageErreur;
+    private Label instructionLabel;
 
     @FXML
     private Button supprimerLivraisonBouton;
@@ -140,18 +124,10 @@ public final class Controleur {
 
         this.listeDeCommandes = new ListDeCommandes();
 
-        this.genererLivreurs(NOMBRE_LIVREURS);
-        this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
-                new FenetreDeLivraison(8, 9),
-                new FenetreDeLivraison(9, 10),
-                new FenetreDeLivraison(10, 11),
-                new FenetreDeLivraison(11, 12)
-        ));
-
         ObservableList<FenetreDeLivraison> oListFenetreDeLivraison =
-                FXCollections.observableArrayList(this.fenetresDeLivraison);
+                FXCollections.observableArrayList(FenetreDeLivraison.values());
         ObservableList<Livreur> oListLivreurs =
-                FXCollections.observableArrayList(this.livreurs);
+                FXCollections.observableArrayList(Livreur.values());
 
         this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
@@ -212,26 +188,6 @@ public final class Controleur {
                         || this.comboBoxAdresse.getValue() == null));
     }
 
-    /**
-     * Génère un ensemble de livreurs en fonction du nombre
-     * souhaité.
-     *
-     * @param nbLivreurs le nombre de livreurs souhaité
-     */
-    private void genererLivreurs(final int nbLivreurs) {
-        if (this.livreurs != null && nbLivreurs == this.livreurs.size()) {
-            return; // déjà le bon nombre de livreurs
-        }
-
-        List<Livreur> livreurs = new ArrayList<>();
-
-        for (int i = 1; i <= nbLivreurs; i++) {
-            livreurs.add(new Livreur(i, VITESSE_MOYENNE));
-        }
-
-        this.livreurs = livreurs;
-    }
-
     public void ajouterLivraison() {
         if (this.comboBoxLivreur.getValue() != null
                 && this.comboBoxFenetreDeLivraison.getValue() != null
@@ -255,8 +211,8 @@ public final class Controleur {
                     this.comboBoxAdresse.getValue());
 
             this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
-
             this.etatCourant.ajouterLivraison(this);
+            this.calquePlan.ajouterLivraison(livraison);
         }
     }
 
@@ -267,6 +223,7 @@ public final class Controleur {
         this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
+        this.calquePlan.enleverLivraison(livraison);
     }
 
     public void annuler() {
@@ -289,8 +246,11 @@ public final class Controleur {
             Serialiseur.sauvegarderLivraisons(
                     fichier, this.tableauLivraison.getItems());
         } catch (Exception e) {
-            this.messageErreur.setText(
-                    "Problème lors de la sauvegarde des livraisons.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText(
+                    "Problème lors de la sauvegarde des livraisons."
+            );
+            alerte.show();
         }
     }
 
@@ -327,8 +287,9 @@ public final class Controleur {
                     FXCollections.observableArrayList(livraisons));
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
-            this.messageErreur.setText(
-                    "Problème lors du chargement des livraisons.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText("Problème lors du chargement des livraisons.");
+            alerte.show();
         }
     }
 
@@ -345,6 +306,7 @@ public final class Controleur {
             Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
             tournee.calculerTournee(this.plan.getEntrepot(), new FenetreDeLivraison(8,9));
             this.tournees.add(tournee);
+            afficherTournee(tournee);
         }
     }
 
@@ -367,7 +329,11 @@ public final class Controleur {
             this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
         } catch (Exception e) {
-            this.messageErreur.setText("Problème lors du chargement du plan.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText(
+                    "Problème lors du chargement du plan."
+            );
+            alerte.show();
         }
     }
 
@@ -393,11 +359,11 @@ public final class Controleur {
         carteVue.setCursor(Cursor.CROSSHAIR);
 
         carteVue.setOnMouseClicked(e -> {
-            Pair<Intersection, Circle> point = calquePlan.
+            Intersection point = calquePlan.
                     trouverPointPlusProche(e.getX(), e.getY());
 
-            this.calquePlan.setPointSelectionne(point.getValue());
-            this.comboBoxAdresse.setValue(point.getKey());
+            this.calquePlan.setPointSelectionne(point);
+            this.comboBoxAdresse.setValue(point);
         });
 
         this.carte.getChildren().add(carteVue);
@@ -410,12 +376,26 @@ public final class Controleur {
         );
     }
 
+    private void afficherTournee(Tournee tournee) {
+        for (Itineraire itineraire : tournee.getItineraires()) {
+            for (int i = 1; i < itineraire.getIntersections().size(); i++) {
+                this.calquePlan.ajouterSegment(
+                        itineraire.getIntersections().get(i - 1),
+                        itineraire.getIntersections().get(i));
+            }
+        }
+    }
+
     public void ajouterLivraison(final Livraison l) {
         this.tableauLivraison.getItems().add(l);
     }
 
     public void supprimerLivraison(final Livraison l) {
         this.tableauLivraison.getItems().remove(l);
+    }
+
+    public Label getInstructionLabel() {
+        return this.instructionLabel;
     }
 
     public ComboBox<Livreur> getComboBoxLivreur() {
@@ -476,6 +456,10 @@ public final class Controleur {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
+    }
+
+    public CalquePlan getCalquePlan() {
+        return calquePlan;
     }
 
     public void setStage(final Stage stage) {

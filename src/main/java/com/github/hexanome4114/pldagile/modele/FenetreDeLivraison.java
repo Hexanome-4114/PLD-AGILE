@@ -1,13 +1,16 @@
 package com.github.hexanome4114.pldagile.modele;
 
-import java.util.Objects;
+public enum FenetreDeLivraison {
 
-public final class FenetreDeLivraison {
+    H8_H9(8, 9),
+    H9_H10(9, 10),
+    H10_H11(10, 11),
+    H11_H12(11, 12);
 
     private final int debut;
     private final int fin;
 
-    public FenetreDeLivraison(final int debut, final int fin) {
+    FenetreDeLivraison(final int debut, final int fin) {
         this.debut = debut;
         this.fin = fin;
     }
@@ -23,18 +26,5 @@ public final class FenetreDeLivraison {
     @Override
     public String toString() {
         return String.format("%dh-%dh", debut, fin);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FenetreDeLivraison that = (FenetreDeLivraison) o;
-        return debut == that.debut && fin == that.fin;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(debut, fin);
     }
 }

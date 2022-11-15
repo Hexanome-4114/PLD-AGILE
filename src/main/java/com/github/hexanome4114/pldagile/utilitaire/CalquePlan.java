@@ -1,17 +1,29 @@
 package com.github.hexanome4114.pldagile.utilitaire;
 
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.gluonhq.maps.MapLayer;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
+
+import java.util.Map;
 
 /**
  * Calque du plan contenant les intersections.
@@ -20,7 +32,7 @@ public final class CalquePlan extends MapLayer {
 
     private static final int TAILLE_POINT = 4;
 
-    private static final Color COULEUR_POINT = Color.GREY;
+    private static final Color COULEUR_POINT = Color.RED;
 
     private static final Image IMAGE_ENTREPOT = new Image(
             CalquePlan.class.getResource("/images/entrepot.png").toString(),
@@ -29,11 +41,28 @@ public final class CalquePlan extends MapLayer {
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
+    private static final int TAILLE_SEGMENT = 5;
+
+    private static final Color COULEUR_SEGMENT = Color.RED;
+
     /**
-     * Liste contenant les points de livraison et leur objet Icon associé.
+     * Map contenant les points de livraison et leur Node associé.
      */
-    private final ObservableList<Pair<Intersection, Circle>> points =
-            FXCollections.observableArrayList();
+    private final ObservableMap<Intersection, Circle> points =
+            FXCollections.observableHashMap();
+
+    /**
+     * Map contenant les livraisons et leur Node associé.
+     */
+    private final ObservableMap<Livraison, Node> livraisons =
+            FXCollections.observableHashMap();
+
+
+    /**
+     * Map contenant les segments de la tournée et leur Node associé.
+     */
+    private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
+            = FXCollections.observableHashMap();
 
     /**
      * Point de livraison sélectionné par l'utilisateur.
@@ -56,8 +85,39 @@ public final class CalquePlan extends MapLayer {
         cercle.setVisible(false); // les points sont masqués par défaut
         cercle.setCursor(Cursor.HAND);
 
-        points.add(new Pair(point, cercle));
+        points.put(point, cercle);
         this.getChildren().add(cercle);
+        this.markDirty();
+    }
+
+    /**
+     * Ajoute une livraison sur le calque.
+     * @param livraison
+     */
+    public void ajouterLivraison(final Livraison livraison) {
+        Shape forme = this.getForme(livraison.getFenetreDeLivraison());
+        forme.setFill(this.getCouleur(livraison.getLivreur()));
+
+        Text texte = new Text(String.valueOf(livraison.getNumero()));
+        texte.setFill(Color.WHITE);
+        texte.setStyle("-fx-font-size: " + (15 - 2 * texte.getText().length()));
+
+        StackPane stack = new StackPane();
+        stack.getChildren().addAll(forme, texte);
+
+        livraisons.put(livraison, stack);
+        this.getChildren().add(stack);
+        this.markDirty();
+    }
+
+    /**
+     * Enlève une livraison du calque.
+     * @param livraison
+     */
+    public void enleverLivraison(final Livraison livraison) {
+        Node noeud = livraisons.get(livraison);
+        livraisons.remove(livraison);
+        this.getChildren().remove(noeud);
         this.markDirty();
     }
 
@@ -68,7 +128,9 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
     }
 
-    public void setPointSelectionne(final Circle point) {
+    public void setPointSelectionne(final Intersection intersection) {
+        Circle point = points.get(intersection);
+
         if (this.pointSelectionne != null) {
             // réinitialisation si une sélection a déjà eu lieu
             this.pointSelectionne.setFill(COULEUR_POINT);
@@ -91,8 +153,8 @@ public final class CalquePlan extends MapLayer {
      * @param visible
      */
     public void afficherPoints(final boolean visible) {
-        for (Pair<Intersection, Circle> candidate : points) {
-            Circle cercle = candidate.getValue();
+        for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
+            Circle cercle = point.getValue();
 
             // on ne masque jamais le point sélectionné
             if (cercle != this.pointSelectionne) {
@@ -107,27 +169,28 @@ public final class CalquePlan extends MapLayer {
      * @param y
      * @return le point du calque le plus proche
      */
-    public Pair<Intersection, Circle> trouverPointPlusProche(
+    public Intersection trouverPointPlusProche(
             final double x, final double y) {
         if (points.isEmpty()) {
             return null;
         }
 
         // initialisation
-        Pair<Intersection, Circle> pointPlusProche = points.get(0);
+        Intersection pointPlusProche = points.keySet().stream().findFirst()
+                .get();
         double distanceMin = this.calculerDistanceEuclidienne(x, y,
-                pointPlusProche.getValue().getTranslateX(),
-                pointPlusProche.getValue().getTranslateY());
+                points.get(pointPlusProche).getTranslateX(),
+                points.get(pointPlusProche).getTranslateY());
 
         // calcul de la distance pour chaque point
-        for (Pair<Intersection, Circle> point : points) {
+        for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             double distance = this.calculerDistanceEuclidienne(x, y,
                     point.getValue().getTranslateX(),
                     point.getValue().getTranslateY());
 
             if (distance < distanceMin) {
                 distanceMin = distance;
-                pointPlusProche = point;
+                pointPlusProche = point.getKey();
             }
         }
 
@@ -149,28 +212,125 @@ public final class CalquePlan extends MapLayer {
         return diffX * diffX + diffY * diffY;
     }
 
-    @Override
-    protected void layoutLayer() {
-        for (Pair<Intersection, Circle> candidate : points) {
-            Intersection point = candidate.getKey();
-            Circle icon = candidate.getValue();
+    /**
+     * Ajoute un segment sur le calque.
+     * @param point1
+     * @param point2
+     */
+    public void ajouterSegment(final Intersection point1,
+                               final Intersection point2) {
+        Line ligne = new Line();
+        ligne.setFill(COULEUR_SEGMENT);
+        ligne.setStroke(COULEUR_SEGMENT);
+        ligne.setStrokeWidth(TAILLE_SEGMENT);
 
-            Point2D mapPoint = getMapPoint(
-                    point.getLatitude(), point.getLongitude());
-            icon.setTranslateX(mapPoint.getX());
-            icon.setTranslateY(mapPoint.getY());
-        }
-
-        Intersection point = entrepot.getKey();
-        ImageView icon = entrepot.getValue();
-
-        Point2D mapPoint = getMapPoint(point.getLatitude(),
-                point.getLongitude());
-        icon.setTranslateX(mapPoint.getX());
-        icon.setTranslateY(mapPoint.getY());
+        segments.put(new Pair(point1, point2), ligne);
+        this.getChildren().add(ligne);
+        this.markDirty();
     }
 
-    public ObservableList<Pair<Intersection, Circle>> getPoints() {
-        return points;
+    /**
+     * Détermine la forme à afficher pour la livraison en fonction de la
+     * fenêtre de livraison.
+     * @param fenetre la fenêtre de livraison de la livraison
+     * @return la forme à afficher
+     */
+    private Shape getForme(final FenetreDeLivraison fenetre) {
+        Shape forme;
+        switch (fenetre) {
+            case H8_H9:
+                forme = new Circle(8);
+                break;
+            case H9_H10:
+                Polygon triangle = new Polygon(0, 0, 9, -18, -9, -18);
+                triangle.setRotate(180);
+
+                forme = triangle;
+                break;
+            case H10_H11:
+                forme = new Rectangle(16, 16);
+                break;
+            case H11_H12:
+                Polygon pentagone = new Polygon();
+                for (int i = 0; i < 5; i++) {
+                    pentagone.getPoints().add(10 * Math.sin(
+                            2 * i * Math.PI / 5));
+                    pentagone.getPoints().add(10 * Math.cos(
+                            2 * i * Math.PI / 5));
+                }
+                pentagone.setRotate(180 / 5);
+
+                forme = pentagone;
+                break;
+            default:
+                forme = new Circle(8);
+        }
+        return forme;
+    }
+
+    private Color getCouleur(final Livreur livreur) {
+        Color couleur;
+        switch (livreur) {
+            case LIVREUR_1:
+                couleur = Color.BLUE;
+                break;
+            case LIVREUR_2:
+                couleur = Color.GREEN;
+                break;
+            case LIVREUR_3:
+                couleur = Color.GREY;
+                break;
+            case LIVREUR_4:
+                couleur = Color.ORANGE;
+                break;
+            default:
+                couleur = Color.BLUE;
+        }
+        return couleur;
+    }
+
+    /**
+     * Ajuste le positionnement des éléments lorsque la carte est déplacée.
+     */
+    @Override
+    protected void layoutLayer() {
+        positionner(entrepot.getKey(), entrepot.getValue());
+
+        for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
+            positionner(point.getKey(), point.getValue());
+        }
+
+        for (Map.Entry<Livraison, Node> livraison : livraisons.entrySet()) {
+            positionner(livraison.getKey().getAdresse(), livraison.getValue());
+        }
+
+        for (Map.Entry<Pair<Intersection, Intersection>, Line> segment
+                : segments.entrySet()) {
+            positionner(segment.getKey(), segment.getValue());
+        }
+    }
+
+    private void positionner(final Intersection intersection,
+                             final Node noeud) {
+        Point2D mapPoint = getMapPoint(intersection.getLatitude(),
+                intersection.getLongitude());
+        noeud.setTranslateX(mapPoint.getX());
+        noeud.setTranslateY(mapPoint.getY());
+    }
+
+    private void positionner(final Pair<Intersection, Intersection> segment,
+                             final Line ligne) {
+        Intersection point1 = segment.getKey();
+        Intersection point2 = segment.getValue();
+
+        Point2D mapPoint1 = getMapPoint(
+                point1.getLatitude(), point1.getLongitude());
+        Point2D mapPoint2 = getMapPoint(
+                point2.getLatitude(), point2.getLongitude());
+
+        ligne.setStartX(mapPoint1.getX());
+        ligne.setStartY(mapPoint1.getY());
+        ligne.setEndX(mapPoint2.getX());
+        ligne.setEndY(mapPoint2.getY());
     }
 }
