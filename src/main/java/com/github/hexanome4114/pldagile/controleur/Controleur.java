@@ -268,29 +268,24 @@ public final class Controleur {
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
-
-            // Ajout de l'entrepôt comme départ(et arrivée) de la tournée.
-            // TODO Pourquoi cette livraison?
-            Livraison livraisonEntrepot = new Livraison(Integer.MAX_VALUE, new FenetreDeLivraison(8, 9),
-                    livreur, this.plan.getEntrepot());
-            livraisons.add(0, livraisonEntrepot);
-            tournees.add(calculerTournee(livreur, livraisons));
+            tournees.add(calculerTournee(livreur, livraisons, this.plan.getEntrepot(), new FenetreDeLivraison(8, 9)));
         }
 
         return tournees;
     }
 
     /**
-     * Calcule une Tournée qui part et revient sur la première livraison
+     * Calcule une Tournée qui part et revient sur la première livraison,
+     * le livreur partira à l'heure de la première livraison.
      *
      * @param livreur livreur qui effectue les livraisons
      * @param livraisons liste des livraisons à effectuer, la première livraison est le point de départ et d'arrivée.
+     * @param pointDepart intersection de départ et d'arrivée de la tournée (doit être différents de la premiere livraison)
+     * @param fdlDepart fenetre de livraison de départ
      * @return Tournée
      */
-    public Tournee calculerTournee(Livreur livreur, List<Livraison> livraisons) {
-        // TODO Il faudrait un helper pour :
-        //  * la traduction Graphe dijkstra vers CompleteGraph (qui remplacerait le constructeur dans CompleteGraph de tsp)
-
+    public Tournee calculerTournee(Livreur livreur, List<Livraison> livraisons,
+                                   Intersection pointDepart, FenetreDeLivraison fdlDepart) {
         // Dijkstra
         // Creation de chaque sommet et ajout dans le graphe
         Graphe graphe = ControleurHelper.creerGrapheDijkstra(this.plan.getIntersections().keySet());
@@ -309,21 +304,27 @@ public final class Controleur {
             }
         }
 
+        // Ajout d'une livraison factice au point de depart
+        Livraison livraisonPointDepart = new Livraison(Integer.MAX_VALUE, fdlDepart, livreur, pointDepart);
+        List<Livraison> livraisonTemporaire = new ArrayList<>(livraisons);
+        livraisonTemporaire.add(0, livraisonPointDepart);
+
         // Création du graphe et calcul de tous les itinéraires nécessaires pour l'affichage
-        Pair< Graphe, Map<String, Itineraire> > resultCreationGrapheTSP = ControleurHelper.creerGrapheTSP(livraisons,
+
+        Pair< Graphe, Map<String, Itineraire> > resultCreationGrapheTSP = ControleurHelper.creerGrapheTSP(livraisonTemporaire,
                 this.plan.getIntersections(), graphe);
         Graphe grapheTSP = resultCreationGrapheTSP.getKey();
         Map<String, Itineraire> itineraireMap = resultCreationGrapheTSP.getValue();
 
-        int nbSommetsDansGrapheTSP = livraisons.size();
+        int nbSommetsDansGrapheTSP = livraisonTemporaire.size();
 
         CompleteGraph g = ControleurHelper.convertirGrapheVersCompleteGraph(grapheTSP);
         TSP tsp = new TSP1();
         tsp.searchSolution(20000, g);
 
-        List<Itineraire> itinerairesFinaux = new ArrayList<>();
-        // TODO réordonner les livraisons dans l'ordre des livraisons pour le TSP
+        // On recree une liste de livraisons pour reordonner
         List<Livraison> livraisonsTSP = new ArrayList<>(livraisons.size());
+        List<Itineraire> itinerairesFinaux = new ArrayList<>();
         if(tsp.getSolutionCost() != Integer.MAX_VALUE){ // s'il y a une solution
             // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
             for(int i=0; i<nbSommetsDansGrapheTSP-1;++i){
@@ -331,15 +332,21 @@ public final class Controleur {
                 String idSommet1 = g.getMapIndexVersNomSommet().get(tsp.getSolution(i+1));
                 Itineraire itineraire = itineraireMap.get(idSommet+"_"+idSommet1);
                 itinerairesFinaux.add(itineraire);
-               //System.out.println("tsp.getSolution(i) = " + tsp.getSolution(i));
+                // Ajoute la livraison dans l'ordre de passage
+                for(Livraison livraison : livraisons){
+                    if(livraison.getAdresse().getId() == idSommet1){ // on n'ajoute pas la livraison factice 'livraisonPointDepart'
+                        livraisonsTSP.add(livraison);
+                        break;
+                    }
+                }
             }
             // Ajout du dernier itinéraire entre la dernière adresse de livraison visité et la première (l'entrepôt)
             String idPremierSommet = g.getMapIndexVersNomSommet().get(0);
             String idDernierSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(nbSommetsDansGrapheTSP-1));
             itinerairesFinaux.add(itineraireMap.get(idDernierSommet+"_"+idPremierSommet));
         }
-        // TODO tournee = new Tournee(livreur, livraisonsTSP, itinerairesFinaux)
-        Tournee tournee = new Tournee(livreur, livraisons, itinerairesFinaux);
+
+        Tournee tournee = new Tournee(livreur, livraisonsTSP, itinerairesFinaux);
 
         return tournee;
     }
