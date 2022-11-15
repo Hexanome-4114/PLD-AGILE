@@ -18,6 +18,11 @@
             </CheckBox>
         </VBox>
         <VBox prefHeight="640.0" prefWidth="640.0">
+            <Label fx:id="instructionLabel" alignment="TOP_LEFT" prefHeight="36.0" prefWidth="630.0" text="Pour commencer à saisir des livraisons, veuillez charger un plan." wrapText="true">
+                <VBox.margin>
+                   <Insets bottom="10.0" />
+                </VBox.margin>
+            </Label>
             <HBox prefHeight="19.0" prefWidth="640.0">
                 <ComboBox fx:id="comboBoxLivreur" disable="true" prefWidth="150.0">
                    <HBox.margin>
@@ -47,11 +52,6 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
-            <Label fx:id="messageErreur" prefHeight="18.0" prefWidth="640.0" textFill="RED">
-                <VBox.margin>
-                   <Insets top="10.0" />
-                </VBox.margin>
-            </Label>
             <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraisonColonne" prefWidth="213.3" text="Numéro de livraison" />

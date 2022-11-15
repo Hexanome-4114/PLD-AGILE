@@ -109,7 +109,7 @@ public final class Controleur {
     private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraisonColonne;
 
     @FXML
-    private Label messageErreur;
+    private Label instructionLabel;
 
     @FXML
     private Button supprimerLivraisonBouton;
@@ -290,8 +290,11 @@ public final class Controleur {
             Serialiseur.sauvegarderLivraisons(
                     fichier, this.tableauLivraison.getItems());
         } catch (Exception e) {
-            this.messageErreur.setText(
-                    "Problème lors de la sauvegarde des livraisons.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText(
+                    "Problème lors de la sauvegarde des livraisons."
+            );
+            alerte.show();
         }
     }
 
@@ -328,8 +331,9 @@ public final class Controleur {
                     FXCollections.observableArrayList(livraisons));
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
-            this.messageErreur.setText(
-                    "Problème lors du chargement des livraisons.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText("Problème lors du chargement des livraisons.");
+            alerte.show();
         }
     }
 
@@ -443,7 +447,11 @@ public final class Controleur {
             this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
         } catch (Exception e) {
-            this.messageErreur.setText("Problème lors du chargement du plan.");
+            Alert alerte = new Alert(Alert.AlertType.ERROR);
+            alerte.setHeaderText(
+                    "Problème lors du chargement du plan."
+            );
+            alerte.show();
         }
     }
 
@@ -492,6 +500,10 @@ public final class Controleur {
 
     public void supprimerLivraison(final Livraison l) {
         this.tableauLivraison.getItems().remove(l);
+    }
+
+    public Label getInstructionLabel() {
+        return this.instructionLabel;
     }
 
     public ComboBox<Livreur> getComboBoxLivreur() {
