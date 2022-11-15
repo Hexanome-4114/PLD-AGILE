@@ -48,9 +48,6 @@ public class Sommet {
     @Override
     public String toString (){
         String result = "Sommet<"+getNom()+">";
-        /*for(Map.Entry<Sommet,Integer> sommetsAdjacents : this.sommetsAdjacents.entrySet()) {
-            result += "{" + sommetsAdjacents.getKey().getNom() + ";" + sommetsAdjacents.getValue() + "}";
-        }*/
         return result;
     }
 }
