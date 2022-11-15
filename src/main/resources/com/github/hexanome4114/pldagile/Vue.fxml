@@ -38,6 +38,11 @@
                     </HBox.margin>
                 </Button>
                 <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
+                <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
+                   <HBox.margin>
+                       <Insets left="10.0" />
+                   </HBox.margin>
+                </Button>
                 <VBox.margin>
                    <Insets top="10.0" />
                 </VBox.margin>
