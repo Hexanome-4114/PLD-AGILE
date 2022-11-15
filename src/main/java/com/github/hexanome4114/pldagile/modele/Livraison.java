@@ -1,11 +1,15 @@
 package com.github.hexanome4114.pldagile.modele;
 
+import java.time.LocalTime;
+
 public final class Livraison {
 
     private final int numero;
     private final FenetreDeLivraison fenetreDeLivraison;
     private final Livreur livreur;
     private final Intersection adresse;
+    private LocalTime heurePassage;
+    private boolean enRetard;
 
     public Livraison(final int numero,
                      final FenetreDeLivraison fenetreDeLivraison,
@@ -14,10 +18,27 @@ public final class Livraison {
         this.fenetreDeLivraison = fenetreDeLivraison;
         this.livreur = livreur;
         this.adresse = adresse;
+        this.enRetard = false;
     }
 
     public int getNumero() {
         return numero;
+    }
+
+    public LocalTime getHeurePassage() {
+        return heurePassage;
+    }
+
+    public void setHeurePassage(final LocalTime heurePassage) {
+        this.heurePassage = heurePassage;
+    }
+
+    public boolean isEnRetard() {
+        return enRetard;
+    }
+
+    public void setEnRetard(final boolean enRetard) {
+        this.enRetard = enRetard;
     }
 
     public FenetreDeLivraison getFenetreDeLivraison() {

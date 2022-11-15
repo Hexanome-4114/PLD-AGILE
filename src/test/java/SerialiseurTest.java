@@ -1,4 +1,3 @@
-import com.github.hexanome4114.pldagile.controleur.Controleur;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
