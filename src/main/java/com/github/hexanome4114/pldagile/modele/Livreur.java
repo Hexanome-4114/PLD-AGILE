@@ -1,13 +1,18 @@
 package com.github.hexanome4114.pldagile.modele;
 
-public final class Livreur {
+public enum Livreur {
+
+    LIVREUR_1(1),
+    LIVREUR_2(2),
+    LIVREUR_3(3),
+    LIVREUR_4(4);
 
     private final int numero;
-    private final int vitesseMoyenne;
 
-    public Livreur(final int numero, final int vitesseMoyenne) {
+    private static final int VITESSE_MOYENNE = 15;
+
+    Livreur(final int numero) {
         this.numero = numero;
-        this.vitesseMoyenne = vitesseMoyenne;
     }
 
     public int getNumero() {
@@ -15,7 +20,7 @@ public final class Livreur {
     }
 
     public int getVitesseMoyenne() {
-        return vitesseMoyenne;
+        return VITESSE_MOYENNE;
     }
 
     @Override

@@ -46,8 +46,8 @@ class SerialiseurTest {
     void sauvegarderLivraisons() {
         List<Livraison> livraisons = new ArrayList<>();
 
-        FenetreDeLivraison fenetre = new FenetreDeLivraison(8, 9);
-        Livreur livreur = new Livreur(1, Controleur.VITESSE_MOYENNE);
+        FenetreDeLivraison fenetre = FenetreDeLivraison.H8_H9;
+        Livreur livreur = Livreur.LIVREUR_1;
 
         livraisons.add(new Livraison(1, fenetre, livreur,
                 new Intersection("1", 45.759335, 4.877039)

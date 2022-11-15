@@ -38,7 +38,6 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,19 +48,7 @@ import java.util.Optional;
  */
 public final class Controleur {
 
-    /**
-     * Vitesse de déplacement d'un livreur.
-     */
-    public static final int VITESSE_MOYENNE = 15;
-
-    /**
-     * Nombre de livreurs disponibles par défaut.
-     */
-    private static final int NOMBRE_LIVREURS = 1;
-
     private List<Livreur> livreurs;
-
-    private List<FenetreDeLivraison> fenetresDeLivraison;
 
     private Circle pointClique;
 
@@ -111,18 +98,10 @@ public final class Controleur {
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
-        this.genererLivreurs(NOMBRE_LIVREURS);
-        this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
-                new FenetreDeLivraison(8, 9),
-                new FenetreDeLivraison(9, 10),
-                new FenetreDeLivraison(10, 11),
-                new FenetreDeLivraison(11, 12)
-        ));
-
         ObservableList<FenetreDeLivraison> oListFenetreDeLivraison =
-                FXCollections.observableArrayList(this.fenetresDeLivraison);
+                FXCollections.observableArrayList(FenetreDeLivraison.values());
         ObservableList<Livreur> oListLivreurs =
-                FXCollections.observableArrayList(this.livreurs);
+                FXCollections.observableArrayList(Livreur.values());
 
         this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
@@ -154,26 +133,6 @@ public final class Controleur {
         );
     }
 
-    /**
-     * Génère un ensemble de livreurs en fonction du nombre
-     * souhaité.
-     *
-     * @param nbLivreurs le nombre de livreurs souhaité
-     */
-    private void genererLivreurs(final int nbLivreurs) {
-        if (this.livreurs != null && nbLivreurs == this.livreurs.size()) {
-            return; // déjà le bon nombre de livreurs
-        }
-
-        List<Livreur> livreurs = new ArrayList<>();
-
-        for (int i = 1; i <= nbLivreurs; i++) {
-            livreurs.add(new Livreur(i, VITESSE_MOYENNE));
-        }
-
-        this.livreurs = livreurs;
-    }
-
     @SuppressWarnings("checkstyle:NeedBraces")
     public void ajouterLivraison() {
         if (this.comboBoxLivreur.getValue() != null
@@ -198,6 +157,7 @@ public final class Controleur {
                     this.comboBoxAdresse.getValue());
 
             livraisons.add(livraison);
+            this.calquePlan.ajouterLivraison(livraison);
             this.messageErreur.setText("");
         } else {
             this.messageErreur.setText("Veuillez renseigner tous les champs !");
@@ -208,6 +168,7 @@ public final class Controleur {
         Livraison livraison = this.tableauLivraison.getSelectionModel()
                 .getSelectedItem();
         this.tableauLivraison.getItems().remove(livraison);
+        this.calquePlan.enleverLivraison(livraison);
     }
 
     public void sauvegarderLivraisons() {
@@ -411,11 +372,11 @@ public final class Controleur {
         carteVue.setCursor(Cursor.CROSSHAIR);
 
         carteVue.setOnMouseClicked(e -> {
-            Pair<Intersection, Circle> point = calquePlan.
+            Intersection point = calquePlan.
                     trouverPointPlusProche(e.getX(), e.getY());
 
-            this.calquePlan.setPointSelectionne(point.getValue());
-            this.comboBoxAdresse.setValue(point.getKey());
+            this.calquePlan.setPointSelectionne(point);
+            this.comboBoxAdresse.setValue(point);
         });
 
         this.carte.getChildren().add(carteVue);
