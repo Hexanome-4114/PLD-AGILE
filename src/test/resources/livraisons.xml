@@ -3,13 +3,8 @@
 <livraisons>
     <livraison>
         <numero>1</numero>
-        <livreur>
-            <numero>1</numero>
-        </livreur>
-        <fenetre>
-            <debut>8</debut>
-            <fin>9</fin>
-        </fenetre>
+        <livreur id="LIVREUR_1"/>
+        <fenetre id="H8_H9"/>
         <adresse>
             <id>1</id>
             <latitude>45.759335</latitude>
@@ -18,13 +13,8 @@
     </livraison>
     <livraison>
         <numero>3</numero>
-        <livreur>
-            <numero>1</numero>
-        </livreur>
-        <fenetre>
-            <debut>8</debut>
-            <fin>9</fin>
-        </fenetre>
+        <livreur id="LIVREUR_1"/>
+        <fenetre id="H8_H9"/>
         <adresse>
             <id>2</id>
             <latitude>45.756004</latitude>
