@@ -1,5 +1,6 @@
 package com.github.hexanome4114.pldagile.modele;
 
+@SuppressWarnings("checkstyle:RegexpSingleline")
 public final class Livraison {
 
     private final int numero;

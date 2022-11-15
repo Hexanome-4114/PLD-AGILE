@@ -1,13 +1,7 @@
 package com.github.hexanome4114.pldagile.controleur;
 
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
-import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
-import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
-import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
-import com.github.hexanome4114.pldagile.modele.Itineraire;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
@@ -38,11 +32,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import java.io.File;
-import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -67,6 +59,8 @@ public final class Controleur {
     private List<FenetreDeLivraison> fenetresDeLivraison;
 
     private Plan plan;
+
+    private List<Tournee> tournees;
 
     private CalquePlan calquePlan;
 
@@ -333,95 +327,20 @@ public final class Controleur {
         }
     }
 
-    public List<Tournee> calculerLesTournees() {
-        List<Tournee> tournees = new ArrayList<>();
+    public void calculerLesTournees() {
         // Pour chaque livreur, on appelle "calculerTournee" pour calcule la tournée qui lui est associé
+        this.tournees = new ArrayList<>();
         for(Livreur livreur : this.livreurs) {
+
             // on récupère les livraisons du livreur courant
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
-            tournees.add(calculerTournee(livreur, livraisons, this.plan.getEntrepot(), new FenetreDeLivraison(8, 9)));
+
+            Tournee tournee = new Tournee(livreur, livraisons, this.plan);
+            tournee.calculerTournee(this.plan.getEntrepot(), new FenetreDeLivraison(8,9));
+            this.tournees.add(tournee);
         }
-
-        return tournees;
-    }
-
-    /**
-     * Calcule une Tournée qui part et revient sur la première livraison,
-     * le livreur partira à l'heure de la première livraison.
-     *
-     * @param livreur livreur qui effectue les livraisons
-     * @param livraisons liste des livraisons à effectuer, la première livraison est le point de départ et d'arrivée.
-     * @param pointDepart intersection de départ et d'arrivée de la tournée (doit être différents de la premiere livraison)
-     * @param fdlDepart fenetre de livraison de départ
-     * @return Tournée
-     */
-    public Tournee calculerTournee(Livreur livreur, List<Livraison> livraisons,
-                                   Intersection pointDepart, FenetreDeLivraison fdlDepart) {
-        // Dijkstra
-        // Creation de chaque sommet et ajout dans le graphe
-        Graphe graphe = ControleurHelper.creerGrapheDijkstra(this.plan.getIntersections().keySet());
-
-        // ajout des sommets adjacents et de la distance
-        for (Intersection intersection : this.plan.getIntersections()
-                .values()) {
-            for (Map.Entry<Intersection, Pair<Integer, String>> set
-                    : intersection.getIntersections().entrySet()) {
-                Sommet sommetOrigine = graphe.getSommets()
-                        .get(intersection.getId());
-                Sommet sommetDestination = graphe.getSommets()
-                        .get(set.getKey().getId());
-                sommetOrigine.addDestination(sommetDestination,
-                        set.getValue().getKey());
-            }
-        }
-
-        // Ajout d'une livraison factice au point de depart
-        Livraison livraisonPointDepart = new Livraison(Integer.MAX_VALUE, fdlDepart, livreur, pointDepart);
-        List<Livraison> livraisonTemporaire = new ArrayList<>(livraisons);
-        livraisonTemporaire.add(0, livraisonPointDepart);
-
-        // Création du graphe et calcul de tous les itinéraires nécessaires pour l'affichage
-
-        Pair< Graphe, Map<String, Itineraire> > resultCreationGrapheTSP = ControleurHelper.creerGrapheTSP(livraisonTemporaire,
-                this.plan.getIntersections(), graphe);
-        Graphe grapheTSP = resultCreationGrapheTSP.getKey();
-        Map<String, Itineraire> itineraireMap = resultCreationGrapheTSP.getValue();
-
-        int nbSommetsDansGrapheTSP = livraisonTemporaire.size();
-
-        CompleteGraph g = ControleurHelper.convertirGrapheVersCompleteGraph(grapheTSP);
-        TSP tsp = new TSP1();
-        tsp.searchSolution(20000, g);
-
-        // On recree une liste de livraisons pour reordonner
-        List<Livraison> livraisonsTSP = new ArrayList<>(livraisons.size());
-        List<Itineraire> itinerairesFinaux = new ArrayList<>();
-        if(tsp.getSolutionCost() != Integer.MAX_VALUE){ // s'il y a une solution
-            // On garde uniquement les itinéraires que nous avons besoin et on crée la tournée à renvoyer
-            for(int i=0; i<nbSommetsDansGrapheTSP-1;++i){
-                String idSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(i));
-                String idSommet1 = g.getMapIndexVersNomSommet().get(tsp.getSolution(i+1));
-                Itineraire itineraire = itineraireMap.get(idSommet+"_"+idSommet1);
-                itinerairesFinaux.add(itineraire);
-                // Ajoute la livraison dans l'ordre de passage
-                for(Livraison livraison : livraisons){
-                    if(livraison.getAdresse().getId() == idSommet1){ // on n'ajoute pas la livraison factice 'livraisonPointDepart'
-                        livraisonsTSP.add(livraison);
-                        break;
-                    }
-                }
-            }
-            // Ajout du dernier itinéraire entre la dernière adresse de livraison visité et la première (l'entrepôt)
-            String idPremierSommet = g.getMapIndexVersNomSommet().get(0);
-            String idDernierSommet = g.getMapIndexVersNomSommet().get(tsp.getSolution(nbSommetsDansGrapheTSP-1));
-            itinerairesFinaux.add(itineraireMap.get(idDernierSommet+"_"+idPremierSommet));
-        }
-
-        Tournee tournee = new Tournee(livreur, livraisonsTSP, itinerairesFinaux);
-
-        return tournee;
     }
 
     @FXML
