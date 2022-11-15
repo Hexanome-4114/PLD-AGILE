@@ -2,7 +2,6 @@ package com.github.hexanome4114.pldagile.modele;
 
 import java.time.LocalTime;
 
-@SuppressWarnings("checkstyle:RegexpSingleline")
 public final class Livraison {
 
     private final int numero;

@@ -2,11 +2,11 @@ package com.github.hexanome4114.pldagile.controleur;
 
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
 import com.github.hexanome4114.pldagile.modele.Tournee;
-import com.github.hexanome4114.pldagile.modele.Itineraire;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
@@ -30,13 +30,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Pair;
+
 import java.io.File;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
  */
 public final class Controleur {
     /**
-     * Temps passé pour effectuer chaque livraison
+     * Temps passé pour effectuer chaque livraison.
      */
     public static final int TEMPS_PAR_LIVRAISON = 5;
 
@@ -90,7 +89,8 @@ public final class Controleur {
     private TableColumn<Livraison, Livreur> livreurColonne;
 
     @FXML
-    private TableColumn<Livraison, FenetreDeLivraison> fenetreDeLivraisonColonne;
+    private TableColumn<Livraison, FenetreDeLivraison>
+            fenetreDeLivraisonColonne;
 
     @FXML
     private Label instructionLabel;
@@ -295,19 +295,24 @@ public final class Controleur {
     }
 
     public void calculerLesTournees() {
-        // Pour chaque livreur, on appelle "calculerTournee" pour calcule la tournée qui lui est associé
+        // Pour chaque livreur, on appelle "calculerTournee" pour calculer
+        // la tournée qui lui est associée
         this.tournees = new ArrayList<>();
         for (Livreur livreur : this.comboBoxLivreur.getItems()) {
 
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
-                    livraison -> livraison.getLivreur().equals(livreur))
+            List<Livraison> livraisons = this.tableauLivraison.getItems()
+                    .stream().filter(
+                            livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
             System.out.println(livraisons.toString());
-            // On ne crée pas de tournée s'il n'y a pas de livraison pour un livreur
+            // On ne crée pas de tournée s'il n'y a pas de livraison
+            // pour un livreur
             if (!livraisons.isEmpty()) {
-                Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
-                tournee.calculerTournee(this.plan.getEntrepot(), FenetreDeLivraison.H8_H9);
+                Tournee tournee = new Tournee(livreur, livraisons, this.plan,
+                        TEMPS_PAR_LIVRAISON);
+                tournee.calculerTournee(this.plan.getEntrepot(),
+                        FenetreDeLivraison.H8_H9);
                 if (tournee.getItineraires() == null) {
                     Alert alerte = new Alert(Alert.AlertType.ERROR);
                     alerte.setHeaderText(
