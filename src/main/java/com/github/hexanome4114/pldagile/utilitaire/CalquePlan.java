@@ -16,6 +16,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -40,6 +41,10 @@ public final class CalquePlan extends MapLayer {
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
+    private static final int TAILLE_SEGMENT = 5;
+
+    private static final Color COULEUR_SEGMENT = Color.RED;
+
     /**
      * Map contenant les points de livraison et leur Node associé.
      */
@@ -51,6 +56,13 @@ public final class CalquePlan extends MapLayer {
      */
     private final ObservableMap<Livraison, Node> livraisons =
             FXCollections.observableHashMap();
+
+
+    /**
+     * Map contenant les segments de la tournée et leur Node associé.
+     */
+    private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
+            = FXCollections.observableHashMap();
 
     /**
      * Point de livraison sélectionné par l'utilisateur.
@@ -201,6 +213,23 @@ public final class CalquePlan extends MapLayer {
     }
 
     /**
+     * Ajoute un segment sur le calque.
+     * @param point1
+     * @param point2
+     */
+    public void ajouterSegment(final Intersection point1,
+                               final Intersection point2) {
+        Line ligne = new Line();
+        ligne.setFill(COULEUR_SEGMENT);
+        ligne.setStroke(COULEUR_SEGMENT);
+        ligne.setStrokeWidth(TAILLE_SEGMENT);
+
+        segments.put(new Pair(point1, point2), ligne);
+        this.getChildren().add(ligne);
+        this.markDirty();
+    }
+
+    /**
      * Détermine la forme à afficher pour la livraison en fonction de la
      * fenêtre de livraison.
      * @param fenetre la fenêtre de livraison de la livraison
@@ -260,8 +289,13 @@ public final class CalquePlan extends MapLayer {
         return couleur;
     }
 
+    /**
+     * Ajuste le positionnement des éléments lorsque la carte est déplacée.
+     */
     @Override
     protected void layoutLayer() {
+        positionner(entrepot.getKey(), entrepot.getValue());
+
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             positionner(point.getKey(), point.getValue());
         }
@@ -270,7 +304,10 @@ public final class CalquePlan extends MapLayer {
             positionner(livraison.getKey().getAdresse(), livraison.getValue());
         }
 
-        positionner(entrepot.getKey(), entrepot.getValue());
+        for (Map.Entry<Pair<Intersection, Intersection>, Line> segment
+                : segments.entrySet()) {
+            positionner(segment.getKey(), segment.getValue());
+        }
     }
 
     private void positionner(final Intersection intersection,
@@ -279,5 +316,21 @@ public final class CalquePlan extends MapLayer {
                 intersection.getLongitude());
         noeud.setTranslateX(mapPoint.getX());
         noeud.setTranslateY(mapPoint.getY());
+    }
+
+    private void positionner(final Pair<Intersection, Intersection> segment,
+                             final Line ligne) {
+        Intersection point1 = segment.getKey();
+        Intersection point2 = segment.getValue();
+
+        Point2D mapPoint1 = getMapPoint(
+                point1.getLatitude(), point1.getLongitude());
+        Point2D mapPoint2 = getMapPoint(
+                point2.getLatitude(), point2.getLongitude());
+
+        ligne.setStartX(mapPoint1.getX());
+        ligne.setStartY(mapPoint1.getY());
+        ligne.setEndX(mapPoint2.getX());
+        ligne.setEndY(mapPoint2.getY());
     }
 }
