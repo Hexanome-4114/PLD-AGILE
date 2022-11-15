@@ -41,7 +41,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Objects;
@@ -51,20 +50,6 @@ import java.util.stream.Collectors;
  * Contrôleur de l'application.
  */
 public final class Controleur {
-
-    /**
-     * Vitesse de déplacement d'un livreur.
-     */
-    public static final int VITESSE_MOYENNE = 15;
-
-    /**
-     * Nombre de livreurs disponibles par défaut.
-     */
-    private static final int NOMBRE_LIVREURS = 1;
-
-    private List<Livreur> livreurs;
-
-    private List<FenetreDeLivraison> fenetresDeLivraison;
 
     private Plan plan;
 
@@ -141,18 +126,10 @@ public final class Controleur {
 
         this.listeDeCommandes = new ListDeCommandes();
 
-        this.genererLivreurs(NOMBRE_LIVREURS);
-        this.fenetresDeLivraison = new ArrayList<>(Arrays.asList(
-                new FenetreDeLivraison(8, 9),
-                new FenetreDeLivraison(9, 10),
-                new FenetreDeLivraison(10, 11),
-                new FenetreDeLivraison(11, 12)
-        ));
-
         ObservableList<FenetreDeLivraison> oListFenetreDeLivraison =
-                FXCollections.observableArrayList(this.fenetresDeLivraison);
+                FXCollections.observableArrayList(FenetreDeLivraison.values());
         ObservableList<Livreur> oListLivreurs =
-                FXCollections.observableArrayList(this.livreurs);
+                FXCollections.observableArrayList(Livreur.values());
 
         this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
@@ -213,26 +190,6 @@ public final class Controleur {
                         || this.comboBoxAdresse.getValue() == null));
     }
 
-    /**
-     * Génère un ensemble de livreurs en fonction du nombre
-     * souhaité.
-     *
-     * @param nbLivreurs le nombre de livreurs souhaité
-     */
-    private void genererLivreurs(final int nbLivreurs) {
-        if (this.livreurs != null && nbLivreurs == this.livreurs.size()) {
-            return; // déjà le bon nombre de livreurs
-        }
-
-        List<Livreur> livreurs = new ArrayList<>();
-
-        for (int i = 1; i <= nbLivreurs; i++) {
-            livreurs.add(new Livreur(i, VITESSE_MOYENNE));
-        }
-
-        this.livreurs = livreurs;
-    }
-
     public void ajouterLivraison() {
         if (this.comboBoxLivreur.getValue() != null
                 && this.comboBoxFenetreDeLivraison.getValue() != null
@@ -256,8 +213,8 @@ public final class Controleur {
                     this.comboBoxAdresse.getValue());
 
             this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
-
             this.etatCourant.ajouterLivraison(this);
+            this.calquePlan.ajouterLivraison(livraison);
         }
     }
 
@@ -268,6 +225,7 @@ public final class Controleur {
         this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
+        this.calquePlan.enleverLivraison(livraison);
     }
 
     public void annuler() {
@@ -340,12 +298,12 @@ public final class Controleur {
     public List<Tournee> calculerLesTournees() {
         List<Tournee> tournees = new ArrayList<>();
         // Pour chaque livreur, on appelle "calculerTournee" pour calcule la tournée qui lui est associé
-        for(Livreur livreur : this.livreurs) {
+        for(Livreur livreur : Livreur.values()) {
             // on récupère les livraisons du livreur courant
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
-                    livraison -> livraison.getLivreur().equals(livreur))
+                    livraison -> livraison.getLivreur() == livreur)
                     .collect(Collectors.toList());
-            tournees.add(calculerTournee(livreur, livraisons, this.plan.getEntrepot(), new FenetreDeLivraison(8, 9)));
+            tournees.add(calculerTournee(livreur, livraisons, this.plan.getEntrepot(), FenetreDeLivraison.H8_H9));
         }
 
         return tournees;
@@ -477,11 +435,11 @@ public final class Controleur {
         carteVue.setCursor(Cursor.CROSSHAIR);
 
         carteVue.setOnMouseClicked(e -> {
-            Pair<Intersection, Circle> point = calquePlan.
+            Intersection point = calquePlan.
                     trouverPointPlusProche(e.getX(), e.getY());
 
-            this.calquePlan.setPointSelectionne(point.getValue());
-            this.comboBoxAdresse.setValue(point.getKey());
+            this.calquePlan.setPointSelectionne(point);
+            this.comboBoxAdresse.setValue(point);
         });
 
         this.carte.getChildren().add(carteVue);
@@ -564,6 +522,10 @@ public final class Controleur {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
+    }
+
+    public CalquePlan getCalquePlan() {
+        return calquePlan;
     }
 
     public void setStage(final Stage stage) {

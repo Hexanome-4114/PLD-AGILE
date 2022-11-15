@@ -1,6 +1,5 @@
 package com.github.hexanome4114.pldagile.utilitaire;
 
-import com.github.hexanome4114.pldagile.controleur.Controleur;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
@@ -20,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,7 +46,8 @@ public final class Serialiseur {
         // intersections
         HashMap<String, Intersection> intersections = new HashMap<>();
 
-        for (Node noeudIntersection: document.selectNodes("/map/intersection")) {
+        for (Node noeudIntersection: document
+                .selectNodes("/map/intersection")) {
             String id = noeudIntersection.valueOf("@id");
             double latitude = Double.parseDouble(
                     noeudIntersection.valueOf("@latitude"));
@@ -74,9 +73,10 @@ public final class Serialiseur {
             Intersection intersectionFin = intersections.get(
                     noeudSegment.valueOf("@destination"));
 
-        // Ajout dans l'intersection début du lien avec l'intersection de fin (modélisation du segment)
-            intersectionDebut.getIntersections()
-                    .put(intersectionFin, new Pair<Integer, String>(longueur, nom));
+            // Ajout dans l'intersection début du lien avec l'intersection
+            // de fin (modélisation du segment)
+            intersectionDebut.getIntersections().put(intersectionFin,
+                    new Pair<Integer, String>(longueur, nom));
         }
 
         return new Plan(intersections, entrepot);
@@ -103,16 +103,12 @@ public final class Serialiseur {
             // livreur
             Livreur livreur = livraison.getLivreur();
             Element livreurElement = livraisonElement.addElement("livreur");
-            livreurElement.addElement("numero")
-                    .addText(String.valueOf(livreur.getNumero()));
+            livreurElement.addAttribute("id", livreur.name());
 
             // fenêtre de livraison
             FenetreDeLivraison fenetre = livraison.getFenetreDeLivraison();
             Element fenetreElement = livraisonElement.addElement("fenetre");
-            fenetreElement.addElement("debut")
-                    .addText(String.valueOf(fenetre.getDebut()));
-            fenetreElement.addElement("fin")
-                    .addText(String.valueOf(fenetre.getFin()));
+            fenetreElement.addAttribute("id", fenetre.name());
 
             // adresse
             Intersection adresse = livraison.getAdresse();
@@ -148,21 +144,17 @@ public final class Serialiseur {
             Node noeudNumero = noeudLivraison.selectSingleNode("numero");
             int numero = Integer.parseInt(noeudNumero.getText());
 
+            // fenêtre de livraison
             Node noeudFenetre = noeudLivraison.selectSingleNode("fenetre");
-            FenetreDeLivraison fenetre = new FenetreDeLivraison(
-                    Integer.parseInt(
-                            noeudFenetre.selectSingleNode("debut").getText()),
-                    Integer.parseInt(
-                            noeudFenetre.selectSingleNode("fin").getText())
-            );
+            FenetreDeLivraison fenetre = FenetreDeLivraison.valueOf(
+                    noeudFenetre.valueOf("@id"));
 
+            // livreur
             Node noeudLivreur = noeudLivraison.selectSingleNode("livreur");
-            Livreur livreur = new Livreur(
-                    Integer.parseInt(
-                            noeudLivreur.selectSingleNode("numero").getText()),
-                    Controleur.VITESSE_MOYENNE
-            );
+            Livreur livreur = Livreur.valueOf(
+                    noeudLivreur.valueOf("@id"));
 
+            // adresse
             Node noeudAdresse = noeudLivraison.selectSingleNode("adresse");
             String id = noeudAdresse.selectSingleNode("id").getText();
             double latitude = Double.parseDouble(
