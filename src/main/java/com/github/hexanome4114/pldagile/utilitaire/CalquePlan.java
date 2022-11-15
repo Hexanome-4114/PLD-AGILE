@@ -6,7 +6,6 @@ import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.gluonhq.maps.MapLayer;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -17,14 +16,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import javafx.scene.shape.Line;
 import javafx.util.Pair;
-import java.util.List;
-import java.util.ArrayList;
+
 import java.util.Map;
 
 /**
@@ -59,6 +57,13 @@ public final class CalquePlan extends MapLayer {
     private final ObservableMap<Livraison, Node> livraisons =
             FXCollections.observableHashMap();
 
+
+    /**
+     * Map contenant les segments de la tournée et leur Node associé.
+     */
+    private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
+            = FXCollections.observableHashMap();
+
     /**
      * Point de livraison sélectionné par l'utilisateur.
      */
@@ -69,11 +74,6 @@ public final class CalquePlan extends MapLayer {
      */
     private Pair<Intersection, ImageView> entrepot;
 
-    /**
-     * Liste contenant les segments de la tournee et leur objet Icon associé.
-     */
-    private final ObservableList<Pair<List<Intersection>, Line>> segments =
-            FXCollections.observableArrayList();
     public CalquePlan() { }
 
     /**
@@ -217,18 +217,14 @@ public final class CalquePlan extends MapLayer {
      * @param point1
      * @param point2
      */
-    public void ajouterSegment(final Intersection point1, final Intersection point2) {
+    public void ajouterSegment(final Intersection point1,
+                               final Intersection point2) {
         Line ligne = new Line();
-        ligne.setVisible(true);
         ligne.setFill(COULEUR_SEGMENT);
         ligne.setStroke(COULEUR_SEGMENT);
         ligne.setStrokeWidth(TAILLE_SEGMENT);
 
-        ArrayList intersections = new ArrayList();
-        intersections.add(point1);
-        intersections.add(point2);
-
-        segments.add(new Pair(intersections, ligne));
+        segments.put(new Pair(point1, point2), ligne);
         this.getChildren().add(ligne);
         this.markDirty();
     }
@@ -293,8 +289,13 @@ public final class CalquePlan extends MapLayer {
         return couleur;
     }
 
+    /**
+     * Ajuste le positionnement des éléments lorsque la carte est déplacée.
+     */
     @Override
     protected void layoutLayer() {
+        positionner(entrepot.getKey(), entrepot.getValue());
+
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             positionner(point.getKey(), point.getValue());
         }
@@ -303,29 +304,9 @@ public final class CalquePlan extends MapLayer {
             positionner(livraison.getKey().getAdresse(), livraison.getValue());
         }
 
-        positionner(entrepot.getKey(), entrepot.getValue());
-
-        Intersection point = entrepot.getKey();
-        ImageView icon = entrepot.getValue();
-
-        Point2D mapPoint = getMapPoint(point.getLatitude(),
-                point.getLongitude());
-        icon.setTranslateX(mapPoint.getX());
-        icon.setTranslateY(mapPoint.getY());
-
-        for (Pair<List<Intersection>, Line> candidate : segments) {
-            Intersection point1 = candidate.getKey().get(0);
-            Intersection point2 = candidate.getKey().get(1);
-            Line line = candidate.getValue();
-
-            Point2D mapPoint1 = getMapPoint(
-                    point1.getLatitude(), point1.getLongitude());
-            Point2D mapPoint2 = getMapPoint(
-                    point2.getLatitude(), point2.getLongitude());
-            line.setStartX(mapPoint1.getX());
-            line.setStartY(mapPoint1.getY());
-            line.setEndX(mapPoint2.getX());
-            line.setEndY(mapPoint2.getY());
+        for (Map.Entry<Pair<Intersection, Intersection>, Line> segment
+                : segments.entrySet()) {
+            positionner(segment.getKey(), segment.getValue());
         }
     }
 
@@ -337,7 +318,19 @@ public final class CalquePlan extends MapLayer {
         noeud.setTranslateY(mapPoint.getY());
     }
 
-    public ObservableList<Pair<List<Intersection>, Line>> getSegments() {
-        return segments;
+    private void positionner(final Pair<Intersection, Intersection> segment,
+                             final Line ligne) {
+        Intersection point1 = segment.getKey();
+        Intersection point2 = segment.getValue();
+
+        Point2D mapPoint1 = getMapPoint(
+                point1.getLatitude(), point1.getLongitude());
+        Point2D mapPoint2 = getMapPoint(
+                point2.getLatitude(), point2.getLongitude());
+
+        ligne.setStartX(mapPoint1.getX());
+        ligne.setStartY(mapPoint1.getY());
+        ligne.setEndX(mapPoint2.getX());
+        ligne.setEndY(mapPoint2.getY());
     }
 }
