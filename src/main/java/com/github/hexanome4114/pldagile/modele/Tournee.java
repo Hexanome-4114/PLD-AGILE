@@ -7,7 +7,9 @@ import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
 import com.github.hexanome4114.pldagile.utilitaire.TourneeHelper;
 import javafx.util.Pair;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -116,6 +118,19 @@ public final class Tournee {
 
             this.livraisons = livraisonsTSP;
             this.itineraires = itinerairesFinaux;
+            calculerHeuresPassagesLivraisons();
+
+        }
+    }
+
+    /**
+     * Met à jour les heures de passage des livraisons de la tournée
+     */
+    public void calculerHeuresPassagesLivraisons() {
+        // TODO
+        Date dateDebut = new Date("08:00");
+        for (Itineraire itineraire : this.itineraires) {
+
         }
     }
 }

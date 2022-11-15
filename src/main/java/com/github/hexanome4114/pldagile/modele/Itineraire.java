@@ -5,9 +5,17 @@ import java.util.List;
 public final class Itineraire {
 
     private List<Intersection> intersections;
+    private int longueur;
 
     public Itineraire(List<Intersection> intersections) {
         this.intersections = intersections;
+
+        // Calcul de la longueur de l'itinéraire
+        this.longueur = 0;
+        for(int i = 0; i < intersections.size() - 1; ++i){
+            Intersection intersectionSuivante = intersections.get(i+1);
+            this.longueur += intersections.get(i).getIntersections().get(intersectionSuivante.getId()).getKey();
+        }
     }
 
     public List<Intersection> getIntersections() {
@@ -27,5 +35,9 @@ public final class Itineraire {
                 .append(intersections.get(nbIntersection-1))
                 .append('}');
         return stringBuilder.toString();
+    }
+
+    public int getLongueur(){
+        return longueur;
     }
 }
