@@ -14,7 +14,7 @@ public final class Itineraire {
         this.longueur = 0;
         for(int i = 0; i < intersections.size() - 1; ++i){
             Intersection intersectionSuivante = intersections.get(i+1);
-            this.longueur += intersections.get(i).getIntersections().get(intersectionSuivante.getId()).getKey();
+            this.longueur += intersections.get(i).getIntersections().get(intersectionSuivante).getKey();
         }
     }
 

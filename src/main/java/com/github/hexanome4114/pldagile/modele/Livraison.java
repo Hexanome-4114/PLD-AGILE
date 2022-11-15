@@ -1,6 +1,6 @@
 package com.github.hexanome4114.pldagile.modele;
 
-import java.util.Date;
+import java.time.LocalTime;
 
 @SuppressWarnings("checkstyle:RegexpSingleline")
 public final class Livraison {
@@ -9,8 +9,8 @@ public final class Livraison {
     private final FenetreDeLivraison fenetreDeLivraison;
     private final Livreur livreur;
     private final Intersection adresse;
-
-    private Date heurePassage;
+    private LocalTime heurePassage;
+    private boolean enRetard;
 
     public Livraison(final int numero,
                      final FenetreDeLivraison fenetreDeLivraison,
@@ -19,18 +19,27 @@ public final class Livraison {
         this.fenetreDeLivraison = fenetreDeLivraison;
         this.livreur = livreur;
         this.adresse = adresse;
+        this.enRetard = false;
     }
 
     public int getNumero() {
         return numero;
     }
 
-    public Date getHeurePassage() {
+    public LocalTime getHeurePassage() {
         return heurePassage;
     }
 
-    public void setHeurePassage(final Date heurePassage) {
+    public void setHeurePassage(final LocalTime heurePassage) {
         this.heurePassage = heurePassage;
+    }
+
+    public boolean isEnRetard() {
+        return enRetard;
+    }
+
+    public void setEnRetard(final boolean enRetard) {
+        this.enRetard = enRetard;
     }
 
     public FenetreDeLivraison getFenetreDeLivraison() {

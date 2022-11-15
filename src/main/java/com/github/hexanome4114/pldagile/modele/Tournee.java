@@ -8,6 +8,7 @@ import com.github.hexanome4114.pldagile.utilitaire.TourneeHelper;
 import javafx.util.Pair;
 
 import java.text.DateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +20,8 @@ public final class Tournee {
      * @livreur livreur qui effectue les livraisons
      */
     private Livreur livreur;
+
+    private int tempsParLivraison;
 
     /**
      * @livraisons liste des livraison à effectuer, elles sont dans l'ordre du TSP une fois la tournée calculée
@@ -32,16 +35,12 @@ public final class Tournee {
     private List<Itineraire> itineraires;
     private Plan plan;
 
-    public Tournee(Livreur livreur, List<Livraison> livraisons, List<Itineraire> itineraires) {
-        this.livreur = livreur;
-        this.livraisons = livraisons;
-        this.itineraires = itineraires;
-    }
 
-    public Tournee(Livreur livreur, List<Livraison> livraisons, Plan plan) {
+    public Tournee(Livreur livreur, List<Livraison> livraisons, Plan plan, int tempsParLivraison) {
         this.livreur = livreur;
         this.livraisons = livraisons;
         this.plan = plan;
+        this.tempsParLivraison = tempsParLivraison;
     }
 
     public Livreur getLivreur() {
@@ -127,10 +126,40 @@ public final class Tournee {
      * Met à jour les heures de passage des livraisons de la tournée
      */
     public void calculerHeuresPassagesLivraisons() {
-        // TODO
-        Date dateDebut = new Date("08:00");
-        for (Itineraire itineraire : this.itineraires) {
 
+        LocalTime heureCourante  = LocalTime.of(8,0);
+        // Les livraisons et les itinéraires sont triés dans l'ordre de passage
+        for (int i = 0; i < livraisons.size(); ++i) {
+            int longueurItinéraire = itineraires.get(i).getLongueur();
+            int vitesse = this.livreur.getVitesseMoyenne();
+            // Conversion km/h en cm/minute
+            double vitesseConvertie = vitesse * (Math.pow(10,5) / 60);
+            int nbMinutesTrajet = (int) Math.ceil(longueurItinéraire / vitesseConvertie);
+            heureCourante = heureCourante.plusMinutes(nbMinutesTrajet);
+
+            Livraison livraisonCourante = livraisons.get(i);
+
+            // Si la fenêtre de livraison de la livraison est plus tard, le livreur attend jusqu'à
+            // l'heure de début de la fenêtre
+            int debutFenetreLivraison = livraisonCourante.getFenetreDeLivraison().getDebut();
+            if (debutFenetreLivraison > heureCourante.getHour()) {
+                heureCourante = LocalTime.of(debutFenetreLivraison, 0);
+                livraisonCourante.setHeurePassage(heureCourante);
+            }
+            else {
+                // Si la fenêtre de livraison est dépassée, on marque la livraison comme non valide pour
+                // l'indiquer à l'utilisateur
+                if (livraisonCourante.getFenetreDeLivraison().getFin() <= heureCourante.getHour()) {
+                    livraisonCourante.setEnRetard(true);
+                }
+                livraisonCourante.setHeurePassage(heureCourante);
+            }
+
+            livraisons.set(i, livraisonCourante);
+            // On incrémente de 5min le nombre de minutes (temps prévu pour la livraison)
+            heureCourante = heureCourante.plusMinutes(this.tempsParLivraison);
         }
+
+        // Gestion à part du dernier itinéraire de retour vers l'entrepôt
     }
 }

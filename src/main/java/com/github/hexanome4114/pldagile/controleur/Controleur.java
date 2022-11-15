@@ -50,6 +50,11 @@ public final class Controleur {
     public static final int VITESSE_MOYENNE = 15;
 
     /**
+     * Temps passé pour effectuer chaque livraison
+     */
+    public static final int TEMPS_PAR_LIVRAISON = 5;
+
+    /**
      * Nombre de livreurs disponibles par défaut.
      */
     private static final int NOMBRE_LIVREURS = 1;
@@ -337,7 +342,7 @@ public final class Controleur {
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
 
-            Tournee tournee = new Tournee(livreur, livraisons, this.plan);
+            Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
             tournee.calculerTournee(this.plan.getEntrepot(), new FenetreDeLivraison(8,9));
             this.tournees.add(tournee);
         }
