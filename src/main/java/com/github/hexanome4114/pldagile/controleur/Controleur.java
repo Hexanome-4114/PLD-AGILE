@@ -51,8 +51,6 @@ import java.util.stream.Collectors;
  */
 public final class Controleur {
 
-    private Circle pointClique;
-
     private Plan plan;
 
     private CalquePlan calquePlan;
