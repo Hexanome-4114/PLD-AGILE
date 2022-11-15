@@ -30,6 +30,6 @@ public final class Intersection extends MapPoint {
 
     @Override
     public String toString() {
-        return "Intersection<"+getId()+">";
+        return "Intersection{"+getId()+'}';
     }
 }

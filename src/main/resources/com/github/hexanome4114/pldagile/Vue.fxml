@@ -38,6 +38,11 @@
                     </HBox.margin>
                 </Button>
                 <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
+                <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
+                   <HBox.margin>
+                       <Insets left="10.0" />
+                   </HBox.margin>
+                </Button>
                 <VBox.margin>
                    <Insets top="10.0" />
                 </VBox.margin>
@@ -49,9 +54,9 @@
             </Label>
             <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
                 <columns>
-                    <TableColumn fx:id="numeroLivraison" prefWidth="213.3" text="Numéro de livraison" />
-                    <TableColumn fx:id="livreur" prefWidth="213.3" text="Livreur" />
-                    <TableColumn fx:id="fenetreDeLivraison" prefWidth="213.3" text="Fenêtre" />
+                    <TableColumn fx:id="numeroLivraisonColonne" prefWidth="213.3" text="Numéro de livraison" />
+                    <TableColumn fx:id="livreurColonne" prefWidth="213.3" text="Livreur" />
+                    <TableColumn fx:id="fenetreDeLivraisonColonne" prefWidth="213.3" text="Fenêtre" />
                 </columns>
                 <VBox.margin>
                    <Insets top="10.0" />
@@ -68,7 +73,7 @@
                     <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
-            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerTourneeEnDur" text="Calculer la tournee">
+            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer les tournées">
                 <VBox.margin>
                     <Insets top="10.0" />
                 </VBox.margin>
