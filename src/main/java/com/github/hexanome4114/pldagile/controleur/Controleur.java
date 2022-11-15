@@ -526,6 +526,10 @@ public final class Controleur {
         return this.afficherPointsCheckBox;
     }
 
+    public CalquePlan getCalquePlan() {
+        return calquePlan;
+    }
+
     public void setStage(final Stage stage) {
         this.stage = stage;
     }

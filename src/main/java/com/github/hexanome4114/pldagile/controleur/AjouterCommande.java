@@ -20,10 +20,12 @@ public final class AjouterCommande implements Commande {
     @Override
     public void faireCommande() {
         this.controleur.ajouterLivraison(this.livraison);
+        this.controleur.getCalquePlan().ajouterLivraison(this.livraison);
     }
 
     @Override
     public void annulerCommande() {
         this.controleur.supprimerLivraison(this.livraison);
+        this.controleur.getCalquePlan().enleverLivraison(this.livraison);
     }
 }
