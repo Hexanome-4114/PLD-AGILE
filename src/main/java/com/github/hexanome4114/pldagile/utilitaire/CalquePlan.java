@@ -11,14 +11,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
-//TODO IMPORT
 import javafx.scene.shape.Line;
-//FIN TODO
 import javafx.util.Pair;
-//TODO IMPORT
 import java.util.List;
 import java.util.ArrayList;
-//FIN TODO
 
 /**
  * Calque du plan contenant les intersections.

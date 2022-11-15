@@ -340,7 +340,9 @@ public final class Controleur {
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
-            tournees.add(calculerTournee(livreur, livraisons, this.plan.getEntrepot(), new FenetreDeLivraison(8, 9)));
+            Tournee tournee = calculerTournee(livreur, livraisons, this.plan.getEntrepot(), new FenetreDeLivraison(8, 9));
+            tournees.add(tournee);
+            afficherTournee(tournee);
         }
 
         return tournees;
