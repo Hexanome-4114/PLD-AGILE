@@ -1,17 +1,25 @@
 package com.github.hexanome4114.pldagile.utilitaire;
 
-
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
 import com.github.hexanome4114.pldagile.algorithme.tsp.GrapheTSP;
-import com.github.hexanome4114.pldagile.modele.*;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.Tournee;
+import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import javafx.util.Pair;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
-import java.util.*;
+public final class TourneeHelper {
 
-public class TourneeHelper {
+    private TourneeHelper() { }
 
-    public static Graphe creerGrapheDijkstra(Tournee tournee) {
+    public static Graphe creerGrapheDijkstra(final Tournee tournee) {
         Graphe graphe = new Graphe();
         for (String intersectionId : tournee.getPlan().getIntersections().keySet()) {
             Sommet sommet = new Sommet(intersectionId);
@@ -44,10 +52,9 @@ public class TourneeHelper {
      * @return La map d'itinéraire est une map dont la clé est de la forme intersection1Id_intersection2Id et la valeur
      * est l'itinéraire pour aller de l'intersection1 à l'intersection2
      */
-    public static Pair< Graphe, Map<String, Itineraire> > creerGrapheTSP (List<Livraison> livraisons,
-                                                                          HashMap<String, Intersection> intersections,
-                                                                          Graphe grapheDijkstra) {
-
+    public static Pair<Graphe, Map<String, Itineraire>> creerGrapheTSP(final List<Livraison> livraisons,
+                                                                       final HashMap<String, Intersection> intersections,
+                                                                       Graphe grapheDijkstra) {
         // Création du graphe utilisé pour appeler le TSP
         Graphe grapheTSP = new Graphe();
         for (Livraison livraison : livraisons) {
@@ -58,8 +65,8 @@ public class TourneeHelper {
         Map<Integer, FenetreDeLivraison> entierVersFenetreDeLivraison = new HashMap<>();
         Map<FenetreDeLivraison, Integer> fenetreDeLivraisonVersEntier = new HashMap<>();
         int compteurFdL = 0;
-        for(Livraison livraison : livraisons){ // On assigne un numéro à chaque fenêtre de livraison
-            if(fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null){
+        for (Livraison livraison : livraisons) { // On assigne un numéro à chaque fenêtre de livraison
+            if (fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null) {
                 compteurFdL += 1;
                 entierVersFenetreDeLivraison.put(compteurFdL, livraison.getFenetreDeLivraison());
                 fenetreDeLivraisonVersEntier.put(livraison.getFenetreDeLivraison(), compteurFdL);
@@ -121,11 +128,11 @@ public class TourneeHelper {
         return new Pair<>(grapheTSP, itineraireMap);
     }
 
-    public static GrapheTSP convertirGrapheVersGrapheComplet(Graphe grapheEntrant) {
+    public static GrapheTSP convertirGrapheVersGrapheComplet(final Graphe grapheEntrant) {
 
         // Création des champs de la classe GrapheTSP
         int nbVertices = grapheEntrant.getSommets().size();
-        int [][] cost = new int[nbVertices][nbVertices];
+        int[][] cost = new int[nbVertices][nbVertices];
         Map<String, Integer> mapNomSommetVersIndex = new LinkedHashMap<>();
         Map<Integer, String> mapIndexVersNomSommet = new LinkedHashMap<>();
 

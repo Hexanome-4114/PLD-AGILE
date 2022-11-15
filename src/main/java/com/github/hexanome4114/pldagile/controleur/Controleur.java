@@ -297,17 +297,28 @@ public final class Controleur {
     public void calculerLesTournees() {
         // Pour chaque livreur, on appelle "calculerTournee" pour calcule la tournée qui lui est associé
         this.tournees = new ArrayList<>();
-        for(Livreur livreur : this.comboBoxLivreur.getItems()) {
+        for (Livreur livreur : this.comboBoxLivreur.getItems()) {
 
             // on récupère les livraisons du livreur courant
             List<Livraison> livraisons = this.tableauLivraison.getItems().stream().filter(
                     livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
-
-            Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
-            tournee.calculerTournee(this.plan.getEntrepot(), FenetreDeLivraison.H8_H9);
-            this.tournees.add(tournee);
-            afficherTournee(tournee);
+            System.out.println(livraisons.toString());
+            // On ne crée pas de tournée s'il n'y a pas de livraison pour un livreur
+            if (!livraisons.isEmpty()) {
+                Tournee tournee = new Tournee(livreur, livraisons, this.plan, TEMPS_PAR_LIVRAISON);
+                tournee.calculerTournee(this.plan.getEntrepot(), FenetreDeLivraison.H8_H9);
+                if (tournee.getItineraires() == null) {
+                    Alert alerte = new Alert(Alert.AlertType.ERROR);
+                    alerte.setHeaderText(
+                            "Aucun itinéraire possible pour cette tournée."
+                    );
+                    alerte.show();
+                } else {
+                    this.tournees.add(tournee);
+                    afficherTournee(tournee);
+                }
+            }
         }
     }
 
@@ -377,7 +388,7 @@ public final class Controleur {
         );
     }
 
-    private void afficherTournee(Tournee tournee) {
+    private void afficherTournee(final Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
             for (int i = 1; i < itineraire.getIntersections().size(); i++) {
                 this.calquePlan.ajouterSegment(
