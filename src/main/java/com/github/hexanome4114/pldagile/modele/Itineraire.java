@@ -13,4 +13,19 @@ public final class Itineraire {
     public List<Intersection> getIntersections() {
         return intersections;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("Itineraire{");
+        int nbIntersection = intersections.size();
+        String points = "->";
+        if(nbIntersection > 2){
+            points = "->"+(nbIntersection-2)+"->";
+        }
+        stringBuilder.append(intersections.get(0))
+                .append(points)
+                .append(intersections.get(nbIntersection-1))
+                .append('}');
+        return stringBuilder.toString();
+    }
 }
