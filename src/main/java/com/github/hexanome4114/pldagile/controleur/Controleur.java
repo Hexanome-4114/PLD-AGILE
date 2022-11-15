@@ -160,7 +160,7 @@ public final class Controleur {
         Image annulerImage = new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream(
                         "/images/annuler.png")
-                )
+                ), 18, 18, false, false
         );
         this.annulerBouton.setGraphic(new ImageView(annulerImage));
         this.etatCourant = etatInitial;

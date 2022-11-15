@@ -38,6 +38,11 @@
                     </HBox.margin>
                 </Button>
                 <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
+                <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
+                   <HBox.margin>
+                       <Insets left="10.0" />
+                   </HBox.margin>
+                </Button>
                 <VBox.margin>
                    <Insets top="10.0" />
                 </VBox.margin>
@@ -47,11 +52,6 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </Label>
-            <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
-                <VBox.margin>
-                    <Insets top="10.0" />
-                </VBox.margin>
-            </Button>
             <TableView fx:id="tableauLivraison" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraison" prefWidth="213.3" text="Numéro de livraison" />
