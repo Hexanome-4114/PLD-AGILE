@@ -454,10 +454,11 @@ public final class Controleur {
 
     private void afficherTournee(Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
-            for (int i = 1; i < itineraire.getIntersections().size(); i++) {
+            for (int j = 1; j < itineraire.getIntersections().size(); j++) {
                 this.calquePlan.ajouterSegment(
-                        itineraire.getIntersections().get(i - 1),
-                        itineraire.getIntersections().get(i));
+                        itineraire.getIntersections().get(j - 1),
+                        itineraire.getIntersections().get(j),
+                        tournee.getLivreur());
             }
         }
     }
