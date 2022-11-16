@@ -224,11 +224,6 @@ public final class Controleur {
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
         this.calquePlan.enleverLivraison(livraison);
-        for (Tournee tournee : this.tournees) {
-            if (tournee.getLivreur().getNumero() == livraison.getLivreur().getNumero()) {
-                tournee.supprimerLivraisonApresCalcul(livraison);
-            }
-        }
     }
 
 public void supprimerLivraisonApresCalcul() {
