@@ -1,37 +1,60 @@
-package com.github.hexanome4114.pldagile.controleur;
-
+package com.github.hexanome4114.pldagile.utilitaire;
 
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
-import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
-import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.algorithme.tsp.GrapheTSP;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.Tournee;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Itineraire;
-import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import javafx.util.Pair;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
-import java.util.*;
+public final class TourneeHelper {
 
-class ControleurHelper {
+    private TourneeHelper() { }
 
-    public static Graphe creerGrapheDijkstra(Set<String> intersectionsId) {
+    public static Graphe creerGrapheDijkstra(final Tournee tournee) {
         Graphe graphe = new Graphe();
-        for (String intersectionId : intersectionsId) {
+        for (String intersectionId : tournee.getPlan().getIntersections().keySet()) {
             Sommet sommet = new Sommet(intersectionId);
             graphe.ajouterSommet(sommet);
+        }
+
+        // ajout des sommets adjacents et de la distance
+        for (Intersection intersection : tournee.getPlan().getIntersections()
+                .values()) {
+            for (Map.Entry<Intersection, Pair<Integer, String>> set
+                    : intersection.getIntersections().entrySet()) {
+                Sommet sommetOrigine = graphe.getSommets()
+                        .get(intersection.getId());
+                Sommet sommetDestination = graphe.getSommets()
+                        .get(set.getKey().getId());
+                sommetOrigine.addDestination(sommetDestination,
+                        set.getValue().getKey());
+            }
         }
         return graphe;
     }
 
-    /***
+    /**
      * Crée le graphe à donner en paramètre au TSP.
-     * Calcule aussi les itinéraires précis entre chaque point de livraison
-     * de la tournée.
+     *      * Calcule aussi les itinéraires précis entre chaque point de livraison
+     *      * de la tournée.
+     * @param livraisons
+     * @param intersections
+     * @param grapheDijkstra
+     * @return La map d'itinéraire est une map dont la clé est de la forme intersection1Id_intersection2Id et la valeur
+     * est l'itinéraire pour aller de l'intersection1 à l'intersection2
      */
-    public static Pair< Graphe, Map<String, Itineraire> > creerGrapheTSP (List<Livraison> livraisons,
-                                                                          HashMap<String, Intersection> intersections,
-                                                                          Graphe grapheDijkstra) {
-
+    public static Pair<Graphe, Map<String, Itineraire>> creerGrapheTSP(final List<Livraison> livraisons,
+                                                                       final HashMap<String, Intersection> intersections,
+                                                                       Graphe grapheDijkstra) {
         // Création du graphe utilisé pour appeler le TSP
         Graphe grapheTSP = new Graphe();
         for (Livraison livraison : livraisons) {
@@ -42,8 +65,8 @@ class ControleurHelper {
         Map<Integer, FenetreDeLivraison> entierVersFenetreDeLivraison = new HashMap<>();
         Map<FenetreDeLivraison, Integer> fenetreDeLivraisonVersEntier = new HashMap<>();
         int compteurFdL = 0;
-        for(Livraison livraison : livraisons){ // On assigne un numéro à chaque fenêtre de livraison
-            if(fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null){
+        for (Livraison livraison : livraisons) { // On assigne un numéro à chaque fenêtre de livraison
+            if (fenetreDeLivraisonVersEntier.get(livraison.getFenetreDeLivraison()) == null) {
                 compteurFdL += 1;
                 entierVersFenetreDeLivraison.put(compteurFdL, livraison.getFenetreDeLivraison());
                 fenetreDeLivraisonVersEntier.put(livraison.getFenetreDeLivraison(), compteurFdL);
@@ -91,8 +114,6 @@ class ControleurHelper {
                                     new Itineraire(intersectionsItineraire));
 
                             // Sommets dans le graph complet
-                            // TODO Il y a un bug quand il n'y a pas d'itinéraire entre 2 sommets
-
                             Sommet sommetSourceDansGrapheComplet = grapheTSP.getSommets().get(sommetSource.getNom());
                             Sommet sommetDestDansGrapheComplet = grapheTSP.getSommets().get(sommetLivraison.getNom());
                             sommetSourceDansGrapheComplet.addDestination(sommetDestDansGrapheComplet,
@@ -107,11 +128,11 @@ class ControleurHelper {
         return new Pair<>(grapheTSP, itineraireMap);
     }
 
-    public static CompleteGraph convertirGrapheVersCompleteGraph(Graphe grapheEntrant) {
+    public static GrapheTSP convertirGrapheVersGrapheComplet(final Graphe grapheEntrant) {
 
-        // Création des champs de la classe CompleteGraph
+        // Création des champs de la classe GrapheTSP
         int nbVertices = grapheEntrant.getSommets().size();
-        int [][] cost = new int[nbVertices][nbVertices];
+        int[][] cost = new int[nbVertices][nbVertices];
         Map<String, Integer> mapNomSommetVersIndex = new LinkedHashMap<>();
         Map<Integer, String> mapIndexVersNomSommet = new LinkedHashMap<>();
 
@@ -143,6 +164,6 @@ class ControleurHelper {
                 cost[sommetOrigine][sommetDest] = arc.getValue();
             }
         }
-        return new CompleteGraph(nbVertices, cost, mapNomSommetVersIndex, mapIndexVersNomSommet);
+        return new GrapheTSP(nbVertices, cost, mapNomSommetVersIndex, mapIndexVersNomSommet);
     }
 }

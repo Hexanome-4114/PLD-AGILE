@@ -1,7 +1,6 @@
 package com.github.hexanome4114.pldagile.modele;
 
 import java.util.HashMap;
-import java.util.List;
 
 public final class Plan {
 
@@ -9,7 +8,8 @@ public final class Plan {
 
     private final Intersection entrepot;
 
-    public Plan(final HashMap<String, Intersection> intersections, final Intersection entrepot) {
+    public Plan(final HashMap<String, Intersection> intersections,
+                final Intersection entrepot) {
         this.intersections = intersections;
         this.entrepot = entrepot;
     }

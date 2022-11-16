@@ -1,10 +1,5 @@
 package com.github.hexanome4114.pldagile.controleur;
 
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
-import com.github.hexanome4114.pldagile.algorithme.tsp.CompleteGraph;
-import com.github.hexanome4114.pldagile.algorithme.tsp.TSP;
-import com.github.hexanome4114.pldagile.algorithme.tsp.TSP1;
 import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
 import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Itineraire;
@@ -35,21 +30,25 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 import java.io.File;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Contrôleur de l'application.
  */
 public final class Controleur {
+    /**
+     * Temps passé pour effectuer chaque livraison.
+     */
+    public static final int TEMPS_PAR_LIVRAISON = 5;
 
     private Plan plan;
+
+    private List<Tournee> tournees;
 
     private CalquePlan calquePlan;
 
@@ -221,7 +220,6 @@ public final class Controleur {
                         new AjouterCommande(this, livraison)
                 );
                 this.etatCourant.ajouterLivraison(this);
-                this.calquePlan.ajouterLivraison(livraison);
             }
         }
     }
@@ -233,7 +231,6 @@ public final class Controleur {
         this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
-        this.calquePlan.enleverLivraison(livraison);
     }
 
     public void annuler() {
@@ -291,15 +288,16 @@ public final class Controleur {
 
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
-            // Vérification si toutes les adresses de livraisons sont sur
-            // le plan et qu'il n'y ait pas de livraisons en double.
-            for (Livraison l : livraisons) {
+            this.reinitialiserTableauLivraison();
+            for (Livraison livraison : livraisons) {
+                // Vérification si toutes les adresses de livraisons sont sur
+                // le plan et qu'il n'y ait pas de livraisons en double.
                 if (!this.plan.getIntersections().containsKey(
-                        l.getAdresse().getId())
+                        livraison.getAdresse().getId())
                 ) {
-                        throw new Exception();
+                    throw new Exception();
                 }
-                if (this.verificationDoublonLivraison(l)) {
+                if (this.verificationDoublonLivraison(livraison)) {
                     throw new Exception();
                 }
             }
@@ -314,140 +312,37 @@ public final class Controleur {
         }
     }
 
-    public List<Tournee> calculerLesTournees() {
-        List<Tournee> tournees = new ArrayList<>();
-        // Pour chaque livreur, on appelle "calculerTournee"
-        // pour calcule la tournée qui lui est associé
-        for (Livreur livreur : Livreur.values()) {
+    public void calculerLesTournees() {
+        // Pour chaque livreur, on appelle "calculerTournee" pour calculer
+        // la tournée qui lui est associée
+        this.tournees = new ArrayList<>();
+        for (Livreur livreur : this.comboBoxLivreur.getItems()) {
+
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.tableauLivraison
-                    .getItems().stream().filter(
-                            livraison -> livraison.getLivreur() == livreur)
-                    .collect(Collectors.toList()
+            List<Livraison> livraisons = this.tableauLivraison.getItems()
+                    .stream().filter(
+                            livraison -> livraison.getLivreur().equals(livreur))
+                    .collect(Collectors.toList());
+            System.out.println(livraisons.toString());
+            // On ne crée pas de tournée s'il n'y a pas de livraison
+            // pour un livreur
+            if (!livraisons.isEmpty()) {
+                Tournee tournee = new Tournee(livreur, livraisons, this.plan,
+                        TEMPS_PAR_LIVRAISON);
+                tournee.calculerTournee(this.plan.getEntrepot(),
+                        FenetreDeLivraison.H8_H9);
+                if (tournee.getItineraires() == null) {
+                    Alert alerte = new Alert(Alert.AlertType.ERROR);
+                    alerte.setHeaderText(
+                            "Aucun itinéraire possible pour cette tournée."
                     );
-            Tournee tournee = calculerTournee(
-                    livreur,
-                    livraisons,
-                    this.plan.getEntrepot(),
-                    FenetreDeLivraison.H8_H9
-            );
-            tournees.add(tournee);
-            afficherTournee(tournee);
-        }
-
-        return tournees;
-    }
-
-    /**
-     * Calcule une Tournée qui part et revient sur la première livraison,
-     * le livreur partira à l'heure de la première livraison.
-     *
-     * @param livreur livreur qui effectue les livraisons
-     * @param livraisons liste des livraisons à effectuer, la première livraison est le point de départ et d'arrivée.
-     * @param pointDepart intersection de départ et d'arrivée de la tournée (doit être différents de la premiere livraison)
-     * @param fdlDepart fenetre de livraison de départ
-     * @return Tournée
-     */
-    public Tournee calculerTournee(final Livreur livreur,
-                                   final List<Livraison> livraisons,
-                                   final Intersection pointDepart,
-                                   final FenetreDeLivraison fdlDepart) {
-        // Dijkstra
-        // Creation de chaque sommet et ajout dans le graphe
-        Graphe graphe = ControleurHelper.creerGrapheDijkstra(
-                this.plan.getIntersections().keySet()
-        );
-
-        // ajout des sommets adjacents et de la distance
-        for (Intersection intersection : this.plan.getIntersections()
-                .values()) {
-            for (Map.Entry<Intersection, Pair<Integer, String>> set
-                    : intersection.getIntersections().entrySet()) {
-                Sommet sommetOrigine = graphe.getSommets()
-                        .get(intersection.getId());
-                Sommet sommetDestination = graphe.getSommets()
-                        .get(set.getKey().getId());
-                sommetOrigine.addDestination(sommetDestination,
-                        set.getValue().getKey());
-            }
-        }
-
-        // Ajout d'une livraison factice au point de depart
-        Livraison livraisonPointDepart = new Livraison(
-                Integer.MAX_VALUE,
-                fdlDepart,
-                livreur,
-                pointDepart
-        );
-        List<Livraison> livraisonTemporaire = new ArrayList<>(livraisons);
-        livraisonTemporaire.add(0, livraisonPointDepart);
-
-        // Création du graphe et calcul de tous les
-        // itinéraires nécessaires pour l'affichage
-        Pair<Graphe, Map<String, Itineraire>> resultCreationGrapheTSP
-                = ControleurHelper.creerGrapheTSP(
-                        livraisonTemporaire,
-                        this.plan.getIntersections(),
-                        graphe
-        );
-        Graphe grapheTSP = resultCreationGrapheTSP.getKey();
-        Map<String, Itineraire> itineraireMap
-                = resultCreationGrapheTSP.getValue();
-
-        int nbSommetsDansGrapheTSP = livraisonTemporaire.size();
-
-        CompleteGraph g = ControleurHelper.convertirGrapheVersCompleteGraph(
-                grapheTSP
-        );
-        TSP tsp = new TSP1();
-        tsp.searchSolution(20000, g);
-
-        // On recree une liste de livraisons pour reordonner
-        List<Livraison> livraisonsTSP = new ArrayList<>(livraisons.size());
-        List<Itineraire> itinerairesFinaux = new ArrayList<>();
-        // S'il il existe une solution
-        if (tsp.getSolutionCost() != Integer.MAX_VALUE) {
-            // On garde uniquement les itinéraires
-            // dont nous avons besoin et on crée la tournée à renvoyer.
-            for (int i = 0; i < nbSommetsDansGrapheTSP - 1; ++i) {
-                String idSommet = g.getMapIndexVersNomSommet().get(
-                        tsp.getSolution(i)
-                );
-                String idSommet1 = g.getMapIndexVersNomSommet().get(
-                        tsp.getSolution(i + 1)
-                );
-                Itineraire itineraire = itineraireMap.get(
-                        idSommet + "_" + idSommet1
-                );
-                itinerairesFinaux.add(itineraire);
-                // Ajoute la livraison dans l'ordre de passage
-                for (Livraison livraison : livraisons) {
-                    // on n'ajoute pas la livraison
-                    // factice 'livraisonPointDepart'
-                    if (livraison.getAdresse().getId() == idSommet1) {
-                        livraisonsTSP.add(livraison);
-                        break;
-                    }
+                    alerte.show();
+                } else {
+                    this.tournees.add(tournee);
+                    afficherTournee(tournee);
                 }
             }
-            // Ajout du dernier itinéraire entre la dernière adresse
-            // de livraison visité et la première (l'entrepôt)
-            String idPremierSommet = g.getMapIndexVersNomSommet().get(0);
-            String idDernierSommet = g.getMapIndexVersNomSommet().get(
-                    tsp.getSolution(nbSommetsDansGrapheTSP - 1)
-            );
-            itinerairesFinaux.add(itineraireMap.get(
-                    idDernierSommet + "_" + idPremierSommet)
-            );
         }
-
-        Tournee tournee = new Tournee(
-                livreur,
-                livraisonsTSP,
-                itinerairesFinaux
-        );
-
-        return tournee;
     }
 
     @FXML
@@ -549,10 +444,18 @@ public final class Controleur {
 
     public void ajouterLivraison(final Livraison l) {
         this.tableauLivraison.getItems().add(l);
+        this.calquePlan.ajouterLivraison(l);
     }
 
     public void supprimerLivraison(final Livraison l) {
         this.tableauLivraison.getItems().remove(l);
+        this.calquePlan.enleverLivraison(l);
+    }
+
+    private void reinitialiserTableauLivraison() {
+        for (Livraison livraison : this.tableauLivraison.getItems()) {
+            this.supprimerLivraison(livraison);
+        }
     }
 
     public Label getInstructionLabel() {
@@ -617,10 +520,6 @@ public final class Controleur {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
-    }
-
-    public CalquePlan getCalquePlan() {
-        return calquePlan;
     }
 
     public void setStage(final Stage stage) {

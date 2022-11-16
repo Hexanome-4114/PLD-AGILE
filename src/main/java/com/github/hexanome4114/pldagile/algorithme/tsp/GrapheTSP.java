@@ -1,12 +1,8 @@
 package com.github.hexanome4114.pldagile.algorithme.tsp;
 
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
-import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
-
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class CompleteGraph implements Graph {
+public final class GrapheTSP implements Graph {
     private final int nbVertices;
     private final int[][] cost;
 
@@ -15,8 +11,8 @@ public final class CompleteGraph implements Graph {
 
     private Map<Integer, String> mapIndexVersNomSommet;
 
-    public CompleteGraph(int nbVertices, int[][] cost,
-                         Map<String, Integer> mapNomSommetVersIndex, Map<Integer, String> mapIndexVersNomSommet) {
+    public GrapheTSP(int nbVertices, int[][] cost,
+                     Map<String, Integer> mapNomSommetVersIndex, Map<Integer, String> mapIndexVersNomSommet) {
         this.nbVertices = nbVertices;
         this.cost = cost;
         this.mapNomSommetVersIndex = mapNomSommetVersIndex;
