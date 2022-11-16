@@ -213,7 +213,6 @@ public final class Controleur {
 
             this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
             this.etatCourant.ajouterLivraison(this);
-            this.calquePlan.ajouterLivraison(livraison);
         }
     }
 
@@ -224,7 +223,6 @@ public final class Controleur {
         this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
-        this.calquePlan.enleverLivraison(livraison);
     }
 
     public void annuler() {
@@ -284,8 +282,12 @@ public final class Controleur {
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
             // TODO valider les livraisons chargées
-            this.tableauLivraison.setItems(
-                    FXCollections.observableArrayList(livraisons));
+
+            this.reinitialiserTableauLivraison();
+            for (Livraison livraison : livraisons) {
+                this.ajouterLivraison(livraison);
+            }
+
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             Alert alerte = new Alert(Alert.AlertType.ERROR);
@@ -405,10 +407,18 @@ public final class Controleur {
 
     public void ajouterLivraison(final Livraison l) {
         this.tableauLivraison.getItems().add(l);
+        this.calquePlan.ajouterLivraison(l);
     }
 
     public void supprimerLivraison(final Livraison l) {
         this.tableauLivraison.getItems().remove(l);
+        this.calquePlan.enleverLivraison(l);
+    }
+
+    private void reinitialiserTableauLivraison() {
+        for (Livraison livraison : this.tableauLivraison.getItems()) {
+            this.supprimerLivraison(livraison);
+        }
     }
 
     public Label getInstructionLabel() {
@@ -473,10 +483,6 @@ public final class Controleur {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
-    }
-
-    public CalquePlan getCalquePlan() {
-        return calquePlan;
     }
 
     public void setStage(final Stage stage) {
