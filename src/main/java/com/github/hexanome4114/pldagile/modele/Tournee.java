@@ -42,7 +42,8 @@ public final class Tournee {
 
 
     public Tournee(final Livreur livreur, final List<Livraison> livraisons,
-                   final Plan plan, final int tempsParLivraison, final Intersection pointDepart) {
+                   final Plan plan, final int tempsParLivraison,
+                   final Intersection pointDepart) {
         this.livreur = livreur;
         this.livraisons = livraisons;
         this.plan = plan;
@@ -74,8 +75,6 @@ public final class Tournee {
      * Calcule une Tournée qui part et revient sur la première livraison,
      * le livreur partira à l'heure de la première livraison.
      *
-     * @param pointDepart intersection de départ et d'arrivée de la tournée
-     *                    (doit être différents de la premiere livraison)
      * @param fdlDepart   fenetre de livraison de départ
      */
     public void calculerTournee(final FenetreDeLivraison fdlDepart) {
@@ -192,23 +191,24 @@ public final class Tournee {
         }
     }
 
-    public void supprimerLivraisonApresCalcul(Livraison livraison) {
+    public void supprimerLivraisonApresCalcul(final Livraison livraison) {
         if (!this.tourneeCalculee) {
             return;
         }
-        // On cherche l'indice de la livraison à supprimer pour récupérer celle d'avant et celle d'après
+        // On cherche l'indice de la livraison à supprimer pour récupérer celle
+        // d'avant et celle d'après
         int indiceLivraison = -2;
         for (int i = 0; i < this.livraisons.size(); ++i) {
             if (this.livraisons.get(i).getNumero() == livraison.getNumero()) {
                 indiceLivraison = i;
             }
         }
-        // On sépare le cas pour faire attention au cas où on part du pointDepart ou si on y revient
-        // (premier et dernier trajet)
+        // On sépare le cas pour faire attention au cas où on part du
+        // pointDepart ou si on y revient (premier et dernier trajet)
         Intersection intersectionAvant;
         Intersection intersectionApres;
-        // Dans le cas où il ne reste qu'une seule livraison, on vide la dernière restante et les 2 derniers
-        // itinéraires restants
+        // Dans le cas où il ne reste qu'une seule livraison, on vide la
+        // dernière restante et les 2 derniers itinéraires restants
         if (indiceLivraison == 0 && this.livraisons.size() == 1) {
             this.livraisons.remove(0);
             this.itineraires.clear();
@@ -216,19 +216,26 @@ public final class Tournee {
         } else {
             if (indiceLivraison == 0) {
                 intersectionAvant = this.pointDepart;
-                intersectionApres = this.livraisons.get(indiceLivraison + 1).getAdresse();
+                intersectionApres = this.livraisons.get(indiceLivraison + 1)
+                        .getAdresse();
             } else if (indiceLivraison == this.livraisons.size() - 1) {
-                intersectionAvant = this.livraisons.get(indiceLivraison - 1).getAdresse();
+                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
+                        .getAdresse();
                 intersectionApres = this.pointDepart;
             } else {
-                intersectionAvant = this.livraisons.get(indiceLivraison - 1).getAdresse();
-                intersectionApres = this.livraisons.get(indiceLivraison + 1).getAdresse();
+                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
+                        .getAdresse();
+                intersectionApres = this.livraisons.get(indiceLivraison + 1)
+                        .getAdresse();
             }
-            // On récupère l'itinéraire entre intersectionAvant et intersectionApres
-            Map<Intersection, Itineraire> itinerairesMap = this.plan.getItineraire(intersectionAvant);
+            // On récupère l'itinéraire entre intersectionAvant et
+            // intersectionApres
+            Map<Intersection, Itineraire> itinerairesMap = this.plan
+                    .getItineraire(intersectionAvant);
             Itineraire itineraire = itinerairesMap.get(intersectionApres);
 
-            // On supprime la livraison et les itinéraires puis on rajoute la nouvelle
+            // On supprime la livraison et les itinéraires puis on rajoute
+            // la nouvelle
             this.livraisons.remove((indiceLivraison));
             this.itineraires.remove(indiceLivraison + 1);
             this.itineraires.remove(indiceLivraison);

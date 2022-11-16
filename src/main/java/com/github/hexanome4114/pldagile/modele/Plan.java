@@ -30,27 +30,35 @@ public final class Plan {
     }
 
     /**
-     * Calcule l'itinéraire (plus court chemin) entre la source et toutes les autres intersections
+     * Calcule l'itinéraire (plus court chemin) entre la source et toutes
+     * les autres intersections.
+     *
      * @param source intersection source
-     * @return clef : intersection, valeur : itinéraire = itineraire entre la source et la clef
+     * @return clef : intersection, valeur : itinéraire = itineraire entre
+     * la source et la clef
      */
-    public Map<Intersection, Itineraire> getItineraire(final Intersection source) {
+    public Map<Intersection, Itineraire> getItineraire(
+            final Intersection source) {
         Map<Intersection, Itineraire> result = new HashMap<>();
         Graphe graphePlan = TourneeHelper.creerGrapheDijkstra(this);
 
-        Graphe.calculerCheminplusCourtDepuisSource(graphePlan, graphePlan.getSommets()
+        Graphe.calculerCheminplusCourtDepuisSource(graphePlan,
+                graphePlan.getSommets()
                 .get(source.getId()));
         for (Sommet sommet : graphePlan.getSommets().values()) {
-            List<Intersection> intersectionsItineraire = new ArrayList<>(sommet.getCheminPlusCourt().size());
+            List<Intersection> intersectionsItineraire = new ArrayList<>(
+                    sommet.getCheminPlusCourt().size());
             List<Sommet> plusCourtCheminCourant = sommet.getCheminPlusCourt();
 
             // S'il n'y a pas de chemin plus court entre les 2, on n'ajoute pas
             if (!plusCourtCheminCourant.isEmpty()) {
                 for (Sommet sommet1 : plusCourtCheminCourant) {
-                    Intersection intersectionDuPcc = intersections.get(sommet1.getNom());
+                    Intersection intersectionDuPcc = intersections.get(
+                            sommet1.getNom());
                     intersectionsItineraire.add(intersectionDuPcc);
                 }
-                intersectionsItineraire.add(intersections.get(sommet.getNom())); // On doit ajouter l'intersection destination
+                // On doit ajouter l'intersection destination
+                intersectionsItineraire.add(intersections.get(sommet.getNom()));
             }
             Itineraire itineraire = new Itineraire(intersectionsItineraire);
             result.put(this.intersections.get(sommet.getNom()), itineraire);
