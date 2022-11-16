@@ -21,5 +21,4 @@ public final class TSP1 extends TemplateTSP {
     ) {
         return new SeqIter(unvisited, currentVertex, g);
     }
-
 }

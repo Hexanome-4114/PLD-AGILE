@@ -208,19 +208,13 @@ public final class Controleur {
                     numero,
                     this.comboBoxFenetreDeLivraison.getValue(),
                     this.comboBoxLivreur.getValue(),
-                    this.comboBoxAdresse.getValue());
+                    this.comboBoxAdresse.getValue()
+            );
 
-            if (this.verificationDoublonLivraison(livraison)) {
-                this.afficherPopUp(
-                        "Une livraison existe déjà à cette adresse.",
-                        Alert.AlertType.ERROR
-                );
-            } else {
-                this.listeDeCommandes.ajouter(
-                        new AjouterCommande(this, livraison)
-                );
-                this.etatCourant.ajouterLivraison(this);
-            }
+            this.listeDeCommandes.ajouter(
+                    new AjouterCommande(this, livraison)
+            );
+            this.etatCourant.ajouterLivraison(this);
         }
     }
 
