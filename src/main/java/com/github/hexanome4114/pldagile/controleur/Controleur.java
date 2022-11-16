@@ -16,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -151,14 +152,17 @@ public final class Controleur {
         // EventListener de la vue
         this.tableauLivraison.getSelectionModel().selectedItemProperty()
                 // bouton cliquable que lorsqu'une livraison est sélectionnée
-                .addListener((obs, ancienneSelection, nouvelleSelection)
-                        -> this.supprimerLivraisonBouton.setDisable(
-                        nouvelleSelection == null)
+                .addListener((obs, ancienneSelection, nouvelleSelection) -> {
+
+                            this.supprimerLivraisonBouton.setDisable(
+                                    nouvelleSelection == null);
+                            this.calquePlan.setLivraisonSelectionnee(
+                                    nouvelleSelection);
+                        }
                 );
         this.tableauLivraison.getItems()
                 // bouton cliquable que lorsqu'il y a des livraisons
-                .addListener((ListChangeListener<Livraison>) (obs)
-                                -> {
+                .addListener((ListChangeListener<Livraison>) (obs) -> {
                             this.sauvegarderLivraisonsBouton.setDisable(
                                     obs.getList().isEmpty());
                             this.calculerTourneeBouton.setDisable(
@@ -166,7 +170,7 @@ public final class Controleur {
                             this.getAnnulerBouton().setDisable(
                                     listeDeCommandes.getIndexCourant() == -1
                             );
-                }
+                        }
                 );
         this.comboBoxLivreur.valueProperty().
                 addListener((obs, ancienneSelection, nouvelleSelection) ->
@@ -211,6 +215,7 @@ public final class Controleur {
                     this.comboBoxAdresse.getValue()
             );
 
+            this.reinitialiserPointSelectionne();
             this.listeDeCommandes.ajouter(
                     new AjouterCommande(this, livraison)
             );
@@ -300,6 +305,7 @@ public void supprimerLivraisonApresCalcul() {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
 
             this.reinitialiserTableauLivraison();
+            this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
                 // Vérifie que les adresses de livraisons sont sur le plan
@@ -404,8 +410,17 @@ public void supprimerLivraisonApresCalcul() {
             Intersection point = calquePlan.
                     trouverPointPlusProche(e.getX(), e.getY());
 
-            this.calquePlan.setPointSelectionne(point);
-            this.comboBoxAdresse.setValue(point);
+            // s'il n'y a pas de sélection en cours ou que l'adresse de celle-ci
+            // est différente du point le plus proche
+            if (calquePlan.getLivraisonSelectionnee() == null
+                    || !point.getId().equals(calquePlan
+                    .getLivraisonSelectionnee().getAdresse().getId())) {
+                this.calquePlan.setPointSelectionne(point);
+                this.comboBoxAdresse.setValue(point);
+            } else {
+                this.calquePlan.setPointSelectionne(null);
+                this.comboBoxAdresse.setValue(null);
+            }
         });
 
         this.carte.getChildren().add(carteVue);
@@ -440,7 +455,11 @@ public void supprimerLivraisonApresCalcul() {
 
     public void ajouterLivraison(final Livraison l) {
         this.tableauLivraison.getItems().add(l);
-        this.calquePlan.ajouterLivraison(l);
+        Node noeud = this.calquePlan.ajouterLivraison(l);
+
+        noeud.setOnMouseClicked(e -> {
+            this.tableauLivraison.getSelectionModel().select(l);
+        });
     }
 
     public void supprimerLivraison(final Livraison l) {
@@ -450,8 +469,14 @@ public void supprimerLivraisonApresCalcul() {
 
     private void reinitialiserTableauLivraison() {
         for (Livraison livraison : this.tableauLivraison.getItems()) {
-            this.supprimerLivraison(livraison);
+            this.calquePlan.enleverLivraison(livraison);
         }
+        this.tableauLivraison.getItems().clear();
+    }
+
+    private void reinitialiserPointSelectionne() {
+        this.calquePlan.setPointSelectionne(null);
+        this.comboBoxAdresse.setValue(null);
     }
 
     public Label getInstructionLabel() {
