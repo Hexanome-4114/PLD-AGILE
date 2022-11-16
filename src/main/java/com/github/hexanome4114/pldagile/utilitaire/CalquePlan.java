@@ -22,7 +22,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
-
 import java.util.Map;
 
 /**
@@ -63,10 +62,11 @@ public final class CalquePlan extends MapLayer {
             = FXCollections.observableHashMap();
 
     /**
-     * Map contenant les flèches directionnelles des segments de la tournée et leur Node associé.
+     * Map contenant les flèches directionnelles des segments de la tournée
+     * et leur Node associé.
      */
-    private final ObservableMap<Pair<Intersection, Intersection>, Polygon> directions =
-            FXCollections.observableHashMap();
+    private final ObservableMap<Pair<Intersection, Intersection>, Polygon>
+            directions = FXCollections.observableHashMap();
 
     /**
      * Point de livraison sélectionné par l'utilisateur.
@@ -213,7 +213,7 @@ public final class CalquePlan extends MapLayer {
             final double x2, final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
-        return diffX * diffX + diffY * diffY;
+        return Math.sqrt(diffX * diffX + diffY * diffY);
     }
 
     /**
@@ -361,20 +361,26 @@ public final class CalquePlan extends MapLayer {
                 point1.getLatitude(), point1.getLongitude());
         Point2D mapPoint2 = getMapPoint(
                 point2.getLatitude(), point2.getLongitude());
-        Double pourcentageCentreFleche = 0.25; //Localisation du centre de la flèche sur le segment
+        //Localisation du centre de la flèche sur le segment
+        Double pourcentageCentreFleche = 0.75;
         Point2D mapPointCentreFleche = new Point2D(
-                mapPoint1.getX()+(mapPoint2.getX()-mapPoint1.getX())*pourcentageCentreFleche,
-                mapPoint1.getY()+(mapPoint2.getY()-mapPoint1.getY())*pourcentageCentreFleche);
-        Double diffX = mapPoint2.getX()-mapPoint1.getX();
-        Double diffY = mapPoint2.getY()-mapPoint1.getY();
-        Double coefficient = 0.05;
+                mapPoint1.getX() + (mapPoint2.getX() - mapPoint1.getX())
+                        * pourcentageCentreFleche,
+                mapPoint1.getY() + (mapPoint2.getY() - mapPoint1.getY())
+                        * pourcentageCentreFleche);
+        // On normalise les flèches pour qu'elles aient la même taille
+        Double norme = calculerDistanceEuclidienne(mapPoint1.getX(),
+                mapPoint1.getY(), mapPoint2.getX(), mapPoint2.getY());
+        Double diffX = (mapPoint2.getX() - mapPoint1.getX()) / norme;
+        Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
+        Double coefficient = 3.0;
 
         direction.getPoints().setAll(new Double[]{
-                mapPointCentreFleche.getX()+coefficient*diffX,
-                mapPointCentreFleche.getY()+coefficient*diffY,
-                mapPointCentreFleche.getX()+coefficient*(-diffX+diffY),
-                mapPointCentreFleche.getY()+coefficient*(-diffY-diffX),
-                mapPointCentreFleche.getX()+coefficient*(-diffX-diffY),
-                mapPointCentreFleche.getY()+coefficient*(-diffY+diffX)});
+                mapPointCentreFleche.getX() + coefficient * diffX,
+                mapPointCentreFleche.getY() + coefficient * diffY,
+                mapPointCentreFleche.getX() + coefficient * (-diffX + diffY),
+                mapPointCentreFleche.getY() + coefficient * (-diffY - diffX),
+                mapPointCentreFleche.getX() + coefficient * (-diffX - diffY),
+                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX)});
     }
 }
