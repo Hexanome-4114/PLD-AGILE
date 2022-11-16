@@ -227,6 +227,22 @@ public final class Controleur {
         );
     }
 
+public void supprimerLivraisonApresCalcul() {
+        Livraison livraison = this.tableauLivraison.getSelectionModel()
+                .getSelectedItem();
+
+        this.listeDeCommandes.ajouter(
+                new AnnulerCommande(new AjouterCommande(this, livraison))
+        );
+
+        for (Tournee tournee : this.tournees) {
+            if (tournee.getLivreur().getNumero()
+                    == livraison.getLivreur().getNumero()) {
+                tournee.supprimerLivraisonApresCalcul(livraison);
+            }
+        }
+    }
+
     public void annuler() {
         this.listeDeCommandes.annuler();
     }
@@ -317,13 +333,14 @@ public final class Controleur {
                     .stream().filter(
                             livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
+
             // On ne crée pas de tournée s'il n'y a pas de livraison
             // pour un livreur
             if (!livraisons.isEmpty()) {
                 Tournee tournee = new Tournee(livreur, livraisons, this.plan,
-                        TEMPS_PAR_LIVRAISON);
-                tournee.calculerTournee(this.plan.getEntrepot(),
-                        FenetreDeLivraison.H8_H9);
+                        TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
+                tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+
                 if (tournee.getItineraires() == null) {
                     Alert alerte = new Alert(Alert.AlertType.ERROR);
                     alerte.setHeaderText(
