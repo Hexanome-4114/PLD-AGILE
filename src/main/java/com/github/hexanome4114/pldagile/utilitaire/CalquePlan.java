@@ -26,7 +26,6 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
-import java.util.List;
 import java.util.Map;
 
 /**
