@@ -22,7 +22,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
-
 import java.util.Map;
 
 /**
@@ -43,8 +42,6 @@ public final class CalquePlan extends MapLayer {
 
     private static final int TAILLE_SEGMENT = 5;
 
-    private static final Color COULEUR_SEGMENT = Color.RED;
-
     /**
      * Map contenant les points de livraison et leur Node associé.
      */
@@ -63,6 +60,13 @@ public final class CalquePlan extends MapLayer {
      */
     private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
             = FXCollections.observableHashMap();
+
+    /**
+     * Map contenant les flèches directionnelles des segments de la tournée
+     * et leur Node associé.
+     */
+    private final ObservableMap<Pair<Intersection, Intersection>, Polygon>
+            directions = FXCollections.observableHashMap();
 
     /**
      * Point de livraison sélectionné par l'utilisateur.
@@ -209,23 +213,32 @@ public final class CalquePlan extends MapLayer {
             final double x2, final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
-        return diffX * diffX + diffY * diffY;
+        return Math.sqrt(diffX * diffX + diffY * diffY);
     }
 
     /**
      * Ajoute un segment sur le calque.
      * @param point1
      * @param point2
+     * @param livreur
      */
     public void ajouterSegment(final Intersection point1,
-                               final Intersection point2) {
+                               final Intersection point2,
+                               final Livreur livreur) {
         Line ligne = new Line();
-        ligne.setFill(COULEUR_SEGMENT);
-        ligne.setStroke(COULEUR_SEGMENT);
+        ligne.setFill(this.getCouleur(livreur));
+        ligne.setStroke(this.getCouleur(livreur));
         ligne.setStrokeWidth(TAILLE_SEGMENT);
 
+        Polygon direction = new Polygon();
+        direction.setFill(this.getCouleur(livreur));
+        direction.setStroke(this.getCouleur(livreur));
+        direction.setStrokeWidth(TAILLE_SEGMENT);
+
         segments.put(new Pair(point1, point2), ligne);
+        directions.put(new Pair(point1, point2), direction);
         this.getChildren().add(ligne);
+        this.getChildren().add(direction);
         this.markDirty();
     }
 
@@ -308,6 +321,11 @@ public final class CalquePlan extends MapLayer {
                 : segments.entrySet()) {
             positionner(segment.getKey(), segment.getValue());
         }
+
+        for (Map.Entry<Pair<Intersection, Intersection>, Polygon> direction
+                : directions.entrySet()) {
+            positionner(direction.getKey(), direction.getValue());
+        }
     }
 
     private void positionner(final Intersection intersection,
@@ -332,5 +350,37 @@ public final class CalquePlan extends MapLayer {
         ligne.setStartY(mapPoint1.getY());
         ligne.setEndX(mapPoint2.getX());
         ligne.setEndY(mapPoint2.getY());
+    }
+
+    private void positionner(final Pair<Intersection, Intersection> segment,
+                             final Polygon direction) {
+        Intersection point1 = segment.getKey();
+        Intersection point2 = segment.getValue();
+
+        Point2D mapPoint1 = getMapPoint(
+                point1.getLatitude(), point1.getLongitude());
+        Point2D mapPoint2 = getMapPoint(
+                point2.getLatitude(), point2.getLongitude());
+        //Localisation du centre de la flèche sur le segment
+        Double pourcentageCentreFleche = 0.75;
+        Point2D mapPointCentreFleche = new Point2D(
+                mapPoint1.getX() + (mapPoint2.getX() - mapPoint1.getX())
+                        * pourcentageCentreFleche,
+                mapPoint1.getY() + (mapPoint2.getY() - mapPoint1.getY())
+                        * pourcentageCentreFleche);
+        // On normalise les flèches pour qu'elles aient la même taille
+        Double norme = calculerDistanceEuclidienne(mapPoint1.getX(),
+                mapPoint1.getY(), mapPoint2.getX(), mapPoint2.getY());
+        Double diffX = (mapPoint2.getX() - mapPoint1.getX()) / norme;
+        Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
+        Double coefficient = 3.0;
+
+        direction.getPoints().setAll(new Double[]{
+                mapPointCentreFleche.getX() + coefficient * diffX,
+                mapPointCentreFleche.getY() + coefficient * diffY,
+                mapPointCentreFleche.getX() + coefficient * (-diffX + diffY),
+                mapPointCentreFleche.getY() + coefficient * (-diffY - diffX),
+                mapPointCentreFleche.getX() + coefficient * (-diffX - diffY),
+                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX)});
     }
 }

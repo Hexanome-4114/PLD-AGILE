@@ -213,7 +213,6 @@ public final class Controleur {
 
             this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
             this.etatCourant.ajouterLivraison(this);
-            this.calquePlan.ajouterLivraison(livraison);
         }
     }
 
@@ -305,8 +304,12 @@ public void supprimerLivraisonApresCalcul() {
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
             // TODO valider les livraisons chargées
-            this.tableauLivraison.setItems(
-                    FXCollections.observableArrayList(livraisons));
+
+            this.reinitialiserTableauLivraison();
+            for (Livraison livraison : livraisons) {
+                this.ajouterLivraison(livraison);
+            }
+
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             Alert alerte = new Alert(Alert.AlertType.ERROR);
@@ -416,20 +419,29 @@ public void supprimerLivraisonApresCalcul() {
 
     private void afficherTournee(final Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
-            for (int i = 1; i < itineraire.getIntersections().size(); i++) {
+            for (int j = 1; j < itineraire.getIntersections().size(); j++) {
                 this.calquePlan.ajouterSegment(
-                        itineraire.getIntersections().get(i - 1),
-                        itineraire.getIntersections().get(i));
+                        itineraire.getIntersections().get(j - 1),
+                        itineraire.getIntersections().get(j),
+                        tournee.getLivreur());
             }
         }
     }
 
     public void ajouterLivraison(final Livraison l) {
         this.tableauLivraison.getItems().add(l);
+        this.calquePlan.ajouterLivraison(l);
     }
 
     public void supprimerLivraison(final Livraison l) {
         this.tableauLivraison.getItems().remove(l);
+        this.calquePlan.enleverLivraison(l);
+    }
+
+    private void reinitialiserTableauLivraison() {
+        for (Livraison livraison : this.tableauLivraison.getItems()) {
+            this.supprimerLivraison(livraison);
+        }
     }
 
     public Label getInstructionLabel() {
@@ -494,10 +506,6 @@ public void supprimerLivraisonApresCalcul() {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
-    }
-
-    public CalquePlan getCalquePlan() {
-        return calquePlan;
     }
 
     public void setStage(final Stage stage) {
