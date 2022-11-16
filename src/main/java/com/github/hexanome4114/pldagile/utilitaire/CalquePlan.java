@@ -5,6 +5,8 @@ import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.gluonhq.maps.MapLayer;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Point2D;
@@ -21,8 +23,10 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,9 +69,14 @@ public final class CalquePlan extends MapLayer {
             = FXCollections.observableHashMap();
 
     /**
-     * Point de livraison sélectionné par l'utilisateur.
+     * Point de livraison à mettre en avant car sélectionné par l'utilisateur.
      */
-    private Circle pointSelectionne;
+    private Pair<Intersection, Circle> pointSelectionne;
+
+    /**
+     * Livraison à mettre en avant car sélectionnée par l'utilisateur.
+     */
+    private Pair<Livraison, FadeTransition> livraisonSelectionnee;
 
     /**
      * Point particulier représentant l'entrepôt.
@@ -93,8 +102,9 @@ public final class CalquePlan extends MapLayer {
     /**
      * Ajoute une livraison sur le calque.
      * @param livraison
+     * @return l'objet Node correspondant à la livraison sur le calque
      */
-    public void ajouterLivraison(final Livraison livraison) {
+    public Node ajouterLivraison(final Livraison livraison) {
         Shape forme = this.getForme(livraison.getFenetreDeLivraison());
         forme.setFill(this.getCouleur(livraison.getLivreur()));
 
@@ -103,11 +113,14 @@ public final class CalquePlan extends MapLayer {
         texte.setStyle("-fx-font-size: " + (15 - 2 * texte.getText().length()));
 
         StackPane stack = new StackPane();
+        stack.setCursor(Cursor.HAND);
         stack.getChildren().addAll(forme, texte);
 
         livraisons.put(livraison, stack);
         this.getChildren().add(stack);
         this.markDirty();
+
+        return stack;
     }
 
     /**
@@ -129,23 +142,54 @@ public final class CalquePlan extends MapLayer {
     }
 
     public void setPointSelectionne(final Intersection intersection) {
-        Circle point = points.get(intersection);
+        Circle nouvelleSelection = points.get(intersection);
 
         if (this.pointSelectionne != null) {
             // réinitialisation si une sélection a déjà eu lieu
-            this.pointSelectionne.setFill(COULEUR_POINT);
-            this.pointSelectionne.setRadius(TAILLE_POINT);
-            this.pointSelectionne.setCenterY(0);
-            this.pointSelectionne.setVisible(point.isVisible());
+            Circle ancienneSelection = pointSelectionne.getValue();
+
+            ancienneSelection.setFill(COULEUR_POINT);
+            ancienneSelection.setRadius(TAILLE_POINT);
+            ancienneSelection.setCenterY(0);
+            ancienneSelection.setVisible(points.values().stream().findFirst()
+                    .get().isVisible());
         }
 
-        point.setFill(new ImagePattern(IMAGE_POINT_SELECTIONNE));
-        point.setRadius(15);
-        // modification du Y pour bien positionner le pin
-        point.setCenterY(point.getCenterY() - point.getRadius());
-        point.setVisible(true);
+        if (nouvelleSelection != null) {
+            nouvelleSelection.setFill(
+                    new ImagePattern(IMAGE_POINT_SELECTIONNE));
+            nouvelleSelection.setRadius(15);
+            // modification du Y pour bien positionner le pin
+            nouvelleSelection.setCenterY(nouvelleSelection.getCenterY()
+                    - nouvelleSelection.getRadius());
+            nouvelleSelection.setVisible(true);
 
-        this.pointSelectionne = point;
+            this.pointSelectionne = new Pair<>(intersection, nouvelleSelection);
+        } else {
+            this.pointSelectionne = null;
+        }
+    }
+
+    public void setLivraisonSelectionnee(final Livraison livraison) {
+        Node noeud = livraisons.get(livraison);
+        FadeTransition animation;
+
+        if (this.livraisonSelectionnee != null) {
+            // réinitialisation si une sélection a déjà eu lieu
+            animation = livraisonSelectionnee.getValue();
+            animation.jumpTo(Duration.ZERO);
+            animation.stop();
+            animation.setNode(noeud);
+        } else {
+            animation = new FadeTransition(Duration.seconds(1), noeud);
+            animation.setFromValue(10);
+            animation.setToValue(0.1);
+            animation.setCycleCount(Animation.INDEFINITE);
+            animation.setAutoReverse(true);
+        }
+
+        animation.play();
+        livraisonSelectionnee = new Pair<>(livraison, animation);
     }
 
     /**
@@ -157,7 +201,8 @@ public final class CalquePlan extends MapLayer {
             Circle cercle = point.getValue();
 
             // on ne masque jamais le point sélectionné
-            if (cercle != this.pointSelectionne) {
+            if (this.pointSelectionne == null
+                    || cercle != this.pointSelectionne.getValue()) {
                 cercle.setVisible(visible);
             }
         }
@@ -332,5 +377,12 @@ public final class CalquePlan extends MapLayer {
         ligne.setStartY(mapPoint1.getY());
         ligne.setEndX(mapPoint2.getX());
         ligne.setEndY(mapPoint2.getY());
+    }
+
+    public Livraison getLivraisonSelectionnee() {
+        if (this.livraisonSelectionnee != null) {
+            return this.livraisonSelectionnee.getKey();
+        }
+        return null;
     }
 }
