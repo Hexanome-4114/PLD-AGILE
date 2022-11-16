@@ -306,9 +306,9 @@ public void supprimerLivraisonApresCalcul() {
                 ) {
                     throw new Exception();
                 }
-                if (this.verificationDoublonLivraison(livraison)) {
-                    throw new Exception();
-                }
+            }
+            if (this.verificationDoublonLivraison(livraisons)) {
+                throw new Exception();
             }
             this.reinitialiserTableauLivraison();
             this.tableauLivraison.setItems(
@@ -431,14 +431,19 @@ public void supprimerLivraisonApresCalcul() {
         }
     }
 
-    private boolean verificationDoublonLivraison(final Livraison livraison) {
+    private boolean verificationDoublonLivraison(
+            final List<Livraison> livraisons
+    ) {
         boolean doublon = false;
-        for (Livraison l : this.tableauLivraison.getItems()) {
-            if (l.getAdresse().getId().equals(
-                    livraison.getAdresse().getId())
-            ) {
-                doublon = true;
-                break;
+        for (int i = 0; i < livraisons.size(); i++) {
+            for (int j = 1; j < livraisons.size(); j++) {
+                if (
+                        i != j
+                        && livraisons.get(i).getAdresse().getId()
+                        .equals(livraisons.get(j).getAdresse().getId())) {
+                    doublon = true;
+                    break;
+                }
             }
         }
         return doublon;
