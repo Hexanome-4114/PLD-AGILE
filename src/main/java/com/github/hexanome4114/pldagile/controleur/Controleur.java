@@ -130,10 +130,9 @@ public final class Controleur {
         ObservableList<Livreur> oListLivreurs =
                 FXCollections.observableArrayList(Livreur.values());
 
-        this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
-        this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+
         Image annulerImage = new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream(
                         "/images/annuler.png")
@@ -163,13 +162,15 @@ public final class Controleur {
         this.tableauLivraison.getItems()
                 // bouton cliquable que lorsqu'il y a des livraisons
                 .addListener((ListChangeListener<Livraison>) (obs) -> {
+                            boolean tableauEstVide = obs.getList().isEmpty();
+
                             this.sauvegarderLivraisonsBouton.setDisable(
-                                    obs.getList().isEmpty());
+                                    tableauEstVide);
                             this.calculerTourneeBouton.setDisable(
-                                    obs.getList().isEmpty());
-                            this.getAnnulerBouton().setDisable(
-                                    listeDeCommandes.getIndexCourant() == -1
-                            );
+                                    tableauEstVide);
+                            this.annulerBouton.setDisable(
+                                    listeDeCommandes.getIndexCourant() == -1);
+                            this.tableauLivraison.setDisable(tableauEstVide);
                         }
                 );
         this.comboBoxLivreur.valueProperty().
