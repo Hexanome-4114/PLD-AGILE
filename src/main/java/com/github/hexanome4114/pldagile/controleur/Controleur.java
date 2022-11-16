@@ -215,6 +215,7 @@ public final class Controleur {
                     this.comboBoxAdresse.getValue()
             );
 
+            this.reinitialiserPointSelectionne();
             this.listeDeCommandes.ajouter(
                     new AjouterCommande(this, livraison)
             );
@@ -304,8 +305,7 @@ public void supprimerLivraisonApresCalcul() {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
 
             this.reinitialiserTableauLivraison();
-            this.calquePlan.setPointSelectionne(null);
-            this.comboBoxAdresse.setValue(null);
+            this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
                 // Vérifie que les adresses de livraisons sont sur le plan
@@ -472,6 +472,11 @@ public void supprimerLivraisonApresCalcul() {
             this.calquePlan.enleverLivraison(livraison);
         }
         this.tableauLivraison.getItems().clear();
+    }
+
+    private void reinitialiserPointSelectionne() {
+        this.calquePlan.setPointSelectionne(null);
+        this.comboBoxAdresse.setValue(null);
     }
 
     public Label getInstructionLabel() {
