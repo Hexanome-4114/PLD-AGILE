@@ -288,7 +288,6 @@ public final class Controleur {
 
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
-            this.reinitialiserTableauLivraison();
             for (Livraison livraison : livraisons) {
                 // Vérification si toutes les adresses de livraisons sont sur
                 // le plan et qu'il n'y ait pas de livraisons en double.
@@ -301,6 +300,7 @@ public final class Controleur {
                     throw new Exception();
                 }
             }
+            this.reinitialiserTableauLivraison();
             this.tableauLivraison.setItems(
                     FXCollections.observableArrayList(livraisons));
             this.etatCourant.ajouterLivraison(this);
@@ -323,7 +323,6 @@ public final class Controleur {
                     .stream().filter(
                             livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
-            System.out.println(livraisons.toString());
             // On ne crée pas de tournée s'il n'y a pas de livraison
             // pour un livreur
             if (!livraisons.isEmpty()) {

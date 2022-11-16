@@ -1,6 +1,5 @@
 package com.github.hexanome4114.pldagile.algorithme.dijkstra;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,10 +7,10 @@ import java.util.Map;
 
 public final class Sommet {
 
-    private String nom;
+    private final String nom;
     private List<Sommet> cheminPlusCourt = new LinkedList<>();
     private Integer distance = Integer.MAX_VALUE;
-    private Map<Sommet, Integer> sommetsAdjacents = new HashMap<>();
+    private final Map<Sommet, Integer> sommetsAdjacents = new HashMap<>();
 
     public Sommet(final String nom) {
         this.nom = nom;

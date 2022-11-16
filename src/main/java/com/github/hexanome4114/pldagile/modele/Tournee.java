@@ -17,9 +17,9 @@ public final class Tournee {
     /**
      * @livreur livreur qui effectue les livraisons
      */
-    private Livreur livreur;
+    private final Livreur livreur;
 
-    private int tempsParLivraison;
+    private final int tempsParLivraison;
 
     /**
      * @livraisons liste des livraison à effectuer, elles sont dans l'ordre du
@@ -35,7 +35,7 @@ public final class Tournee {
      */
     private List<Itineraire> itineraires;
 
-    private Plan plan;
+    private final Plan plan;
 
 
     public Tournee(final Livreur livreur, final List<Livraison> livraisons,
