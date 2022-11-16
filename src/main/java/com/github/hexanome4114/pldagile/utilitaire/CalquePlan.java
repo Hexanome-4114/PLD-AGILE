@@ -44,7 +44,9 @@ public final class CalquePlan extends MapLayer {
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
-    private static final int TAILLE_SEGMENT = 5;
+    private static final int TAILLE_SEGMENT = 3;
+
+    private static final int TAILLE_FLECHE = 5;
 
     /**
      * Map contenant les points de livraison et leur Node associé.
@@ -125,6 +127,34 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
 
         return stack;
+    }
+
+    /**
+     * Ajoute un segment sur le calque.
+     * @param point1
+     * @param point2
+     * @param livreur
+     */
+    public void ajouterSegment(final Intersection point1,
+                               final Intersection point2,
+                               final Livreur livreur) {
+        Line ligne = new Line();
+        ligne.setFill(this.getCouleur(livreur));
+        ligne.setStroke(this.getCouleur(livreur));
+        ligne.setStrokeWidth(TAILLE_SEGMENT);
+
+        Polygon direction = new Polygon();
+        direction.setFill(this.getCouleur(livreur));
+        direction.setStroke(this.getCouleur(livreur));
+        direction.setStrokeWidth(TAILLE_FLECHE);
+
+        segments.put(new Pair(point1, point2), ligne);
+        directions.put(new Pair(point1, point2), direction);
+
+        // ajout en position 0 pour que ce soit l'élément le plus en arrière
+        this.getChildren().add(0, ligne);
+        this.getChildren().add(0, direction);
+        this.markDirty();
     }
 
     /**
@@ -262,32 +292,6 @@ public final class CalquePlan extends MapLayer {
     }
 
     /**
-     * Ajoute un segment sur le calque.
-     * @param point1
-     * @param point2
-     * @param livreur
-     */
-    public void ajouterSegment(final Intersection point1,
-                               final Intersection point2,
-                               final Livreur livreur) {
-        Line ligne = new Line();
-        ligne.setFill(this.getCouleur(livreur));
-        ligne.setStroke(this.getCouleur(livreur));
-        ligne.setStrokeWidth(TAILLE_SEGMENT);
-
-        Polygon direction = new Polygon();
-        direction.setFill(this.getCouleur(livreur));
-        direction.setStroke(this.getCouleur(livreur));
-        direction.setStrokeWidth(TAILLE_SEGMENT);
-
-        segments.put(new Pair(point1, point2), ligne);
-        directions.put(new Pair(point1, point2), direction);
-        this.getChildren().add(ligne);
-        this.getChildren().add(direction);
-        this.markDirty();
-    }
-
-    /**
      * Détermine la forme à afficher pour la livraison en fonction de la
      * fenêtre de livraison.
      * @param fenetre la fenêtre de livraison de la livraison
@@ -406,7 +410,7 @@ public final class CalquePlan extends MapLayer {
                 point1.getLatitude(), point1.getLongitude());
         Point2D mapPoint2 = getMapPoint(
                 point2.getLatitude(), point2.getLongitude());
-        //Localisation du centre de la flèche sur le segment
+        // Localisation du centre de la flèche sur le segment
         Double pourcentageCentreFleche = 0.75;
         Point2D mapPointCentreFleche = new Point2D(
                 mapPoint1.getX() + (mapPoint2.getX() - mapPoint1.getX())
