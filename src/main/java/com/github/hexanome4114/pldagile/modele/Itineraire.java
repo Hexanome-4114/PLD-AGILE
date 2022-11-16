@@ -30,11 +30,11 @@ public final class Itineraire {
         String points = "->";
         if (nbIntersection > 2) {
             points = "->" + (nbIntersection - 2) + "->";
-        }
-        stringBuilder.append(intersections.get(0))
+            stringBuilder.append(intersections.get(0))
                 .append(points)
-                .append(intersections.get(nbIntersection - 1))
-                .append('}');
+                .append(intersections.get(nbIntersection - 1));
+        }
+        stringBuilder.append('}');
         return stringBuilder.toString();
     }
 

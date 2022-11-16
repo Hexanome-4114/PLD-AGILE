@@ -3,11 +3,7 @@ package com.github.hexanome4114.pldagile.utilitaire;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Graphe;
 import com.github.hexanome4114.pldagile.algorithme.dijkstra.Sommet;
 import com.github.hexanome4114.pldagile.algorithme.tsp.GrapheTSP;
-import com.github.hexanome4114.pldagile.modele.Livraison;
-import com.github.hexanome4114.pldagile.modele.Tournee;
-import com.github.hexanome4114.pldagile.modele.Intersection;
-import com.github.hexanome4114.pldagile.modele.Itineraire;
-import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.modele.*;
 import javafx.util.Pair;
 import java.util.Map;
 import java.util.List;
@@ -19,15 +15,15 @@ public final class TourneeHelper {
 
     private TourneeHelper() { }
 
-    public static Graphe creerGrapheDijkstra(final Tournee tournee) {
+    public static Graphe creerGrapheDijkstra(final Plan plan) {
         Graphe graphe = new Graphe();
-        for (String intersectionId : tournee.getPlan().getIntersections().keySet()) {
+        for (String intersectionId : plan.getIntersections().keySet()) {
             Sommet sommet = new Sommet(intersectionId);
             graphe.ajouterSommet(sommet);
         }
 
         // ajout des sommets adjacents et de la distance
-        for (Intersection intersection : tournee.getPlan().getIntersections()
+        for (Intersection intersection : plan.getIntersections()
                 .values()) {
             for (Map.Entry<Intersection, Pair<Integer, String>> set
                     : intersection.getIntersections().entrySet()) {
@@ -84,7 +80,7 @@ public final class TourneeHelper {
             Sommet sommetSource = grapheDijkstra.getSommets().get(livraisonCourante.getAdresse().getId());
 
             // Calcul des plus courts chemins entre le sommet source et les autres sommets
-            grapheDijkstra = Graphe.calculerCheminplusCourtDepuisSource(grapheDijkstra, sommetSource);
+            Graphe.calculerCheminplusCourtDepuisSource(grapheDijkstra, sommetSource);
 
             // Récupération des pcc pour construire le graphe TSP et les itinéraires précis correspondants.
             for (Livraison autreLivraison : livraisons) {
