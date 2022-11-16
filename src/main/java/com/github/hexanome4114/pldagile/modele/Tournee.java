@@ -17,9 +17,9 @@ public final class Tournee {
     /**
      * @livreur livreur qui effectue les livraisons
      */
-    private Livreur livreur;
+    private final Livreur livreur;
 
-    private int tempsParLivraison;
+    private final int tempsParLivraison;
 
     /**
      * @livraisons liste des livraison à effectuer, elles sont dans l'ordre du
@@ -35,15 +35,24 @@ public final class Tournee {
      */
     private List<Itineraire> itineraires;
 
-    private Plan plan;
+    private final Plan plan;
+
+    private Intersection pointDepart;
+    private boolean tourneeCalculee = false;
 
 
     public Tournee(final Livreur livreur, final List<Livraison> livraisons,
-                   final Plan plan, final int tempsParLivraison) {
+                   final Plan plan, final int tempsParLivraison,
+                   final Intersection pointDepart) {
         this.livreur = livreur;
         this.livraisons = livraisons;
         this.plan = plan;
         this.tempsParLivraison = tempsParLivraison;
+        this.pointDepart = pointDepart;
+    }
+
+    public Intersection getPointDepart() {
+        return pointDepart;
     }
 
     public Livreur getLivreur() {
@@ -66,16 +75,13 @@ public final class Tournee {
      * Calcule une Tournée qui part et revient sur la première livraison,
      * le livreur partira à l'heure de la première livraison.
      *
-     * @param pointDepart intersection de départ et d'arrivée de la tournée
-     *                    (doit être différents de la premiere livraison)
      * @param fdlDepart   fenetre de livraison de départ
      */
-    public void calculerTournee(final Intersection pointDepart,
-                                final FenetreDeLivraison fdlDepart) {
+    public void calculerTournee(final FenetreDeLivraison fdlDepart) {
 
         // Dijkstra
         // Creation de chaque sommet et ajout dans le graphe
-        Graphe graphe = TourneeHelper.creerGrapheDijkstra(this);
+        Graphe graphe = TourneeHelper.creerGrapheDijkstra(this.plan);
 
 
         // Ajout d'une livraison factice au point de depart
@@ -138,6 +144,8 @@ public final class Tournee {
             this.livraisons = livraisonsTSP;
             this.itineraires = itinerairesFinaux;
             calculerHeuresPassagesLivraisons();
+
+            this.tourneeCalculee = true;
         }
     }
 
@@ -181,7 +189,59 @@ public final class Tournee {
             // la livraison)
             heureCourante = heureCourante.plusMinutes(this.tempsParLivraison);
         }
+    }
 
-        // Gestion à part du dernier itinéraire de retour vers l'entrepôt
+    public void supprimerLivraisonApresCalcul(final Livraison livraison) {
+        if (!this.tourneeCalculee) {
+            return;
+        }
+        // On cherche l'indice de la livraison à supprimer pour récupérer celle
+        // d'avant et celle d'après
+        int indiceLivraison = -2;
+        for (int i = 0; i < this.livraisons.size(); ++i) {
+            if (this.livraisons.get(i).getNumero() == livraison.getNumero()) {
+                indiceLivraison = i;
+            }
+        }
+        // On sépare le cas pour faire attention au cas où on part du
+        // pointDepart ou si on y revient (premier et dernier trajet)
+        Intersection intersectionAvant;
+        Intersection intersectionApres;
+        // Dans le cas où il ne reste qu'une seule livraison, on vide la
+        // dernière restante et les 2 derniers itinéraires restants
+        if (indiceLivraison == 0 && this.livraisons.size() == 1) {
+            this.livraisons.remove(0);
+            this.itineraires.clear();
+
+        } else {
+            if (indiceLivraison == 0) {
+                intersectionAvant = this.pointDepart;
+                intersectionApres = this.livraisons.get(indiceLivraison + 1)
+                        .getAdresse();
+            } else if (indiceLivraison == this.livraisons.size() - 1) {
+                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
+                        .getAdresse();
+                intersectionApres = this.pointDepart;
+            } else {
+                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
+                        .getAdresse();
+                intersectionApres = this.livraisons.get(indiceLivraison + 1)
+                        .getAdresse();
+            }
+            // On récupère l'itinéraire entre intersectionAvant et
+            // intersectionApres
+            Map<Intersection, Itineraire> itinerairesMap = this.plan
+                    .getItineraire(intersectionAvant);
+            Itineraire itineraire = itinerairesMap.get(intersectionApres);
+
+            // On supprime la livraison et les itinéraires puis on rajoute
+            // la nouvelle
+            this.livraisons.remove((indiceLivraison));
+            this.itineraires.remove(indiceLivraison + 1);
+            this.itineraires.remove(indiceLivraison);
+            this.itineraires.add(indiceLivraison, itineraire);
+
+            this.calculerHeuresPassagesLivraisons();
+        }
     }
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 public final class Itineraire {
 
-    private List<Intersection> intersections;
+    private final List<Intersection> intersections;
     private int longueur;
 
     public Itineraire(final List<Intersection> intersections) {
@@ -30,11 +30,11 @@ public final class Itineraire {
         String points = "->";
         if (nbIntersection > 2) {
             points = "->" + (nbIntersection - 2) + "->";
-        }
-        stringBuilder.append(intersections.get(0))
+            stringBuilder.append(intersections.get(0))
                 .append(points)
-                .append(intersections.get(nbIntersection - 1))
-                .append('}');
+                .append(intersections.get(nbIntersection - 1));
+        }
+        stringBuilder.append('}');
         return stringBuilder.toString();
     }
 
