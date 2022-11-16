@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class Graphe {
-    private Map<String, Sommet> sommets = new LinkedHashMap<>();
+    private final Map<String, Sommet> sommets = new LinkedHashMap<>();
 
     public Map<String, Sommet> getSommets() {
         return sommets;

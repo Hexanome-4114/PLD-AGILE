@@ -4,7 +4,7 @@ import java.util.List;
 
 public final class Itineraire {
 
-    private List<Intersection> intersections;
+    private final List<Intersection> intersections;
     private int longueur;
 
     public Itineraire(final List<Intersection> intersections) {

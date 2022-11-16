@@ -1,5 +1,6 @@
 package com.github.hexanome4114.pldagile.algorithme.tsp;
 
+
 public interface Graph {
     /**
      * @return the number of vertices in <code>this</code>

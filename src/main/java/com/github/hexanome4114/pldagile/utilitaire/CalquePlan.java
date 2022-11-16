@@ -375,12 +375,12 @@ public final class CalquePlan extends MapLayer {
         Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
         Double coefficient = 3.0;
 
-        direction.getPoints().setAll(new Double[]{
+        direction.getPoints().setAll(
                 mapPointCentreFleche.getX() + coefficient * diffX,
                 mapPointCentreFleche.getY() + coefficient * diffY,
                 mapPointCentreFleche.getX() + coefficient * (-diffX + diffY),
                 mapPointCentreFleche.getY() + coefficient * (-diffY - diffX),
                 mapPointCentreFleche.getX() + coefficient * (-diffX - diffY),
-                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX)});
+                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX));
     }
 }

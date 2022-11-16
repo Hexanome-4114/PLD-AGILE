@@ -30,7 +30,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -209,9 +208,12 @@ public final class Controleur {
                     numero,
                     this.comboBoxFenetreDeLivraison.getValue(),
                     this.comboBoxLivreur.getValue(),
-                    this.comboBoxAdresse.getValue());
+                    this.comboBoxAdresse.getValue()
+            );
 
-            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
+            this.listeDeCommandes.ajouter(
+                    new AjouterCommande(this, livraison)
+            );
             this.etatCourant.ajouterLivraison(this);
         }
     }
@@ -261,11 +263,10 @@ public void supprimerLivraisonApresCalcul() {
             Serialiseur.sauvegarderLivraisons(
                     fichier, this.tableauLivraison.getItems());
         } catch (Exception e) {
-            Alert alerte = new Alert(Alert.AlertType.ERROR);
-            alerte.setHeaderText(
-                    "Problème lors de la sauvegarde des livraisons."
+            this.afficherPopUp(
+                    "Problème lors de la sauvegarde des livraisons.",
+                    Alert.AlertType.ERROR
             );
-            alerte.show();
         }
     }
 
@@ -297,18 +298,25 @@ public void supprimerLivraisonApresCalcul() {
 
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
-            // TODO valider les livraisons chargées
 
             this.reinitialiserTableauLivraison();
+
             for (Livraison livraison : livraisons) {
+                // Vérifie que les adresses de livraisons sont sur le plan
+                if (!this.plan.getIntersections().containsKey(
+                        livraison.getAdresse().getId())) {
+                    throw new Exception("L'adresse de cette livraison"
+                            + "n'existe pas sur le plan");
+                }
+
                 this.ajouterLivraison(livraison);
             }
-
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
-            Alert alerte = new Alert(Alert.AlertType.ERROR);
-            alerte.setHeaderText("Problème lors du chargement des livraisons.");
-            alerte.show();
+            this.afficherPopUp(
+                    "Problème lors du chargement des livraisons.",
+                    Alert.AlertType.ERROR
+            );
         }
     }
 
@@ -364,11 +372,10 @@ public void supprimerLivraisonApresCalcul() {
             this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
         } catch (Exception e) {
-            Alert alerte = new Alert(Alert.AlertType.ERROR);
-            alerte.setHeaderText(
-                    "Problème lors du chargement du plan."
+            this.afficherPopUp(
+                    "Problème lors du chargement du plan.",
+                    Alert.AlertType.ERROR
             );
-            alerte.show();
         }
     }
 
@@ -420,6 +427,15 @@ public void supprimerLivraisonApresCalcul() {
                         tournee.getLivreur());
             }
         }
+    }
+
+    private void afficherPopUp(
+            final String message,
+            final Alert.AlertType type
+    ) {
+        Alert alerte = new Alert(type);
+        alerte.setHeaderText(message);
+        alerte.show();
     }
 
     public void ajouterLivraison(final Livraison l) {

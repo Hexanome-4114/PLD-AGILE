@@ -24,6 +24,7 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
+          VALIDATE_ALL_CODEBASE: false
           VALIDATE_JSCPD: false
           FILTER_REGEX_EXCLUDE: "mvnw.*"
           DEFAULT_BRANCH: "main"
