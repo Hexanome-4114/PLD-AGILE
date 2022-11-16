@@ -298,21 +298,19 @@ public void supprimerLivraisonApresCalcul() {
 
         try {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
-            for (Livraison livraison : livraisons) {
-                // Vérification si toutes les adresses de livraisons sont sur
-                // le plan et qu'il n'y ait pas de livraisons en double.
-                if (!this.plan.getIntersections().containsKey(
-                        livraison.getAdresse().getId())
-                ) {
-                    throw new Exception();
-                }
-            }
-            if (this.verificationDoublonLivraison(livraisons)) {
-                throw new Exception();
-            }
+
             this.reinitialiserTableauLivraison();
-            this.tableauLivraison.setItems(
-                    FXCollections.observableArrayList(livraisons));
+
+            for (Livraison livraison : livraisons) {
+                // Vérifie que les adresses de livraisons sont sur le plan
+                if (!this.plan.getIntersections().containsKey(
+                        livraison.getAdresse().getId())) {
+                    throw new Exception("L'adresse de cette livraison"
+                            + "n'existe pas sur le plan");
+                }
+
+                this.ajouterLivraison(livraison);
+            }
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             this.afficherPopUp(
@@ -429,24 +427,6 @@ public void supprimerLivraisonApresCalcul() {
                         tournee.getLivreur());
             }
         }
-    }
-
-    private boolean verificationDoublonLivraison(
-            final List<Livraison> livraisons
-    ) {
-        boolean doublon = false;
-        for (int i = 0; i < livraisons.size(); i++) {
-            for (int j = 1; j < livraisons.size(); j++) {
-                if (
-                        i != j
-                        && livraisons.get(i).getAdresse().getId()
-                        .equals(livraisons.get(j).getAdresse().getId())) {
-                    doublon = true;
-                    break;
-                }
-            }
-        }
-        return doublon;
     }
 
     private void afficherPopUp(
