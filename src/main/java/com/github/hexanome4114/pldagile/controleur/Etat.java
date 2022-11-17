@@ -18,7 +18,7 @@ public interface Etat {
      */
     default void chargerLivraison(final Controleur c) { }
     /**
-     * Passage à l'état livraison.
+     * Passage à l'état tournée.
      * @param c le controleur qui change d'état
      */
     default void calculerTournee(final Controleur c) { }
