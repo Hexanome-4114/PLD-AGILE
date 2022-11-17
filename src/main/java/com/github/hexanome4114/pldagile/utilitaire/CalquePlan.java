@@ -291,7 +291,8 @@ public final class CalquePlan extends MapLayer {
      * @return la distance euclidienne entre deux points
      */
     private double calculerDistanceEuclidienne(final double x1, final double y1,
-                                               final double x2, final double y2) {
+                                               final double x2,
+                                               final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);
