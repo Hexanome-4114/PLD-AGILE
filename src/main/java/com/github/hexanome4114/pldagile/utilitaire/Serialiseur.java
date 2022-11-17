@@ -1,6 +1,12 @@
 package com.github.hexanome4114.pldagile.utilitaire;
 
-import com.github.hexanome4114.pldagile.modele.*;
+import com.github.hexanome4114.pldagile.modele.Plan;
+import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Livreur;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.modele.Tournee;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
 import javafx.util.Pair;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -11,7 +17,10 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -187,8 +196,10 @@ public final class Serialiseur {
         }
 
         // HEADER
-        ecrivain.println("Tournée pour le livreur numéro " + tournee.getLivreur().getNumero());
-        ecrivain.println("Nombre de livraisons à effectuer : " + tournee.getLivraisons().size() + '\n');
+        ecrivain.println("Tournée pour le livreur numéro "
+                + tournee.getLivreur().getNumero());
+        ecrivain.println("Nombre de livraisons à effectuer : "
+                + tournee.getLivraisons().size() + '\n');
         ecrivain.println("L'itinéraire à suivre est le suivant :");
         // Départ
         ecrivain.println("Départ de l'entrepôt ");
@@ -196,34 +207,45 @@ public final class Serialiseur {
             Itineraire itineraire = tournee.getItineraires().get(i);
             // Itinéraire entre deux livraisons
             for (int j = 0; j < itineraire.getIntersections().size() - 1; ++j) {
-                Intersection intersectionCourante = itineraire.getIntersections().get(j);
-                Intersection intersectionSuivante = itineraire.getIntersections().get(j + 1);
-                String nomRue = intersectionCourante.getIntersections().get(intersectionSuivante).getValue();
+                Intersection intersectionCourante = itineraire
+                        .getIntersections().get(j);
+                Intersection intersectionSuivante = itineraire
+                        .getIntersections().get(j + 1);
+                String nomRue = intersectionCourante.getIntersections()
+                        .get(intersectionSuivante).getValue();
                 ecrivain.println("Prendre " + nomRue);
-                if(j != itineraire.getIntersections().size() - 2){
+                if (j != itineraire.getIntersections().size() - 2) {
                     ecrivain.println(", puis");
                 }
             }
 
             // Affichage de la livraison
             Livraison livraison = tournee.getLivraisons().get(i);
-            ecrivain.println("La livraison doit être livrée entre " + livraison.getFenetreDeLivraison());
-            ecrivain.println("L'arrivée à la livraison numéro " + livraison.getNumero() +
-                    " est prévue à " + livraison.getHeurePassage()); // TODO heure de passage heure d'arrivée
+            ecrivain.println("La livraison doit être livrée entre "
+                    + livraison.getFenetreDeLivraison());
+            ecrivain.println("L'arrivée à la livraison numéro "
+                    + livraison.getNumero() + " est prévue à "
+                    + livraison.getHeurePassage());
 
             // Départ prochaine livraison
-            ecrivain.println("Départ du point de livraison prévu à " + livraison.getHeurePassage().plusMinutes(tournee.getTempsParLivraison()) + ".");
+            ecrivain.println("Départ du point de livraison prévu à "
+                    + livraison.getHeurePassage()
+                    .plusMinutes(tournee.getTempsParLivraison()) + ".");
         }
         // Retour à l'entrepôt
         ecrivain.println("Retour à l'entrepôt.");
-        Itineraire itineraire = tournee.getItineraires().get(tournee.getLivraisons().size());
+        Itineraire itineraire = tournee.getItineraires()
+                .get(tournee.getLivraisons().size());
         // Itinéraire entre deux livraisons
         for (int j = 0; j < itineraire.getIntersections().size() - 1; ++j) {
-            Intersection intersectionCourante = itineraire.getIntersections().get(j);
-            Intersection intersectionSuivante = itineraire.getIntersections().get(j + 1);
-            String nomRue = intersectionCourante.getIntersections().get(intersectionSuivante).getValue();
+            Intersection intersectionCourante = itineraire
+                    .getIntersections().get(j);
+            Intersection intersectionSuivante = itineraire
+                    .getIntersections().get(j + 1);
+            String nomRue = intersectionCourante.getIntersections()
+                    .get(intersectionSuivante).getValue();
             ecrivain.println("Prendre " + nomRue);
-            if(j != itineraire.getIntersections().size() - 2){
+            if (j != itineraire.getIntersections().size() - 2) {
                 ecrivain.println(", puis");
             }
         }
