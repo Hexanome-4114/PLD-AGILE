@@ -15,6 +15,12 @@ public interface Graph {
     int getCost(int i, int j);
 
     /**
+     *
+     * @return minimum cost of graph arcs
+     */
+    int getMinCost();
+
+    /**
      * @param i
      * @param j
      * @return true if <code>(i,j)</code> is an arc of <code>this</code>

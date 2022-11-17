@@ -5,6 +5,8 @@ import java.util.Map;
 public final class GrapheTSP implements Graph {
     private final int nbVertices;
     private final int[][] cost;
+    private int minCost;
+    //utile pour l'heuristique de la fonction bound de l'algo tsp
 
     private final Map<String, Integer> mapNomSommetVersIndex;
     //map entre nom des sommets et index dans le tableau utilisé par le TSP
@@ -13,11 +15,13 @@ public final class GrapheTSP implements Graph {
 
     public GrapheTSP(final int nbVertices,
                      final int[][] cost,
+                     int minimumCost,
                      final Map<String, Integer> mapNomSommetVersIndex,
                      final Map<Integer, String> mapIndexVersNomSommet
     ) {
         this.nbVertices = nbVertices;
         this.cost = cost;
+        this.minCost = minimumCost;
         this.mapNomSommetVersIndex = mapNomSommetVersIndex;
         this.mapIndexVersNomSommet = mapIndexVersNomSommet;
     }
@@ -33,6 +37,10 @@ public final class GrapheTSP implements Graph {
             return -1;
         }
         return cost[i][j];
+    }
+
+    public int getMinCost() {
+        return minCost;
     }
 
     public Map<String, Integer> getMapNomSommetVersIndex() {
