@@ -24,4 +24,27 @@ public final class EtatLivraison implements Etat {
         );
         c.setEtatCourant(c.getEtatPlanCharge());
     }
+
+    @Override
+    public void chargerLivraison(final Controleur c) {
+        c.getSauvegarderLivraisonsBouton().setDisable(false);
+        c.getCalculerTourneeBouton().setDisable(false);
+        c.getListeDeCommandes().reinitialiser();
+        c.getAnnulerBouton().setDisable(true);
+        c.setEtatCourant(c.getEtatLivraison());
+    }
+
+    @Override
+    public void calculerTournee(final Controleur c) {
+        c.getComboBoxLivreur().getSelectionModel().clearSelection();
+        c.getComboBoxLivreur().getItems().clear();
+        c.getComboBoxFenetreDeLivraison().getSelectionModel().clearSelection();
+        c.getComboBoxFenetreDeLivraison().getItems().clear();
+        c.getComboBoxLivreur().setDisable(true);
+        c.getComboBoxFenetreDeLivraison().setDisable(true);
+        c.getAjouterLivraisonBouton().setDisable(true);
+        c.getCalculerTourneeBouton().setDisable(true);
+        c.getChargerLivraisonBouton().setDisable(true);
+        c.setEtatCourant(c.getEtatTournee());
+    }
 }

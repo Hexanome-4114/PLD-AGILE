@@ -4,13 +4,6 @@ package com.github.hexanome4114.pldagile.controleur;
 public final class EtatPlanCharge implements Etat {
 
     @Override
-    public void ajouterLivraison(final Controleur c) {
-        c.getSauvegarderLivraisonsBouton().setDisable(false);
-        c.getCalculerTourneeBouton().setDisable(false);
-        c.setEtatCourant(c.getEtatLivraison());
-    }
-
-    @Override
     public void chargerPlan(final Controleur c) {
         c.getComboBoxLivreur().setValue(null);
         c.getComboBoxFenetreDeLivraison().setValue(null);
@@ -30,5 +23,21 @@ public final class EtatPlanCharge implements Etat {
                         + " en cliquant sur la carte."
         );
         c.setEtatCourant(c.getEtatPlanCharge());
+    }
+
+    @Override
+    public void ajouterLivraison(final Controleur c) {
+        c.getSauvegarderLivraisonsBouton().setDisable(false);
+        c.getCalculerTourneeBouton().setDisable(false);
+        c.setEtatCourant(c.getEtatLivraison());
+    }
+
+    @Override
+    public void chargerLivraison(final Controleur c) {
+        c.getSauvegarderLivraisonsBouton().setDisable(false);
+        c.getCalculerTourneeBouton().setDisable(false);
+        c.getListeDeCommandes().reinitialiser();
+        c.getAnnulerBouton().setDisable(true);
+        c.setEtatCourant(c.getEtatLivraison());
     }
 }

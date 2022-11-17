@@ -61,6 +61,7 @@ public final class Controleur {
     private final EtatInitial etatInitial = new EtatInitial();
     private final EtatPlanCharge etatPlanCharge = new EtatPlanCharge();
     private final EtatLivraison etatLivraison = new EtatLivraison();
+    private final EtatTournee etatTournee = new EtatTournee();
 
     /**
      * Vue de l'application.
@@ -317,7 +318,7 @@ public void supprimerLivraisonApresCalcul() {
 
                 this.ajouterLivraison(livraison);
             }
-            this.etatCourant.ajouterLivraison(this);
+            this.etatCourant.chargerLivraison(this);
         } catch (Exception e) {
             this.afficherPopUp(
                     "Problème lors du chargement des livraisons.",
@@ -346,14 +347,14 @@ public void supprimerLivraisonApresCalcul() {
                 tournee.calculerTournee(FenetreDeLivraison.H8_H9);
 
                 if (tournee.getItineraires() == null) {
-                    Alert alerte = new Alert(Alert.AlertType.ERROR);
-                    alerte.setHeaderText(
-                            "Aucun itinéraire possible pour cette tournée."
+                    this.afficherPopUp(
+                            "Aucun itinéraire possible pour cette tournée.",
+                            Alert.AlertType.ERROR
                     );
-                    alerte.show();
                 } else {
                     this.tournees.add(tournee);
                     afficherTournee(tournee);
+                    this.etatCourant.calculerTournee(this);
                 }
             }
         }
@@ -533,6 +534,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public EtatLivraison getEtatLivraison() {
         return this.etatLivraison;
+    }
+
+    public EtatTournee getEtatTournee() {
+        return etatTournee;
     }
 
     public ListDeCommandes getListeDeCommandes() {
