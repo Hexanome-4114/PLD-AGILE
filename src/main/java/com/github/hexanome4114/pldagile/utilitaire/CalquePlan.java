@@ -47,6 +47,8 @@ public final class CalquePlan extends MapLayer {
 
     private static final int TAILLE_FLECHE = 5;
 
+    private double zoomReference = -1.0;
+
     /**
      * Map contenant les points de livraison et leur Node associé.
      */
@@ -385,6 +387,19 @@ public final class CalquePlan extends MapLayer {
     protected void layoutLayer() {
         positionner(entrepot.getKey(), entrepot.getValue());
 
+        // Obtenir une référence pour le niveau de zoom
+        Point2D mapPointEntrepot = getMapPoint(
+                entrepot.getKey().getLatitude(),
+                entrepot.getKey().getLongitude());
+        // Coordonnées du point de référence 25321689
+        Point2D mapPointReference = getMapPoint(45.751118, 4.876261);
+        Double zoom = calculerDistanceEuclidienne(mapPointEntrepot.getX(),
+                mapPointEntrepot.getY(), mapPointReference.getX(),
+                mapPointReference.getY());
+        if (zoomReference == -1.0) {
+            zoomReference = zoom;
+        }
+
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             positionner(point.getKey(), point.getValue());
         }
@@ -400,7 +415,8 @@ public final class CalquePlan extends MapLayer {
 
         for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
                 Polygon> direction : directions.entrySet()) {
-            positionner(direction.getKey().getKey(), direction.getValue());
+            positionner(direction.getKey().getKey(), direction.getValue(),
+                    zoom / zoomReference);
         }
     }
 
@@ -429,7 +445,7 @@ public final class CalquePlan extends MapLayer {
     }
 
     private void positionner(final Pair<Intersection, Intersection> segment,
-                             final Polygon direction) {
+                             final Polygon direction, final Double zoom) {
         Intersection point1 = segment.getKey();
         Intersection point2 = segment.getValue();
 
@@ -449,7 +465,8 @@ public final class CalquePlan extends MapLayer {
                 mapPoint1.getY(), mapPoint2.getX(), mapPoint2.getY());
         Double diffX = (mapPoint2.getX() - mapPoint1.getX()) / norme;
         Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
-        Double coefficient = 3.0;
+        Double coefficient = 0.5 * zoom;
+        System.out.println("coefficient = " + coefficient);
 
         direction.getPoints().setAll(
                 mapPointCentreFleche.getX() + coefficient * diffX,
