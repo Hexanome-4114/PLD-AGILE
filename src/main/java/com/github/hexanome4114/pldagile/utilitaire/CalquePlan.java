@@ -340,7 +340,7 @@ public final class CalquePlan extends MapLayer {
                 couleur = Color.GREEN;
                 break;
             case LIVREUR_3:
-                couleur = Color.GREY;
+                couleur = Color.PURPLE;
                 break;
             case LIVREUR_4:
                 couleur = Color.ORANGE;
