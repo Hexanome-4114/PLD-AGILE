@@ -32,6 +32,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -416,6 +417,9 @@ public void supprimerLivraisonApresCalcul() {
             checkBoxList.add(this.afficherLivreur3CheckBox);
             checkBoxList.add(this.afficherLivreur4CheckBox);
             for(CheckBox checkBox : checkBoxList) {
+                if(!checkBox.isSelected()){
+                    continue;
+                }
                 Livreur livreur = (Livreur) checkBox.getUserData();
                 Tournee tournee = null;
                 for(Tournee tournee1 : this.tournees) {
