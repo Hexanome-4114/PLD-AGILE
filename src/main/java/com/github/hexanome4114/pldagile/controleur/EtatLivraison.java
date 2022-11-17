@@ -71,8 +71,8 @@ public final class EtatLivraison implements Etat {
         c.getInstructionLabel().setText(
                 "Pour ajouter une livraison, veuillez sélectionner un livreur,"
                         + " une fenêtre horaire, une adresse de livraison"
-                        + " en cliquant sur la carte et sa place dans la"
-                        + " tournée."
+                        + " en cliquant sur la carte et la place de la"
+                        + " nouvelle livraison dans la tournée."
         );
         c.setEtatCourant(c.getEtatTournee());
     }
