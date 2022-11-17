@@ -285,27 +285,31 @@ public final class Controleur {
     }
 
     public void supprimerLivraison() {
-        Livraison livraison = this.tableauLivraison.getSelectionModel()
-                .getSelectedItem();
+        if (this.etatCourant instanceof EtatTournee) {
+            Livraison livraison = this.tableauLivraison.getSelectionModel()
+                    .getSelectedItem();
 
-        this.listeDeCommandes.ajouter(
-                new AnnulerCommande(new AjouterCommande(this, livraison))
-        );
-    }
+            this.listeDeCommandes.ajouter(
+                    new AnnulerCommande(new AjouterCommande(this, livraison))
+            );
 
-public void supprimerLivraisonApresCalcul() {
-        Livraison livraison = this.tableauLivraison.getSelectionModel()
-                .getSelectedItem();
-
-        this.listeDeCommandes.ajouter(
-                new AnnulerCommande(new AjouterCommande(this, livraison))
-        );
-
-        for (Tournee tournee : this.tournees) {
-            if (tournee.getLivreur().getNumero()
-                    == livraison.getLivreur().getNumero()) {
-                tournee.supprimerLivraisonApresCalcul(livraison);
+            for (Tournee tournee : this.tournees) {
+                if (tournee.getLivreur().getNumero()
+                        == livraison.getLivreur().getNumero()) {
+                    this.supprimerAffichageTournee(tournee);
+                    tournee.supprimerLivraisonApresCalcul(livraison);
+                }
             }
+            for (Tournee tournee : this.tournees) {
+                this.afficherTournee(tournee);
+            }
+        } else {
+            Livraison livraison = this.tableauLivraison.getSelectionModel()
+                    .getSelectedItem();
+
+            this.listeDeCommandes.ajouter(
+                    new AnnulerCommande(new AjouterCommande(this, livraison))
+            );
         }
     }
 
@@ -410,7 +414,7 @@ public void supprimerLivraisonApresCalcul() {
                     );
                 } else {
                     this.tournees.add(tournee);
-                    afficherTournee(tournee);
+                    this.afficherTournee(tournee);
                     this.etatCourant.calculerTournee(this);
                 }
             }
