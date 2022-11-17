@@ -347,7 +347,7 @@ public void supprimerLivraisonApresCalcul() {
         for (Livreur livreur : this.comboBoxLivreur.getItems()) {
 
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.tableauLivraison.getItems()
+            List<Livraison> livraisons = this.livraisons
                     .stream().filter(
                             livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
@@ -485,8 +485,11 @@ public void supprimerLivraisonApresCalcul() {
             }
 
             this.tableauLivraison.getItems().clear();
-            this.tableauLivraison.getItems().addAll(FXCollections.observableArrayList(
-                    this.livraisons.stream().filter(livraison -> livreurs.contains(livraison.getLivreur())).collect(Collectors.toList())));
+            this.tableauLivraison.getItems().addAll(FXCollections
+                    .observableArrayList(this.livraisons.stream().filter(
+                            livraison -> livreurs.contains(livraison
+                                    .getLivreur())).collect(Collectors.toList()
+                    )));
 
             this.calquePlan.afficherDonneesLivreurs(livreurs);
         }
