@@ -5,20 +5,12 @@
         <numero>1</numero>
         <livreur id="LIVREUR_1"/>
         <fenetre id="H8_H9"/>
-        <adresse>
-            <id>1</id>
-            <latitude>45.759335</latitude>
-            <longitude>4.877039</longitude>
-        </adresse>
+        <adresse id="33066088"/>
     </livraison>
     <livraison>
         <numero>3</numero>
-        <livreur id="LIVREUR_1"/>
+        <livreur id="LIVREUR_3"/>
         <fenetre id="H8_H9"/>
-        <adresse>
-            <id>2</id>
-            <latitude>45.756004</latitude>
-            <longitude>4.8742256</longitude>
-        </adresse>
+        <adresse id="55475004"/>
     </livraison>
 </livraisons>

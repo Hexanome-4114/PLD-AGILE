@@ -156,6 +156,13 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
     }
 
+    public void supprimerSegment(final Intersection point1,
+                                 final Intersection point2,
+                                 final Livreur livreur) {
+        segments.remove(new Pair(new Pair(point1, point2), livreur));
+        directions.remove(new Pair(new Pair(point1, point2), livreur));
+    }
+
     /**
      * Enlève un segment et sa direction du calque.
      * @param point1
