@@ -19,6 +19,9 @@ public final class Tournee {
      */
     private final Livreur livreur;
 
+    /**
+     * Le temps que passe le livreur à chaque livraison en minutes.
+     */
     private final int tempsParLivraison;
 
     /**
@@ -38,6 +41,11 @@ public final class Tournee {
     private final Plan plan;
 
     private Intersection pointDepart;
+
+    public boolean isTourneeCalculee() {
+        return tourneeCalculee;
+    }
+
     private boolean tourneeCalculee = false;
 
 
@@ -69,6 +77,10 @@ public final class Tournee {
 
     public Plan getPlan() {
         return plan;
+    }
+
+    public int getTempsParLivraison() {
+        return tempsParLivraison;
     }
 
     /**
