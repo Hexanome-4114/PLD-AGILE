@@ -73,6 +73,39 @@
                     <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
+         <Label text="Afficher les données de :">
+            <VBox.margin>
+               <Insets top="20.0" />
+            </VBox.margin>
+         </Label>
+         <HBox prefHeight="49.0" prefWidth="630.0">
+            <children>
+               <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
+                  <HBox.margin>
+                     <Insets right="20.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
+            </children>
+            <VBox.margin>
+               <Insets top="10.0" />
+            </VBox.margin>
+         </HBox>
             <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer les tournées">
                 <VBox.margin>
                     <Insets top="10.0" />
@@ -83,5 +116,5 @@
             </HBox.margin>
         </VBox>
     </HBox>
-    <Button fx:id="chargerPlanBouton" onAction="#chargerPlan" text="Charger le plan" />
+    <Button fx:id="chargerPlanBouton" onAction="#chargerPlan" text="Charger un plan" />
 </VBox>

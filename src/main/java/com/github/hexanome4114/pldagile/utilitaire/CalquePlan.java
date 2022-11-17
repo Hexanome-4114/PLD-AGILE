@@ -26,7 +26,9 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Calque du plan contenant les intersections.
@@ -89,6 +91,8 @@ public final class CalquePlan extends MapLayer {
      */
     private Pair<Intersection, ImageView> entrepot;
 
+    private boolean afficherPointsDeLivraison = true;
+
     public CalquePlan() { }
 
     /**
@@ -111,6 +115,12 @@ public final class CalquePlan extends MapLayer {
      * @return l'objet Node correspondant à la livraison sur le calque
      */
     public Node ajouterLivraison(final Livraison livraison) {
+        // le point de livraison n'est plus accessible
+        Node point = points.get(livraison.getAdresse());
+        point.setDisable(true);
+        point.setVisible(false);
+
+        // création du Node de la livraison
         Shape forme = this.getForme(livraison.getFenetreDeLivraison());
         forme.setFill(this.getCouleur(livraison.getLivreur()));
 
@@ -127,6 +137,22 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
 
         return stack;
+    }
+
+    /**
+     * Enlève une livraison du calque.
+     * @param livraison
+     */
+    public void enleverLivraison(final Livraison livraison) {
+        // le point de livraison redevient accessible
+        Node point = points.get(livraison.getAdresse());
+        point.setDisable(false);
+        point.setVisible(this.afficherPointsDeLivraison);
+
+        Node noeud = livraisons.get(livraison);
+        livraisons.remove(livraison);
+        this.getChildren().remove(noeud);
+        this.markDirty();
     }
 
     /**
@@ -157,17 +183,6 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
     }
 
-    /**
-     * Enlève une livraison du calque.
-     * @param livraison
-     */
-    public void enleverLivraison(final Livraison livraison) {
-        Node noeud = livraisons.get(livraison);
-        livraisons.remove(livraison);
-        this.getChildren().remove(noeud);
-        this.markDirty();
-    }
-
     public void setEntrepot(final Intersection entrepot) {
         ImageView imageView = new ImageView(IMAGE_ENTREPOT);
         this.entrepot = new Pair(entrepot, imageView);
@@ -185,8 +200,7 @@ public final class CalquePlan extends MapLayer {
             ancienneSelection.setFill(COULEUR_POINT);
             ancienneSelection.setRadius(TAILLE_POINT);
             ancienneSelection.setCenterY(0);
-            ancienneSelection.setVisible(points.values().stream().findFirst()
-                    .get().isVisible());
+            ancienneSelection.setVisible(this.afficherPointsDeLivraison);
         }
 
         if (nouvelleSelection != null) {
@@ -231,15 +245,34 @@ public final class CalquePlan extends MapLayer {
      * @param visible
      */
     public void afficherPoints(final boolean visible) {
+        this.afficherPointsDeLivraison = visible;
+
+        Circle cerclePointSelectionne = Optional.ofNullable(pointSelectionne)
+                .map(Pair::getValue)
+                .orElse(null);
+
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             Circle cercle = point.getValue();
 
-            // on ne masque jamais le point sélectionné
-            if (this.pointSelectionne == null
-                    || cercle != this.pointSelectionne.getValue()) {
+            // on ne change pas la visibilité du point sélectionné et des
+            // points disable (points avec une livraison)
+            if (cercle != cerclePointSelectionne && !cercle.isDisable()) {
                 cercle.setVisible(visible);
             }
         }
+    }
+
+    public void afficherDonneesLivreurs(final List<Livreur> livreurs) {
+        for (Map.Entry<Livraison, Node> l : livraisons.entrySet()) {
+            Livraison livraison = l.getKey();
+            Node livraisonNoeud = l.getValue();
+
+            // visible si le livreur de la livraison est dans la liste
+            livraisonNoeud.setVisible(
+                    livreurs.contains(livraison.getLivreur()));
+        }
+
+        // TODO masquer les tournées
     }
 
     /**
