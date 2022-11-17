@@ -523,6 +523,12 @@ public void supprimerLivraisonApresCalcul() {
                         tournee.getLivreur());
             }
         }
+
+        for (Livraison livraison : tournee.getLivraisons()) {
+            if (livraison.isEnRetard()) {
+                this.calquePlan.modifierLivraisonEnRetard(livraison);
+            }
+        }
     }
 
     private void supprimerAffichageTournee(final Tournee tournee) {
@@ -558,7 +564,8 @@ public void supprimerLivraisonApresCalcul() {
             this.tableauLivraison.getItems().add(l);
         }
 
-        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison);
+        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison,
+                false);
 
         noeud.setOnMouseClicked(e -> {
             this.tableauLivraison.getSelectionModel().select(l);

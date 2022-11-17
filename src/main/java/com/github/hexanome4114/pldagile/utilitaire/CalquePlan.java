@@ -39,6 +39,8 @@ public final class CalquePlan extends MapLayer {
 
     private static final Color COULEUR_POINT = Color.RED;
 
+    private static final Color COULEUR_RETARD = Color.RED;
+
     private static final Image IMAGE_ENTREPOT = new Image(
             CalquePlan.class.getResource("/images/entrepot.png").toString(),
             25, 25, false, false);
@@ -115,10 +117,12 @@ public final class CalquePlan extends MapLayer {
      * Ajoute une livraison sur le calque.
      * @param livraison
      * @param visible
+     * @param enRetard
      * @return l'objet Node correspondant à la livraison sur le calque
      */
     public Node ajouterLivraison(final Livraison livraison,
-                                 final boolean visible) {
+                                 final boolean visible,
+                                 final boolean enRetard) {
         // le point de livraison n'est plus accessible
         Node point = points.get(livraison.getAdresse());
         point.setDisable(true);
@@ -126,7 +130,11 @@ public final class CalquePlan extends MapLayer {
 
         // création du Node de la livraison
         Shape forme = this.getForme(livraison.getFenetreDeLivraison());
-        forme.setFill(this.getCouleur(livraison.getLivreur()));
+        if (enRetard) {
+            forme.setFill(COULEUR_RETARD);
+        } else {
+            forme.setFill(this.getCouleur(livraison.getLivreur()));
+        }
 
         Text texte = new Text(String.valueOf(livraison.getNumero()));
         texte.setFill(Color.WHITE);
@@ -142,6 +150,11 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
 
         return stack;
+    }
+
+    public void modifierLivraisonEnRetard(final Livraison livraison) {
+        enleverLivraison(livraison);
+        ajouterLivraison(livraison, true, true);
     }
 
     /**
