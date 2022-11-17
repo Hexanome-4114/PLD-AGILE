@@ -385,8 +385,6 @@ public final class CalquePlan extends MapLayer {
      */
     @Override
     protected void layoutLayer() {
-        positionner(entrepot.getKey(), entrepot.getValue());
-
         // Obtenir une référence pour le niveau de zoom
         Point2D mapPointEntrepot = getMapPoint(
                 entrepot.getKey().getLatitude(),
@@ -399,6 +397,8 @@ public final class CalquePlan extends MapLayer {
         if (zoomReference == -1.0) {
             zoomReference = zoom;
         }
+
+        positionner(entrepot.getKey(), entrepot.getValue());
 
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
             positionner(point.getKey(), point.getValue());
