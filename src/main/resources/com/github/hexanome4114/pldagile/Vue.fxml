@@ -42,6 +42,11 @@
                         <Insets right="10.0" />
                     </HBox.margin>
                 </Button>
+            <ComboBox fx:id="comboBoxPlacementLivraison" disable="true" prefWidth="150.0" promptText="Placement dans la tournée">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </ComboBox>
                 <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
                 <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
                    <HBox.margin>
@@ -53,29 +58,27 @@
                 </VBox.margin>
             </HBox>
          <HBox prefHeight="31.0" prefWidth="630.0">
-            <children>
-               <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
-                  <HBox.margin>
-                     <Insets right="20.0" />
-                  </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
-                  <HBox.margin>
-                     <Insets right="10.0" />
-                  </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
-                  <HBox.margin>
-                     <Insets right="10.0" />
-                  </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
-                  <HBox.margin>
-                     <Insets right="10.0" />
-                  </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
-            </children>
+            <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
+              <HBox.margin>
+                 <Insets right="20.0" />
+              </HBox.margin>
+            </CheckBox>
+            <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
+              <HBox.margin>
+                 <Insets right="10.0" />
+              </HBox.margin>
+            </CheckBox>
+            <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
+              <HBox.margin>
+                 <Insets right="10.0" />
+              </HBox.margin>
+            </CheckBox>
+            <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
+              <HBox.margin>
+                 <Insets right="10.0" />
+              </HBox.margin>
+            </CheckBox>
+            <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
             <VBox.margin>
                <Insets top="30.0" />
             </VBox.margin>
@@ -86,9 +89,6 @@
                     <TableColumn fx:id="livreurColonne" prefWidth="213.3" text="Livreur" />
                     <TableColumn fx:id="fenetreDeLivraisonColonne" prefWidth="213.3" text="Fenêtre" />
                 </columns>
-                <VBox.margin>
-                   <Insets />
-                </VBox.margin>
             </TableView>
             <HBox>
                 <Button fx:id="sauvegarderLivraisonsBouton" disable="true" onAction="#sauvegarderLivraisons" text="Sauvegarder les livraisons">

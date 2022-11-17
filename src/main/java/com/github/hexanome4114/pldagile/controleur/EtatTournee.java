@@ -1,6 +1,11 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+import com.github.hexanome4114.pldagile.modele.Livreur;
+
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * Etat de l'application lorsque l'on a calculé les tournées.
  * Il est seulement possible de revenir à l'état plan chargé
@@ -21,6 +26,7 @@ public final class EtatTournee implements Etat {
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxAdresse().setValue(null);
         c.getTableauLivraison().getItems().clear();
+        c.getComboBoxPlacementLivraison().setDisable(true);
         c.getTableauLivraison().getSelectionModel().clearSelection();
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getSupprimerLivraisonBouton().setDisable(true);

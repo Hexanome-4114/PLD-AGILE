@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Contrôleur de l'application.
@@ -82,6 +83,9 @@ public final class Controleur {
 
     @FXML
     private ComboBox<Intersection> comboBoxAdresse;
+
+    @FXML
+    private ComboBox<Integer> comboBoxPlacementLivraison;
 
     @FXML
     private TableView<Livraison> tableauLivraison;
@@ -177,7 +181,6 @@ public final class Controleur {
         this.tableauLivraison.getSelectionModel().selectedItemProperty()
                 // bouton cliquable que lorsqu'une livraison est sélectionnée
                 .addListener((obs, ancienneSelection, nouvelleSelection) -> {
-
                             this.supprimerLivraisonBouton.setDisable(
                                     nouvelleSelection == null);
                             this.calquePlan.setLivraisonSelectionnee(
@@ -187,33 +190,73 @@ public final class Controleur {
         this.tableauLivraison.getItems()
                 // bouton cliquable que lorsqu'il y a des livraisons
                 .addListener((ListChangeListener<Livraison>) (obs) -> {
-                            boolean tableauEstVide = obs.getList().isEmpty();
+                        boolean tableauEstVide = obs.getList().isEmpty();
 
-                            this.sauvegarderLivraisonsBouton.setDisable(
-                                    tableauEstVide);
-                            this.calculerTourneeBouton.setDisable(
-                                    tableauEstVide);
-                            this.annulerBouton.setDisable(
-                                    listeDeCommandes.getIndexCourant() == -1);
-                            this.tableauLivraison.setDisable(tableauEstVide);
-                            this.afficherLivreursCheckBox.setDisable(
-                                    livraisons.isEmpty());
-                        }
+                        this.sauvegarderLivraisonsBouton.setDisable(
+                            tableauEstVide
+                        );
+                        this.calculerTourneeBouton.setDisable(
+                            tableauEstVide
+                            || etatCourant instanceof EtatTournee
+                        );
+                        this.annulerBouton.setDisable(
+                            listeDeCommandes.getIndexCourant() == -1
+                        );
+                        this.tableauLivraison.setDisable(tableauEstVide);
+                        this.afficherLivreursCheckBox.setDisable(
+                            livraisons.isEmpty()
+                        );
+                        this.comboBoxPlacementLivraison.setDisable(
+                            !(this.etatCourant instanceof EtatTournee)
+                        );
+                    }
                 );
-        this.comboBoxLivreur.valueProperty().
-                addListener((obs, ancienneSelection, nouvelleSelection) ->
+        this.comboBoxLivreur.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) -> {
+                        Livreur livreur = this.comboBoxLivreur.getValue();
+                        int nombreLivraison = (int) this.livraisons
+                                .stream().filter(
+                                        livraison -> livraison
+                                                .getLivreur().equals(livreur)
+                                ).count();
+                        List<Integer> placementLivraison
+                                = IntStream.range(1, nombreLivraison + 2)
+                                .boxed().collect(
+                                        Collectors.toList()
+                                );
+
                         this.ajouterLivraisonBouton.setDisable(
-                        this.comboBoxLivreur.getValue() == null
+                        (this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
-                        || this.comboBoxAdresse.getValue() == null));
-        this.comboBoxFenetreDeLivraison.valueProperty().
-                addListener((options, oldValue, newValue) ->
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null));
+                        this.comboBoxPlacementLivraison.setItems(
+                                FXCollections.observableArrayList(
+                                        placementLivraison
+                                )
+                        );
+                });
+        this.comboBoxFenetreDeLivraison.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
                         this.ajouterLivraisonBouton.setDisable(
-                        this.comboBoxLivreur.getValue() == null
+                        (this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
-                        || this.comboBoxAdresse.getValue() == null));
-        this.comboBoxAdresse.valueProperty().
-                addListener((options, oldValue, newValue) ->
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null))
+                );
+        this.comboBoxAdresse.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        (this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null))
+                );
+        this.comboBoxPlacementLivraison.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
                         this.ajouterLivraisonBouton.setDisable(
                         this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
@@ -592,6 +635,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public ComboBox<FenetreDeLivraison> getComboBoxFenetreDeLivraison() {
         return this.comboBoxFenetreDeLivraison;
+    }
+
+    public ComboBox<Integer> getComboBoxPlacementLivraison() {
+        return this.comboBoxPlacementLivraison;
     }
 
     public Button getAjouterLivraisonBouton() {
