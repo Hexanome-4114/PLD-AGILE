@@ -503,6 +503,17 @@ public void supprimerLivraisonApresCalcul() {
         }
     }
 
+    private void supprimerAffichageTournee(final Tournee tournee) {
+        for (Itineraire itineraire : tournee.getItineraires()) {
+            for (int j = 1; j < itineraire.getIntersections().size(); j++) {
+                this.calquePlan.supprimerSegment(
+                        itineraire.getIntersections().get(j - 1),
+                        itineraire.getIntersections().get(j),
+                        tournee.getLivreur());
+            }
+        }
+    }
+
     private void afficherPopUp(
             final String message,
             final Alert.AlertType type
