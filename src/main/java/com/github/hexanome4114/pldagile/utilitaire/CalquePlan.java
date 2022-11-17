@@ -112,9 +112,11 @@ public final class CalquePlan extends MapLayer {
     /**
      * Ajoute une livraison sur le calque.
      * @param livraison
+     * @param visible
      * @return l'objet Node correspondant à la livraison sur le calque
      */
-    public Node ajouterLivraison(final Livraison livraison) {
+    public Node ajouterLivraison(final Livraison livraison,
+                                 final boolean visible) {
         // le point de livraison n'est plus accessible
         Node point = points.get(livraison.getAdresse());
         point.setDisable(true);
@@ -130,6 +132,7 @@ public final class CalquePlan extends MapLayer {
 
         StackPane stack = new StackPane();
         stack.setCursor(Cursor.HAND);
+        stack.setVisible(visible);
         stack.getChildren().addAll(forme, texte);
 
         livraisons.put(livraison, stack);

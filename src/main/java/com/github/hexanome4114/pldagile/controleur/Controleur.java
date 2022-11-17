@@ -454,7 +454,7 @@ public void supprimerLivraisonApresCalcul() {
                 afficherLivreur1CheckBox, afficherLivreur2CheckBox,
                 afficherLivreur3CheckBox, afficherLivreur4CheckBox};
 
-        // gestion des états des checkBoxs
+        // gestion des états des checkBoxes
         if (this.afficherLivreursCheckBox.isSelected()) {
             for (CheckBox c : checkBoxes) {
                 c.setSelected(true);
@@ -467,32 +467,47 @@ public void supprimerLivraisonApresCalcul() {
             }
         }
 
-        // mise à jour du calque
-        if (this.afficherLivreursCheckBox.isSelected()) { // tous les livreurs
-            this.calquePlan.afficherDonneesLivreurs(Arrays.asList(
-                    Livreur.values()));
+        // mise à jour du calque et du tableau
+        List<Livreur> livreurs = getLivreursSelectionnes();
 
-            this.tableauLivraison.getItems().clear();
+        this.calquePlan.afficherDonneesLivreurs(livreurs);
+        this.tableauLivraison.getItems().clear();
+
+        // on affiche toutes les livraisons
+        if (livreurs.size() == Livreur.values().length) {
             this.tableauLivraison.getItems().addAll(
                     FXCollections.observableArrayList(this.livraisons));
-        } else {
-            List<Livreur> livreurs = new ArrayList<>();
-
-            for (CheckBox c : checkBoxes) {
-                if (c.isSelected()) {
-                    livreurs.add((Livreur) c.getUserData());
-                }
-            }
-
-            this.tableauLivraison.getItems().clear();
+        } else { // on filtre les livraisons selon les livreurs sélectionnés
             this.tableauLivraison.getItems().addAll(FXCollections
                     .observableArrayList(this.livraisons.stream().filter(
                             livraison -> livreurs.contains(livraison
                                     .getLivreur())).collect(Collectors.toList()
                     )));
-
-            this.calquePlan.afficherDonneesLivreurs(livreurs);
         }
+    }
+
+    /**
+     * Retourne les livreurs dont la checkbox est sélectionnée.
+     * @return les livreurs dont la checkbox est sélectionnée.
+     */
+    private List<Livreur> getLivreursSelectionnes() {
+        if (afficherLivreursCheckBox.isSelected()) {
+            return Arrays.asList(Livreur.values());
+        }
+
+        List<Livreur> livreurs = new ArrayList<>();
+
+        CheckBox[] checkBoxes = {
+                afficherLivreur1CheckBox, afficherLivreur2CheckBox,
+                afficherLivreur3CheckBox, afficherLivreur4CheckBox};
+
+        for (CheckBox c : checkBoxes) {
+            if (c.isSelected()) {
+                livreurs.add((Livreur) c.getUserData());
+            }
+        }
+
+        return livreurs;
     }
 
     private void afficherTournee(final Tournee tournee) {
@@ -527,10 +542,19 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void ajouterLivraison(final Livraison l) {
+        // si la checkbox du livreur n'est pas sélectionnée, on ajoute la
+        // livraison mais on ne l'affiche pas sur la carte
+
         this.livraisons.add(l);
 
-        this.tableauLivraison.getItems().add(l);
-        Node noeud = this.calquePlan.ajouterLivraison(l);
+        boolean afficherLivraison = this.getLivreursSelectionnes()
+                .contains(l.getLivreur());
+
+        if (afficherLivraison) {
+            this.tableauLivraison.getItems().add(l);
+        }
+
+        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison);
 
         noeud.setOnMouseClicked(e -> {
             this.tableauLivraison.getSelectionModel().select(l);
@@ -539,7 +563,6 @@ public void supprimerLivraisonApresCalcul() {
 
     public void supprimerLivraison(final Livraison l) {
         this.livraisons.remove(l);
-
         this.tableauLivraison.getItems().remove(l);
         this.calquePlan.enleverLivraison(l);
     }
