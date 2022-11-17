@@ -1,5 +1,11 @@
 package com.github.hexanome4114.pldagile.controleur;
 
+
+/**
+ * Etat de l'application lorsque qu'aucun plan n'a été chargé,
+ * il n'est alors possible que de charger un plan pour passer à
+ * l'état plan chargé.
+ */
 public final class EtatInitial implements Etat {
 
     /**

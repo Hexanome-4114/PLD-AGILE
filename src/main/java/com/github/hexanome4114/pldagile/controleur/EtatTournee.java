@@ -1,6 +1,11 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+/**
+ * Etat de l'application lorsque l'on a calculé les tournées.
+ * Il est seulement possible de revenir à l'état plan chargé
+ * si l'on recharge un nouveau plan.
+ */
 public final class EtatTournee implements Etat {
 
     /**

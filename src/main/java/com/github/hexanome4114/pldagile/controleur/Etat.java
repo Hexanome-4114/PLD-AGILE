@@ -1,6 +1,9 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+/**
+ * Etat de l'application.
+ */
 public interface Etat {
     /**
      * Passage à l'état plan chargé.

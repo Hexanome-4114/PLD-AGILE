@@ -1,6 +1,16 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+/**
+ * Etat de l'application lorsque des livraisons ont été ajoutées.
+ * Il est possible de rajouter des livraisons ou en supprimer,
+ * l'état livraison est conservé même si il n'y a aucune livraison.
+ * Il est possible de passer à l'état tournée si l'on clique sur
+ * le bouton calculer les tournées, il est aussi possible de passer
+ * à l'état plan chargé si l'on recharge un plan, les livraisons sont
+ * alors réinitialiser. Si l'on charge des livraisons depuis un fichier,
+ * l'état est conservé mais les livraisons sont réinitialiser
+ */
 public final class EtatLivraison implements Etat {
 
     /**

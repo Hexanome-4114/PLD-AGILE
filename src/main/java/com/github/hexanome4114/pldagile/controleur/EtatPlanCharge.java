@@ -1,6 +1,11 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+/**
+ * Etat de l'application lorsque le plan à été chargé.
+ * Il est possible de passer à l'état livraison si l'on ajoute
+ * des livraisons ou si l'on en charge.
+ */
 public final class EtatPlanCharge implements Etat {
 
     /**
