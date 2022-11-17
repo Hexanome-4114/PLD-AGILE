@@ -15,20 +15,20 @@ import java.util.Map;
 public final class Tournee {
 
     /**
-     * @livreur livreur qui effectue les livraisons
+     * Le livreur qui effectue les livraisons.
      */
     private final Livreur livreur;
 
     private final int tempsParLivraison;
 
     /**
-     * @livraisons liste des livraison à effectuer, elles sont dans l'ordre du
-     * TSP une fois la tournée calculée
+     * La liste des livraison à effectuer, elles sont dans l'ordre du
+     * TSP une fois la tournée calculée.
      */
     private List<Livraison> livraisons;
 
     /**
-     * @itineraires liste des itinéraire à effectuer dans l'ordre des livraisons
+     * La liste des itinéraire à effectuer dans l'ordre des livraisons.
      * La première intersection du premier segment de chaque itinéraire
      * correspond à une intersection de livraison. Et inversement pour la
      * toute dernière.
@@ -246,7 +246,7 @@ public final class Tournee {
      * @param rang représente la x ième livraison que l'on souhaite effectuer.
      * @param livraisonAAjouter la livraison à ajouter.
      */
-    public void ajouterLivraisonApresCalcul(int rang, final Livraison livraisonAAjouter) throws Exception {
+    public void ajouterLivraisonApresCalcul(final int rang, final Livraison livraisonAAjouter) throws Exception {
         if (!this.tourneeCalculee) {
             return;
         }
@@ -255,16 +255,16 @@ public final class Tournee {
         Intersection intersectionAvant = getAdresseLivraisonAvant(indice);
         Intersection intersectionApres;
         // Si on veut ajouter à la fin de la liste des livraison
-        if(indice == this.livraisons.size()){
+        if (indice == this.livraisons.size()) {
             intersectionApres = this.getPointDepart();
-        }else {
+        } else {
             intersectionApres = this.livraisons.get(indice).getAdresse();
         }
         // Calculer l'itinéraire entre intersectionAvant et intersectionAAjouter
         Map<Intersection, Itineraire> itinerairesMap = this.plan.getItineraire(intersectionAvant);
         Itineraire itineraireAvantAAjouter = itinerairesMap.get(intersectionAAjouter);
         // Si il n'y a pas d'itinéraire entre les 2, throw une exception.
-        if(itineraireAvantAAjouter.getIntersections().isEmpty()){
+        if (itineraireAvantAAjouter.getIntersections().isEmpty()) {
             throw new Exception("Il manque un itinéraire entre l'adresse précédente et l'adresse de livraison.");
         }
 
@@ -300,15 +300,15 @@ public final class Tournee {
      *     <li>Le point de départ de la tournée si indice==0</li></>
      * </ul>
      */
-    private Intersection getAdresseLivraisonAvant(int indice){
-        if(!this.tourneeCalculee || indice < 0 || indice >= this.livraisons.size()){
+    private Intersection getAdresseLivraisonAvant(final int indice) {
+        if (!this.tourneeCalculee || indice < 0 || indice >= this.livraisons.size()) {
             return null;
         }
         Intersection result;
-        if(indice == 0){
+        if (indice == 0) {
             result = this.pointDepart;
-        }else {
-            result = this.livraisons.get(indice-1).getAdresse();
+        } else {
+            result = this.livraisons.get(indice - 1).getAdresse();
         }
         return result;
     }
@@ -324,15 +324,15 @@ public final class Tournee {
      *     <li>Le point de départ de la tournée si indice==this.livraisons.size()-1</li></>
      * </ul>
      */
-    private Intersection getAdresseIntersectionApres(int indice){
+    private Intersection getAdresseIntersectionApres(final int indice) {
         Intersection result;
-        if(!this.tourneeCalculee || indice < 0 || indice >= this.livraisons.size()){
+        if (!this.tourneeCalculee || indice < 0 || indice >= this.livraisons.size()) {
             result = null;
         }
-        if(indice == this.livraisons.size()-1){
+        if (indice == this.livraisons.size() - 1) {
             result = this.pointDepart;
-        }else{
-            result = this.livraisons.get(indice+1).getAdresse();
+        } else {
+            result = this.livraisons.get(indice + 1).getAdresse();
         }
         return result;
     }
