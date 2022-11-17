@@ -3,6 +3,11 @@ package com.github.hexanome4114.pldagile.controleur;
 
 public final class EtatLivraison implements Etat {
 
+    /**
+     * Passage de l'état livraison à l'état plan chargé
+     * lorsque l'on charge un nouveau plan.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerPlan(final Controleur c) {
         c.getComboBoxLivreur().setValue(null);
@@ -25,6 +30,11 @@ public final class EtatLivraison implements Etat {
         c.setEtatCourant(c.getEtatPlanCharge());
     }
 
+    /**
+     * Réinitialise l'état livraison
+     * lorsque l'on charge de nouvelles livraisons.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerLivraison(final Controleur c) {
         c.getSauvegarderLivraisonsBouton().setDisable(false);
@@ -34,17 +44,23 @@ public final class EtatLivraison implements Etat {
         c.setEtatCourant(c.getEtatLivraison());
     }
 
+    /**
+     * Passage de l'état livraison à l'état tournée
+     * lorsque l'on calcule les tournées.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void calculerTournee(final Controleur c) {
-        c.getComboBoxLivreur().getSelectionModel().clearSelection();
-        c.getComboBoxLivreur().getItems().clear();
-        c.getComboBoxFenetreDeLivraison().getSelectionModel().clearSelection();
-        c.getComboBoxFenetreDeLivraison().getItems().clear();
+        c.getComboBoxLivreur().setValue(null);
         c.getComboBoxLivreur().setDisable(true);
+        c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxFenetreDeLivraison().setDisable(true);
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getChargerLivraisonBouton().setDisable(true);
+        c.getInstructionLabel().setText(
+                "Comment ajouter nouvelle livraison"
+        );
         c.setEtatCourant(c.getEtatTournee());
     }
 }

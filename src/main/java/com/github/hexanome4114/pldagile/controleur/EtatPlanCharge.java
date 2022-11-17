@@ -3,6 +3,10 @@ package com.github.hexanome4114.pldagile.controleur;
 
 public final class EtatPlanCharge implements Etat {
 
+    /**
+     * Réinitialise l'état plan chargé lorsque l'on charge un nouveau plan.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerPlan(final Controleur c) {
         c.getComboBoxLivreur().setValue(null);
@@ -25,6 +29,11 @@ public final class EtatPlanCharge implements Etat {
         c.setEtatCourant(c.getEtatPlanCharge());
     }
 
+    /**
+     * Passage de l'état plan chargé à l'état livraison
+     * lorsque l'on ajoute une livraison.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void ajouterLivraison(final Controleur c) {
         c.getSauvegarderLivraisonsBouton().setDisable(false);
@@ -32,6 +41,11 @@ public final class EtatPlanCharge implements Etat {
         c.setEtatCourant(c.getEtatLivraison());
     }
 
+    /**
+     * Passage de l'état plan chargé à l'état livraison
+     * lorsque l'on charge des livraisons.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerLivraison(final Controleur c) {
         c.getSauvegarderLivraisonsBouton().setDisable(false);

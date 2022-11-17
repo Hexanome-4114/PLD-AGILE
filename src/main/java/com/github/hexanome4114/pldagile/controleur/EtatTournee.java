@@ -1,10 +1,18 @@
 package com.github.hexanome4114.pldagile.controleur;
 
+
 public final class EtatTournee implements Etat {
 
+    /**
+     * Passage de l'état tournée à l'état plan chargé
+     * lorsque l'on charge un nouveau plan.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerPlan(final Controleur c) {
+        c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxLivreur().setValue(null);
+        c.getComboBoxFenetreDeLivraison().setDisable(false);
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxAdresse().setValue(null);
         c.getTableauLivraison().getItems().clear();

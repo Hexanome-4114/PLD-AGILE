@@ -2,6 +2,11 @@ package com.github.hexanome4114.pldagile.controleur;
 
 public final class EtatInitial implements Etat {
 
+    /**
+    * Passage de l'état initial à l'état plan chargé
+     * lorsque l'on charge un plan.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerPlan(final Controleur c) {
         c.getComboBoxLivreur().setDisable(false);
