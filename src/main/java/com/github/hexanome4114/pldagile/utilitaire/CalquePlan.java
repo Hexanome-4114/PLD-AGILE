@@ -156,11 +156,24 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
     }
 
-    public void supprimerSegment(final Intersection point1,
+    /**
+     * Enlève un segment et sa direction du calque.
+     * @param point1
+     * @param point2
+     * @param livreur
+     */
+    public void enleverSegment(final Intersection point1,
                                  final Intersection point2,
                                  final Livreur livreur) {
-        segments.remove(new Pair(new Pair(point1, point2), livreur));
-        directions.remove(new Pair(new Pair(point1, point2), livreur));
+        Pair<Pair<Intersection, Intersection>, Livreur> segment
+                = new Pair(new Pair(point1, point2), livreur);
+        Line ligne = segments.get(segment);
+        Polygon direction = directions.get(segment);
+        segments.remove(segment);
+        directions.remove(segment);
+        this.getChildren().remove(ligne);
+        this.getChildren().remove(direction);
+        this.markDirty();
     }
 
     /**
@@ -291,7 +304,8 @@ public final class CalquePlan extends MapLayer {
      * @return la distance euclidienne entre deux points
      */
     private double calculerDistanceEuclidienne(final double x1, final double y1,
-                                               final double x2, final double y2) {
+                                               final double x2,
+                                               final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);

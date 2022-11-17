@@ -448,7 +448,7 @@ public void supprimerLivraisonApresCalcul() {
     private void supprimerAffichageTournee(final Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
             for (int j = 1; j < itineraire.getIntersections().size(); j++) {
-                this.calquePlan.supprimerSegment(
+                this.calquePlan.enleverSegment(
                         itineraire.getIntersections().get(j - 1),
                         itineraire.getIntersections().get(j),
                         tournee.getLivreur());
