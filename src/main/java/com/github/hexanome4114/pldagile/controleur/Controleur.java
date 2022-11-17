@@ -33,11 +33,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -414,13 +409,15 @@ public void supprimerLivraisonApresCalcul() {
                     }
                 }
                 if (tournee != null) {
-                    File feuilleDeRoute = new File(dossier.getPath() + "/feuille_de_route_" + livreur.getNumero() + ".txt");
+                    File feuilleDeRoute = new File(dossier.getPath() +
+                            "/feuille_de_route_" + livreur.getNumero() +
+                            ".txt");
                     Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
                 }
             }
         } catch (Exception e) {
             this.afficherPopUp(
-                    "Problème lors de la sauvegarde des livraisons.",
+                    "Problème lors de la generation de la feuille de route.",
                     Alert.AlertType.ERROR
             );
         }
