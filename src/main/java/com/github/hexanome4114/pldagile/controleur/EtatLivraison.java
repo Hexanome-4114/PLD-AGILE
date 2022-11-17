@@ -62,14 +62,17 @@ public final class EtatLivraison implements Etat {
     @Override
     public void calculerTournee(final Controleur c) {
         c.getComboBoxLivreur().setValue(null);
-        c.getComboBoxLivreur().setDisable(true);
+        c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxFenetreDeLivraison().setValue(null);
-        c.getComboBoxFenetreDeLivraison().setDisable(true);
+        c.getComboBoxFenetreDeLivraison().setDisable(false);
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getChargerLivraisonBouton().setDisable(true);
         c.getInstructionLabel().setText(
-                "Comment ajouter nouvelle livraison"
+                "Pour ajouter une livraison, veuillez sélectionner un livreur,"
+                        + " une fenêtre horaire, une adresse de livraison"
+                        + " en cliquant sur la carte et sa place dans la"
+                        + " tournée."
         );
         c.setEtatCourant(c.getEtatTournee());
     }
