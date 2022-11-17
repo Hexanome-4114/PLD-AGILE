@@ -303,21 +303,16 @@ public void supprimerLivraisonApresCalcul() {
         }
 
         try {
-            List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
+            List<Livraison> livraisons = Serialiseur.chargerLivraisons(
+                    fichier, this.plan);
 
             this.reinitialiserTableauLivraison();
             this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
-                // Vérifie que les adresses de livraisons sont sur le plan
-                if (!this.plan.getIntersections().containsKey(
-                        livraison.getAdresse().getId())) {
-                    throw new Exception("L'adresse de cette livraison"
-                            + "n'existe pas sur le plan");
-                }
-
                 this.ajouterLivraison(livraison);
             }
+
             this.etatCourant.ajouterLivraison(this);
         } catch (Exception e) {
             this.afficherPopUp(

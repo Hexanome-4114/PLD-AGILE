@@ -43,20 +43,20 @@ class SerialiseurTest {
 
     @Test
     void sauvegarderLivraisons() {
-        List<Livraison> livraisons = new ArrayList<>();
-
-        FenetreDeLivraison fenetre = FenetreDeLivraison.H8_H9;
-        Livreur livreur = Livreur.LIVREUR_1;
-
-        livraisons.add(new Livraison(1, fenetre, livreur,
-                new Intersection("1", 45.759335, 4.877039)
-        ));
-
-        livraisons.add(new Livraison(3, fenetre, livreur,
-                new Intersection("2", 45.756004, 4.8742256)
-        ));
-
         try {
+            URL urlPlan = this.getClass().getResource("/smallMap.xml");
+            Plan plan = Serialiseur.chargerPlan(new File(urlPlan.getFile()));
+
+            List<Livraison> livraisons = new ArrayList<>();
+
+            livraisons.add(new Livraison(1, FenetreDeLivraison.H8_H9,
+                    Livreur.LIVREUR_1, plan.getIntersections().get("33066088"))
+            );
+
+            livraisons.add(new Livraison(3, FenetreDeLivraison.H8_H9,
+                    Livreur.LIVREUR_3, plan.getIntersections().get("55475004"))
+            );
+
             File fichierAttendu = new File(this.getClass()
                     .getResource("/livraisons.xml").getFile());
             File fichierResultat = File.createTempFile("temp", ".xml");
@@ -73,16 +73,28 @@ class SerialiseurTest {
 
     @Test
     void chargerLivraisons() {
-        File fichier = new File(this.getClass()
-                .getResource("/livraisons.xml").getFile());
-
-        List<Livraison> livraisons = null;
         try {
-            livraisons = Serialiseur.chargerLivraisons(fichier);
+            URL urlPlan = this.getClass().getResource("/smallMap.xml");
+            Plan plan = Serialiseur.chargerPlan(new File(urlPlan.getFile()));
+
+            File fichier = new File(this.getClass()
+                    .getResource("/livraisons.xml").getFile());
+
+            List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier,
+                    plan);
 
             assertEquals(2, livraisons.size());
 
-            // TODO comparer les livraisons
+            assertAll(
+                    () -> assertEquals("Livraison{numero=1, fenetreDe"
+                            + "Livraison=8h-9h, livreur=Livreur 1, adresse="
+                            + "Intersection{33066088}}", livraisons.get(0)
+                            .toString()),
+                    () -> assertEquals("Livraison{numero=3, fenetreDe"
+                            + "Livraison=8h-9h, livreur=Livreur 3, adresse="
+                            + "Intersection{55475004}}", livraisons.get(1)
+                            .toString())
+            );
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
