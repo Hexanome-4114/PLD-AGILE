@@ -452,10 +452,21 @@ public final class Controleur {
         );
     }
 
-    private void afficherTournee(Tournee tournee) {
+    private void afficherTournee(final Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
             for (int j = 1; j < itineraire.getIntersections().size(); j++) {
                 this.calquePlan.ajouterSegment(
+                        itineraire.getIntersections().get(j - 1),
+                        itineraire.getIntersections().get(j),
+                        tournee.getLivreur());
+            }
+        }
+    }
+
+    private void supprimerAffichageTournee(final Tournee tournee) {
+        for (Itineraire itineraire : tournee.getItineraires()) {
+            for (int j = 1; j < itineraire.getIntersections().size(); j++) {
+                this.calquePlan.supprimerSegment(
                         itineraire.getIntersections().get(j - 1),
                         itineraire.getIntersections().get(j),
                         tournee.getLivreur());

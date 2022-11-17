@@ -5,6 +5,8 @@ import com.github.hexanome4114.pldagile.modele.Intersection;
 import com.github.hexanome4114.pldagile.modele.Livraison;
 import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.gluonhq.maps.MapLayer;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Point2D;
@@ -21,6 +23,7 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import java.util.Map;
 
@@ -40,7 +43,9 @@ public final class CalquePlan extends MapLayer {
     private static final Image IMAGE_POINT_SELECTIONNE = new Image(
             CalquePlan.class.getResource("/images/pin.png").toString());
 
-    private static final int TAILLE_SEGMENT = 5;
+    private static final int TAILLE_SEGMENT = 3;
+
+    private static final int TAILLE_FLECHE = 5;
 
     /**
      * Map contenant les points de livraison et leur Node associé.
@@ -58,20 +63,25 @@ public final class CalquePlan extends MapLayer {
     /**
      * Map contenant les segments de la tournée et leur Node associé.
      */
-    private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
-            = FXCollections.observableHashMap();
+    private final ObservableMap<Pair<Pair<Intersection, Intersection>, Livreur>,
+            Line> segments = FXCollections.observableHashMap();
 
     /**
      * Map contenant les flèches directionnelles des segments de la tournée
      * et leur Node associé.
      */
-    private final ObservableMap<Pair<Intersection, Intersection>, Polygon>
-            directions = FXCollections.observableHashMap();
+    private final ObservableMap<Pair<Pair<Intersection, Intersection>, Livreur>,
+            Polygon> directions = FXCollections.observableHashMap();
 
     /**
-     * Point de livraison sélectionné par l'utilisateur.
+     * Point de livraison à mettre en avant car sélectionné par l'utilisateur.
      */
-    private Circle pointSelectionne;
+    private Pair<Intersection, Circle> pointSelectionne;
+
+    /**
+     * Livraison à mettre en avant car sélectionnée par l'utilisateur.
+     */
+    private Pair<Livraison, FadeTransition> livraisonSelectionnee;
 
     /**
      * Point particulier représentant l'entrepôt.
@@ -97,8 +107,9 @@ public final class CalquePlan extends MapLayer {
     /**
      * Ajoute une livraison sur le calque.
      * @param livraison
+     * @return l'objet Node correspondant à la livraison sur le calque
      */
-    public void ajouterLivraison(final Livraison livraison) {
+    public Node ajouterLivraison(final Livraison livraison) {
         Shape forme = this.getForme(livraison.getFenetreDeLivraison());
         forme.setFill(this.getCouleur(livraison.getLivreur()));
 
@@ -107,11 +118,54 @@ public final class CalquePlan extends MapLayer {
         texte.setStyle("-fx-font-size: " + (15 - 2 * texte.getText().length()));
 
         StackPane stack = new StackPane();
+        stack.setCursor(Cursor.HAND);
         stack.getChildren().addAll(forme, texte);
 
         livraisons.put(livraison, stack);
         this.getChildren().add(stack);
         this.markDirty();
+
+        return stack;
+    }
+
+    /**
+     * Ajoute un segment sur le calque.
+     * @param point1
+     * @param point2
+     * @param livreur
+     */
+    public void ajouterSegment(final Intersection point1,
+                               final Intersection point2,
+                               final Livreur livreur) {
+        Line ligne = new Line();
+        ligne.setFill(this.getCouleur(livreur));
+        ligne.setStroke(this.getCouleur(livreur));
+        ligne.setStrokeWidth(TAILLE_SEGMENT);
+
+        Polygon direction = new Polygon();
+        direction.setFill(this.getCouleur(livreur));
+        direction.setStroke(this.getCouleur(livreur));
+        direction.setStrokeWidth(TAILLE_FLECHE);
+
+        segments.put(new Pair(new Pair(point1, point2), livreur), ligne);
+        directions.put(new Pair(new Pair(point1, point2), livreur), direction);
+
+        // ajout en position 0 pour que ce soit l'élément le plus en arrière
+        this.getChildren().add(0, ligne);
+        this.getChildren().add(0, direction);
+        this.markDirty();
+    }
+
+    public void supprimerSegment(final Intersection point1,
+                                 final Intersection point2,
+                                 final Livreur livreur) {
+        segments.remove(new Pair(new Pair(point1, point2), livreur));
+        directions.remove(new Pair(new Pair(point1, point2), livreur));
+    }
+
+    public void supprimerSegment(final Intersection point1,
+                                 final Intersection point2) {
+
     }
 
     /**
@@ -133,23 +187,54 @@ public final class CalquePlan extends MapLayer {
     }
 
     public void setPointSelectionne(final Intersection intersection) {
-        Circle point = points.get(intersection);
+        Circle nouvelleSelection = points.get(intersection);
 
         if (this.pointSelectionne != null) {
             // réinitialisation si une sélection a déjà eu lieu
-            this.pointSelectionne.setFill(COULEUR_POINT);
-            this.pointSelectionne.setRadius(TAILLE_POINT);
-            this.pointSelectionne.setCenterY(0);
-            this.pointSelectionne.setVisible(point.isVisible());
+            Circle ancienneSelection = pointSelectionne.getValue();
+
+            ancienneSelection.setFill(COULEUR_POINT);
+            ancienneSelection.setRadius(TAILLE_POINT);
+            ancienneSelection.setCenterY(0);
+            ancienneSelection.setVisible(points.values().stream().findFirst()
+                    .get().isVisible());
         }
 
-        point.setFill(new ImagePattern(IMAGE_POINT_SELECTIONNE));
-        point.setRadius(15);
-        // modification du Y pour bien positionner le pin
-        point.setCenterY(point.getCenterY() - point.getRadius());
-        point.setVisible(true);
+        if (nouvelleSelection != null) {
+            nouvelleSelection.setFill(
+                    new ImagePattern(IMAGE_POINT_SELECTIONNE));
+            nouvelleSelection.setRadius(15);
+            // modification du Y pour bien positionner le pin
+            nouvelleSelection.setCenterY(nouvelleSelection.getCenterY()
+                    - nouvelleSelection.getRadius());
+            nouvelleSelection.setVisible(true);
 
-        this.pointSelectionne = point;
+            this.pointSelectionne = new Pair<>(intersection, nouvelleSelection);
+        } else {
+            this.pointSelectionne = null;
+        }
+    }
+
+    public void setLivraisonSelectionnee(final Livraison livraison) {
+        Node noeud = livraisons.get(livraison);
+        FadeTransition animation;
+
+        if (this.livraisonSelectionnee != null) {
+            // réinitialisation si une sélection a déjà eu lieu
+            animation = livraisonSelectionnee.getValue();
+            animation.jumpTo(Duration.ZERO);
+            animation.stop();
+            animation.setNode(noeud);
+        } else {
+            animation = new FadeTransition(Duration.seconds(1), noeud);
+            animation.setFromValue(10);
+            animation.setToValue(0.1);
+            animation.setCycleCount(Animation.INDEFINITE);
+            animation.setAutoReverse(true);
+        }
+
+        animation.play();
+        livraisonSelectionnee = new Pair<>(livraison, animation);
     }
 
     /**
@@ -161,7 +246,8 @@ public final class CalquePlan extends MapLayer {
             Circle cercle = point.getValue();
 
             // on ne masque jamais le point sélectionné
-            if (cercle != this.pointSelectionne) {
+            if (this.pointSelectionne == null
+                    || cercle != this.pointSelectionne.getValue()) {
                 cercle.setVisible(visible);
             }
         }
@@ -210,36 +296,10 @@ public final class CalquePlan extends MapLayer {
      * @return la distance euclidienne entre deux points
      */
     private double calculerDistanceEuclidienne(final double x1, final double y1,
-            final double x2, final double y2) {
+                                               final double x2, final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);
-    }
-
-    /**
-     * Ajoute un segment sur le calque.
-     * @param point1
-     * @param point2
-     * @param livreur
-     */
-    public void ajouterSegment(final Intersection point1,
-                               final Intersection point2,
-                               final Livreur livreur) {
-        Line ligne = new Line();
-        ligne.setFill(this.getCouleur(livreur));
-        ligne.setStroke(this.getCouleur(livreur));
-        ligne.setStrokeWidth(TAILLE_SEGMENT);
-
-        Polygon direction = new Polygon();
-        direction.setFill(this.getCouleur(livreur));
-        direction.setStroke(this.getCouleur(livreur));
-        direction.setStrokeWidth(TAILLE_SEGMENT);
-
-        segments.put(new Pair(point1, point2), ligne);
-        directions.put(new Pair(point1, point2), direction);
-        this.getChildren().add(ligne);
-        this.getChildren().add(direction);
-        this.markDirty();
     }
 
     /**
@@ -317,14 +377,14 @@ public final class CalquePlan extends MapLayer {
             positionner(livraison.getKey().getAdresse(), livraison.getValue());
         }
 
-        for (Map.Entry<Pair<Intersection, Intersection>, Line> segment
-                : segments.entrySet()) {
-            positionner(segment.getKey(), segment.getValue());
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Line> segment : segments.entrySet()) {
+            positionner(segment.getKey().getKey(), segment.getValue());
         }
 
-        for (Map.Entry<Pair<Intersection, Intersection>, Polygon> direction
-                : directions.entrySet()) {
-            positionner(direction.getKey(), direction.getValue());
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Polygon> direction : directions.entrySet()) {
+            positionner(direction.getKey().getKey(), direction.getValue());
         }
     }
 
@@ -361,7 +421,7 @@ public final class CalquePlan extends MapLayer {
                 point1.getLatitude(), point1.getLongitude());
         Point2D mapPoint2 = getMapPoint(
                 point2.getLatitude(), point2.getLongitude());
-        //Localisation du centre de la flèche sur le segment
+        // Localisation du centre de la flèche sur le segment
         Double pourcentageCentreFleche = 0.75;
         Point2D mapPointCentreFleche = new Point2D(
                 mapPoint1.getX() + (mapPoint2.getX() - mapPoint1.getX())
@@ -375,12 +435,19 @@ public final class CalquePlan extends MapLayer {
         Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
         Double coefficient = 3.0;
 
-        direction.getPoints().setAll(new Double[]{
+        direction.getPoints().setAll(
                 mapPointCentreFleche.getX() + coefficient * diffX,
                 mapPointCentreFleche.getY() + coefficient * diffY,
                 mapPointCentreFleche.getX() + coefficient * (-diffX + diffY),
                 mapPointCentreFleche.getY() + coefficient * (-diffY - diffX),
                 mapPointCentreFleche.getX() + coefficient * (-diffX - diffY),
-                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX)});
+                mapPointCentreFleche.getY() + coefficient * (-diffY + diffX));
+    }
+
+    public Livraison getLivraisonSelectionnee() {
+        if (this.livraisonSelectionnee != null) {
+            return this.livraisonSelectionnee.getKey();
+        }
+        return null;
     }
 }
