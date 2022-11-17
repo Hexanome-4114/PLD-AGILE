@@ -1,23 +1,22 @@
 package com.github.hexanome4114.pldagile.algorithme.dijkstra;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Sommet {
+public final class Sommet {
 
-    private String nom;
+    private final String nom;
     private List<Sommet> cheminPlusCourt = new LinkedList<>();
     private Integer distance = Integer.MAX_VALUE;
-    Map<Sommet, Integer> sommetsAdjacents = new HashMap<>();
+    private final Map<Sommet, Integer> sommetsAdjacents = new HashMap<>();
 
-    public Sommet (String nom) {
+    public Sommet(final String nom) {
         this.nom = nom;
     }
 
-    public void addDestination(Sommet destination, int distance) {
+    public void addDestination(final Sommet destination, final int distance) {
         sommetsAdjacents.put(destination, distance);
     }
 
@@ -37,17 +36,16 @@ public class Sommet {
         return sommetsAdjacents;
     }
 
-    public void setDistance(Integer distance) {
+    public void setDistance(final Integer distance) {
         this.distance = distance;
     }
 
-    public void setCheminPlusCourt(List<Sommet> cheminPlusCourt) {
+    public void setCheminPlusCourt(final List<Sommet> cheminPlusCourt) {
         this.cheminPlusCourt = cheminPlusCourt;
     }
 
     @Override
-    public String toString (){
-        String result = "Sommet<"+getNom()+">";
-        return result;
+    public String toString() {
+        return "Sommet<" + getNom() + ">";
     }
 }

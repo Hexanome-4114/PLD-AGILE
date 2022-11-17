@@ -163,11 +163,6 @@ public final class CalquePlan extends MapLayer {
         directions.remove(new Pair(new Pair(point1, point2), livreur));
     }
 
-    public void supprimerSegment(final Intersection point1,
-                                 final Intersection point2) {
-
-    }
-
     /**
      * Enlève une livraison du calque.
      * @param livraison
@@ -351,7 +346,7 @@ public final class CalquePlan extends MapLayer {
                 couleur = Color.GREEN;
                 break;
             case LIVREUR_3:
-                couleur = Color.GREY;
+                couleur = Color.PURPLE;
                 break;
             case LIVREUR_4:
                 couleur = Color.ORANGE;

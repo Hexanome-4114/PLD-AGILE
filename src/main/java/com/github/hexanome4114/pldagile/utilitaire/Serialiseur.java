@@ -20,7 +20,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Sérialisation et désérialisation des données.
@@ -137,6 +139,9 @@ public final class Serialiseur {
             throws DocumentException {
         List<Livraison> livraisons = new ArrayList<>();
 
+        // Set contenant les adresses des livraisons pour vérifier les doublons
+        Set<String> adresses = new HashSet<>();
+
         SAXReader reader = new SAXReader();
         Document document = reader.read(fichier);
 
@@ -157,6 +162,12 @@ public final class Serialiseur {
             // adresse
             Node noeudAdresse = noeudLivraison.selectSingleNode("adresse");
             String id = noeudAdresse.selectSingleNode("id").getText();
+
+            if (!adresses.add(id)) {
+                throw new DocumentException(
+                        "Une livraison existe déjà à cette adresse.");
+            }
+
             double latitude = Double.parseDouble(
                     noeudAdresse.selectSingleNode("latitude").getText());
             double longitude = Double.parseDouble(

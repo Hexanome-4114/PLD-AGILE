@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-public class Graphe {
-    private Map<String, Sommet> sommets = new LinkedHashMap<>();
+public final class Graphe {
+    private final Map<String, Sommet> sommets = new LinkedHashMap<>();
 
     public Map<String, Sommet> getSommets() {
         return sommets;
@@ -25,7 +25,8 @@ public class Graphe {
         }
     }
 
-    public static Graphe calculerCheminplusCourtDepuisSource(Graphe graphe, Sommet source) {
+    public static Graphe calculerCheminplusCourtDepuisSource(
+            final Graphe graphe, final Sommet source) {
         source.setDistance(0);
 
         Set<Sommet> sommetsRelaches = new HashSet<>();
@@ -36,12 +37,13 @@ public class Graphe {
         while (sommetsNonRelaches.size() != 0) {
             Sommet sommetCourant = getSommetLePlusProche(sommetsNonRelaches);
             sommetsNonRelaches.remove(sommetCourant);
-            for (Map.Entry<Sommet, Integer> adjacencyPair :
-                    sommetCourant.getSommetsAdjacents().entrySet()) {
+            for (Map.Entry<Sommet, Integer> adjacencyPair
+                    : sommetCourant.getSommetsAdjacents().entrySet()) {
                 Sommet sommetAdjacent = adjacencyPair.getKey();
                 Integer coutArc = adjacencyPair.getValue();
                 if (!sommetsRelaches.contains(sommetAdjacent)) {
-                    calculDistanceMinimum(sommetAdjacent, coutArc, sommetCourant);
+                    calculDistanceMinimum(sommetAdjacent, coutArc,
+                            sommetCourant);
                     sommetsNonRelaches.add(sommetAdjacent);
                 }
             }
@@ -50,25 +52,34 @@ public class Graphe {
         return graphe;
     }
 
-    private static Sommet getSommetLePlusProche(Set<Sommet> sommetsNonvisites) {
-        Sommet SommetLePlusProche = null;
+    private static Sommet getSommetLePlusProche(
+            final Set<Sommet> sommetsNonvisites) {
+        Sommet sommetLePlusProche = null;
         int lowestDistance = Integer.MAX_VALUE;
         for (Sommet sommet : sommetsNonvisites) {
             int distanceSommet = sommet.getDistance();
             if (distanceSommet < lowestDistance) {
                 lowestDistance = distanceSommet;
-                SommetLePlusProche = sommet;
+                sommetLePlusProche = sommet;
             }
         }
-        return SommetLePlusProche;
+        return sommetLePlusProche;
     }
 
-    private static void calculDistanceMinimum(Sommet sommetEvalue/*un sommet adjacent à la source*/,
-                                              Integer coutArc, Sommet sommetSource) {
+    /**
+     *
+     * @param sommetEvalue un sommet adjacent à la source
+     * @param coutArc
+     * @param sommetSource
+     */
+    private static void calculDistanceMinimum(final Sommet sommetEvalue,
+                                              final Integer coutArc,
+                                              final Sommet sommetSource) {
         Integer sourceDistance = sommetSource.getDistance();
         if (sourceDistance + coutArc < sommetEvalue.getDistance()) {
             sommetEvalue.setDistance(sourceDistance + coutArc);
-            LinkedList<Sommet> cheminPlusCourt = new LinkedList<>(sommetSource.getCheminPlusCourt());
+            LinkedList<Sommet> cheminPlusCourt = new LinkedList<>(
+                    sommetSource.getCheminPlusCourt());
             cheminPlusCourt.add(sommetSource);
             sommetEvalue.setCheminPlusCourt(cheminPlusCourt);
         }
@@ -76,8 +87,6 @@ public class Graphe {
 
     @Override
     public String toString() {
-        return "Graphe{" +
-                "sommets=" + sommets +
-                '}';
+        return "Graphe{sommets=" + sommets + '}';
     }
 }
