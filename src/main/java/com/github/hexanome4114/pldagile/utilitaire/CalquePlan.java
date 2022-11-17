@@ -91,7 +91,7 @@ public final class CalquePlan extends MapLayer {
      */
     private Pair<Intersection, ImageView> entrepot;
 
-    private boolean afficherPointsDeLivraison = true;
+    private boolean afficherPointsDeLivraison = false;
 
     public CalquePlan() { }
 
@@ -279,7 +279,21 @@ public final class CalquePlan extends MapLayer {
                     livreurs.contains(livraison.getLivreur()));
         }
 
-        // TODO masquer les tournées
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Line> segment : segments.entrySet()) {
+            Node ligne = segment.getValue();
+
+            ligne.setVisible(
+                    livreurs.contains(segment.getKey().getValue()));
+        }
+
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Polygon> direction : directions.entrySet()) {
+            Node fleche = direction.getValue();
+
+            fleche.setVisible(
+                    livreurs.contains(direction.getKey().getValue()));
+        }
     }
 
     /**

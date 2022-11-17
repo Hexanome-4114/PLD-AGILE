@@ -427,8 +427,8 @@ public void supprimerLivraisonApresCalcul() {
             // s'il n'y a pas de sélection en cours ou que l'adresse de celle-ci
             // est différente du point le plus proche
             if (calquePlan.getLivraisonSelectionnee() == null
-                    || !point.getId().equals(calquePlan
-                    .getLivraisonSelectionnee().getAdresse().getId())) {
+                    || !point.equals(calquePlan.getLivraisonSelectionnee()
+                    .getAdresse())) {
                 this.calquePlan.setPointSelectionne(point);
                 this.comboBoxAdresse.setValue(point);
             } else {
