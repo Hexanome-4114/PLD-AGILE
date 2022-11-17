@@ -466,7 +466,6 @@ public final class CalquePlan extends MapLayer {
         Double diffX = (mapPoint2.getX() - mapPoint1.getX()) / norme;
         Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
         Double coefficient = 0.5 * zoom;
-        System.out.println("coefficient = " + coefficient);
 
         direction.getPoints().setAll(
                 mapPointCentreFleche.getX() + coefficient * diffX,
