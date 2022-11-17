@@ -115,12 +115,7 @@ public final class Serialiseur {
             // adresse
             Intersection adresse = livraison.getAdresse();
             Element adresseElement = livraisonElement.addElement("adresse");
-            adresseElement.addElement("id")
-                    .addText(adresse.getId());
-            adresseElement.addElement("latitude")
-                    .addText(String.valueOf(adresse.getLatitude()));
-            adresseElement.addElement("longitude")
-                    .addText(String.valueOf(adresse.getLongitude()));
+            adresseElement.addAttribute("id", adresse.getId());
         }
 
         XMLWriter writer = new XMLWriter(new FileOutputStream(fichier),
@@ -133,9 +128,11 @@ public final class Serialiseur {
      * Charge un ensemble de livraisons depuis un fichier XML.
      *
      * @param fichier le fichier source
+     * @param plan
      * @return un ensemble de livraisons
      */
-    public static List<Livraison> chargerLivraisons(final File fichier)
+    public static List<Livraison> chargerLivraisons(final File fichier,
+                                                    final Plan plan)
             throws DocumentException {
         List<Livraison> livraisons = new ArrayList<>();
 
@@ -161,18 +158,19 @@ public final class Serialiseur {
 
             // adresse
             Node noeudAdresse = noeudLivraison.selectSingleNode("adresse");
-            String id = noeudAdresse.selectSingleNode("id").getText();
+            String idAdresse = noeudAdresse.valueOf("@id");
 
-            if (!adresses.add(id)) {
+            if (!plan.getIntersections().containsKey(idAdresse)) {
+                throw new DocumentException("L'adresse de cette livraison"
+                        + "n'existe pas sur le plan.");
+            }
+
+            if (!adresses.add(idAdresse)) {
                 throw new DocumentException(
                         "Une livraison existe déjà à cette adresse.");
             }
 
-            double latitude = Double.parseDouble(
-                    noeudAdresse.selectSingleNode("latitude").getText());
-            double longitude = Double.parseDouble(
-                    noeudAdresse.selectSingleNode("longitude").getText());
-            Intersection adresse = new Intersection(id, latitude, longitude);
+            Intersection adresse = plan.getIntersections().get(idAdresse);
 
             livraisons.add(new Livraison(numero, fenetre, livreur, adresse));
         }

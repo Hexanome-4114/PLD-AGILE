@@ -25,7 +25,6 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
-
 import java.util.Map;
 
 /**
@@ -64,15 +63,15 @@ public final class CalquePlan extends MapLayer {
     /**
      * Map contenant les segments de la tournée et leur Node associé.
      */
-    private final ObservableMap<Pair<Intersection, Intersection>, Line> segments
-            = FXCollections.observableHashMap();
+    private final ObservableMap<Pair<Pair<Intersection, Intersection>, Livreur>,
+            Line> segments = FXCollections.observableHashMap();
 
     /**
      * Map contenant les flèches directionnelles des segments de la tournée
      * et leur Node associé.
      */
-    private final ObservableMap<Pair<Intersection, Intersection>, Polygon>
-            directions = FXCollections.observableHashMap();
+    private final ObservableMap<Pair<Pair<Intersection, Intersection>, Livreur>,
+            Polygon> directions = FXCollections.observableHashMap();
 
     /**
      * Point de livraison à mettre en avant car sélectionné par l'utilisateur.
@@ -148,13 +147,20 @@ public final class CalquePlan extends MapLayer {
         direction.setStroke(this.getCouleur(livreur));
         direction.setStrokeWidth(TAILLE_FLECHE);
 
-        segments.put(new Pair(point1, point2), ligne);
-        directions.put(new Pair(point1, point2), direction);
+        segments.put(new Pair(new Pair(point1, point2), livreur), ligne);
+        directions.put(new Pair(new Pair(point1, point2), livreur), direction);
 
         // ajout en position 0 pour que ce soit l'élément le plus en arrière
         this.getChildren().add(0, ligne);
         this.getChildren().add(0, direction);
         this.markDirty();
+    }
+
+    public void supprimerSegment(final Intersection point1,
+                                 final Intersection point2,
+                                 final Livreur livreur) {
+        segments.remove(new Pair(new Pair(point1, point2), livreur));
+        directions.remove(new Pair(new Pair(point1, point2), livreur));
     }
 
     /**
@@ -285,7 +291,8 @@ public final class CalquePlan extends MapLayer {
      * @return la distance euclidienne entre deux points
      */
     private double calculerDistanceEuclidienne(final double x1, final double y1,
-            final double x2, final double y2) {
+                                               final double x2,
+                                               final double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);
@@ -340,7 +347,7 @@ public final class CalquePlan extends MapLayer {
                 couleur = Color.GREEN;
                 break;
             case LIVREUR_3:
-                couleur = Color.GREY;
+                couleur = Color.PURPLE;
                 break;
             case LIVREUR_4:
                 couleur = Color.ORANGE;
@@ -366,14 +373,14 @@ public final class CalquePlan extends MapLayer {
             positionner(livraison.getKey().getAdresse(), livraison.getValue());
         }
 
-        for (Map.Entry<Pair<Intersection, Intersection>, Line> segment
-                : segments.entrySet()) {
-            positionner(segment.getKey(), segment.getValue());
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Line> segment : segments.entrySet()) {
+            positionner(segment.getKey().getKey(), segment.getValue());
         }
 
-        for (Map.Entry<Pair<Intersection, Intersection>, Polygon> direction
-                : directions.entrySet()) {
-            positionner(direction.getKey(), direction.getValue());
+        for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
+                Polygon> direction : directions.entrySet()) {
+            positionner(direction.getKey().getKey(), direction.getValue());
         }
     }
 

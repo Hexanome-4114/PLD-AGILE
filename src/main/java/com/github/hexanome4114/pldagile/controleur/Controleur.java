@@ -131,10 +131,9 @@ public final class Controleur {
         ObservableList<Livreur> oListLivreurs =
                 FXCollections.observableArrayList(Livreur.values());
 
-        this.comboBoxLivreur.setPromptText("Livreur");
         this.comboBoxLivreur.setItems(oListLivreurs);
-        this.comboBoxFenetreDeLivraison.setPromptText("Fenêtre de livraison");
         this.comboBoxFenetreDeLivraison.setItems(oListFenetreDeLivraison);
+
         Image annulerImage = new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream(
                         "/images/annuler.png")
@@ -164,13 +163,15 @@ public final class Controleur {
         this.tableauLivraison.getItems()
                 // bouton cliquable que lorsqu'il y a des livraisons
                 .addListener((ListChangeListener<Livraison>) (obs) -> {
+                            boolean tableauEstVide = obs.getList().isEmpty();
+
                             this.sauvegarderLivraisonsBouton.setDisable(
-                                    obs.getList().isEmpty());
+                                    tableauEstVide);
                             this.calculerTourneeBouton.setDisable(
-                                    obs.getList().isEmpty());
-                            this.getAnnulerBouton().setDisable(
-                                    listeDeCommandes.getIndexCourant() == -1
-                            );
+                                    tableauEstVide);
+                            this.annulerBouton.setDisable(
+                                    listeDeCommandes.getIndexCourant() == -1);
+                            this.tableauLivraison.setDisable(tableauEstVide);
                         }
                 );
         this.comboBoxLivreur.valueProperty().
@@ -303,21 +304,16 @@ public void supprimerLivraisonApresCalcul() {
         }
 
         try {
-            List<Livraison> livraisons = Serialiseur.chargerLivraisons(fichier);
+            List<Livraison> livraisons = Serialiseur.chargerLivraisons(
+                    fichier, this.plan);
 
             this.reinitialiserTableauLivraison();
             this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
-                // Vérifie que les adresses de livraisons sont sur le plan
-                if (!this.plan.getIntersections().containsKey(
-                        livraison.getAdresse().getId())) {
-                    throw new Exception("L'adresse de cette livraison"
-                            + "n'existe pas sur le plan");
-                }
-
                 this.ajouterLivraison(livraison);
             }
+
             this.etatCourant.chargerLivraison(this);
         } catch (Exception e) {
             this.afficherPopUp(
@@ -438,6 +434,17 @@ public void supprimerLivraisonApresCalcul() {
         for (Itineraire itineraire : tournee.getItineraires()) {
             for (int j = 1; j < itineraire.getIntersections().size(); j++) {
                 this.calquePlan.ajouterSegment(
+                        itineraire.getIntersections().get(j - 1),
+                        itineraire.getIntersections().get(j),
+                        tournee.getLivreur());
+            }
+        }
+    }
+
+    private void supprimerAffichageTournee(final Tournee tournee) {
+        for (Itineraire itineraire : tournee.getItineraires()) {
+            for (int j = 1; j < itineraire.getIntersections().size(); j++) {
+                this.calquePlan.supprimerSegment(
                         itineraire.getIntersections().get(j - 1),
                         itineraire.getIntersections().get(j),
                         tournee.getLivreur());

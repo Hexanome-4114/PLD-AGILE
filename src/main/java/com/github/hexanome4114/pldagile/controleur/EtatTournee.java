@@ -20,12 +20,13 @@ public final class EtatTournee implements Etat {
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getSupprimerLivraisonBouton().setDisable(true);
         c.getSauvegarderLivraisonsBouton().setDisable(true);
+        c.getChargerLivraisonBouton().setDisable(false);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getAfficherPointsCheckBox().setSelected(false);
         c.getListeDeCommandes().reinitialiser();
         c.getAnnulerBouton().setDisable(true);
         c.getInstructionLabel().setText(
-                "Pour ajouter une livraison, veuillez séléctionner un livreur,"
+                "Pour ajouter une livraison, veuillez sélectionner un livreur,"
                         + " une fenêtre horaire et une adresse de livraison"
                         + " en cliquant sur la carte."
         );
