@@ -15,6 +15,7 @@ public final class EtatTournee implements Etat {
      */
     @Override
     public void chargerPlan(final Controleur c) {
+        c.reinitialiserLivraisons();
         c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxLivreur().setValue(null);
         c.getComboBoxFenetreDeLivraison().setDisable(false);

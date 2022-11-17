@@ -10,6 +10,7 @@ import com.github.hexanome4114.pldagile.modele.Tournee;
 import com.github.hexanome4114.pldagile.utilitaire.CalquePlan;
 import com.github.hexanome4114.pldagile.utilitaire.Serialiseur;
 import com.gluonhq.maps.MapView;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -29,10 +30,17 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.stage.DirectoryChooser;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +99,9 @@ public final class Controleur {
     @FXML
     private TableColumn<Livraison, FenetreDeLivraison>
             fenetreDeLivraisonColonne;
+
+    @FXML
+    private TableColumn<Livraison, Text> horaireDeLivraisonColonne;
 
     @FXML
     private Label instructionLabel;
@@ -166,6 +177,9 @@ public final class Controleur {
                 new PropertyValueFactory<>("livreur"));
         this.fenetreDeLivraisonColonne.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
+        this.horaireDeLivraisonColonne.setCellValueFactory(cellule
+                -> new SimpleObjectProperty<>(this.genererTexteHoraireLivraison(
+                        cellule.getValue())));
 
         this.afficherLivreur1CheckBox.setUserData(Livreur.LIVREUR_1);
         this.afficherLivreur2CheckBox.setUserData(Livreur.LIVREUR_2);
@@ -260,7 +274,9 @@ public void supprimerLivraisonApresCalcul() {
         for (Tournee tournee : this.tournees) {
             if (tournee.getLivreur().getNumero()
                     == livraison.getLivreur().getNumero()) {
+                supprimerAffichageTournee(tournee);
                 tournee.supprimerLivraisonApresCalcul(livraison);
+                afficherTournee(tournee);
             }
         }
     }
@@ -570,12 +586,18 @@ public void supprimerLivraisonApresCalcul() {
                         tournee.getLivreur());
             }
         }
+
+        for (Livraison livraison : tournee.getLivraisons()) {
+            if (livraison.isEnRetard()) {
+                this.calquePlan.modifierLivraisonEnRetard(livraison);
+            }
+        }
     }
 
     private void supprimerAffichageTournee(final Tournee tournee) {
         for (Itineraire itineraire : tournee.getItineraires()) {
             for (int j = 1; j < itineraire.getIntersections().size(); j++) {
-                this.calquePlan.supprimerSegment(
+                this.calquePlan.enleverSegment(
                         itineraire.getIntersections().get(j - 1),
                         itineraire.getIntersections().get(j),
                         tournee.getLivreur());
@@ -605,7 +627,8 @@ public void supprimerLivraisonApresCalcul() {
             this.tableauLivraison.getItems().add(l);
         }
 
-        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison);
+        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison,
+                false);
 
         noeud.setOnMouseClicked(e -> {
             this.tableauLivraison.getSelectionModel().select(l);
@@ -624,6 +647,27 @@ public void supprimerLivraisonApresCalcul() {
         }
         this.livraisons.clear();
         this.tableauLivraison.getItems().clear();
+    }
+
+    /**
+     * Génère le texte à afficher dans la colonne Horaire en fonction de la
+     * livraison. Si la livraison est en retard, la couleur est modifée.
+     * @param livraison
+     * @return le texte à afficher dans la colonne Horaire
+     */
+    private Text genererTexteHoraireLivraison(final Livraison livraison) {
+        if (livraison.getHeurePassage() == null) {
+            return new Text();
+        }
+
+        Text texte = new Text(livraison.getHeurePassage().toString());
+
+        if (livraison.isEnRetard()) {
+            texte.setText(texte.getText() + " /!\\");
+            texte.setFill(Color.RED);
+        }
+
+        return texte;
     }
 
     private void reinitialiserPointSelectionne() {

@@ -39,6 +39,8 @@ public final class CalquePlan extends MapLayer {
 
     private static final Color COULEUR_POINT = Color.RED;
 
+    private static final Color COULEUR_RETARD = Color.RED;
+
     private static final Image IMAGE_ENTREPOT = new Image(
             CalquePlan.class.getResource("/images/entrepot.png").toString(),
             25, 25, false, false);
@@ -49,6 +51,8 @@ public final class CalquePlan extends MapLayer {
     private static final int TAILLE_SEGMENT = 3;
 
     private static final int TAILLE_FLECHE = 5;
+
+    private double zoomReference = -1.0;
 
     /**
      * Map contenant les points de livraison et leur Node associé.
@@ -113,10 +117,12 @@ public final class CalquePlan extends MapLayer {
      * Ajoute une livraison sur le calque.
      * @param livraison
      * @param visible
+     * @param enRetard
      * @return l'objet Node correspondant à la livraison sur le calque
      */
     public Node ajouterLivraison(final Livraison livraison,
-                                 final boolean visible) {
+                                 final boolean visible,
+                                 final boolean enRetard) {
         // le point de livraison n'est plus accessible
         Node point = points.get(livraison.getAdresse());
         point.setDisable(true);
@@ -124,7 +130,11 @@ public final class CalquePlan extends MapLayer {
 
         // création du Node de la livraison
         Shape forme = this.getForme(livraison.getFenetreDeLivraison());
-        forme.setFill(this.getCouleur(livraison.getLivreur()));
+        if (enRetard) {
+            forme.setFill(COULEUR_RETARD);
+        } else {
+            forme.setFill(this.getCouleur(livraison.getLivreur()));
+        }
 
         Text texte = new Text(String.valueOf(livraison.getNumero()));
         texte.setFill(Color.WHITE);
@@ -140,6 +150,11 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
 
         return stack;
+    }
+
+    public void modifierLivraisonEnRetard(final Livraison livraison) {
+        enleverLivraison(livraison);
+        ajouterLivraison(livraison, true, true);
     }
 
     /**
@@ -186,11 +201,24 @@ public final class CalquePlan extends MapLayer {
         this.markDirty();
     }
 
-    public void supprimerSegment(final Intersection point1,
+    /**
+     * Enlève un segment et sa direction du calque.
+     * @param point1
+     * @param point2
+     * @param livreur
+     */
+    public void enleverSegment(final Intersection point1,
                                  final Intersection point2,
                                  final Livreur livreur) {
-        segments.remove(new Pair(new Pair(point1, point2), livreur));
-        directions.remove(new Pair(new Pair(point1, point2), livreur));
+        Pair<Pair<Intersection, Intersection>, Livreur> segment
+                = new Pair(new Pair(point1, point2), livreur);
+        Line ligne = segments.get(segment);
+        Polygon direction = directions.get(segment);
+        segments.remove(segment);
+        directions.remove(segment);
+        this.getChildren().remove(ligne);
+        this.getChildren().remove(direction);
+        this.markDirty();
     }
 
     public void setEntrepot(final Intersection entrepot) {
@@ -414,6 +442,19 @@ public final class CalquePlan extends MapLayer {
      */
     @Override
     protected void layoutLayer() {
+        // Obtenir une référence pour le niveau de zoom
+        Point2D mapPointEntrepot = getMapPoint(
+                entrepot.getKey().getLatitude(),
+                entrepot.getKey().getLongitude());
+        // Coordonnées du point de référence 25321689
+        Point2D mapPointReference = getMapPoint(45.751118, 4.876261);
+        Double zoom = calculerDistanceEuclidienne(mapPointEntrepot.getX(),
+                mapPointEntrepot.getY(), mapPointReference.getX(),
+                mapPointReference.getY());
+        if (zoomReference == -1.0) {
+            zoomReference = zoom;
+        }
+
         positionner(entrepot.getKey(), entrepot.getValue());
 
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
@@ -431,7 +472,8 @@ public final class CalquePlan extends MapLayer {
 
         for (Map.Entry<Pair<Pair<Intersection, Intersection>, Livreur>,
                 Polygon> direction : directions.entrySet()) {
-            positionner(direction.getKey().getKey(), direction.getValue());
+            positionner(direction.getKey().getKey(), direction.getValue(),
+                    zoom / zoomReference);
         }
     }
 
@@ -460,7 +502,7 @@ public final class CalquePlan extends MapLayer {
     }
 
     private void positionner(final Pair<Intersection, Intersection> segment,
-                             final Polygon direction) {
+                             final Polygon direction, final Double zoom) {
         Intersection point1 = segment.getKey();
         Intersection point2 = segment.getValue();
 
@@ -480,7 +522,12 @@ public final class CalquePlan extends MapLayer {
                 mapPoint1.getY(), mapPoint2.getX(), mapPoint2.getY());
         Double diffX = (mapPoint2.getX() - mapPoint1.getX()) / norme;
         Double diffY = (mapPoint2.getY() - mapPoint1.getY()) / norme;
-        Double coefficient = 3.0;
+        Double coefficient = zoom;
+        if (zoom > 1.0) {
+            coefficient = Math.log(zoom);
+        } else if (zoom < 1.0) {
+            coefficient = 0.0;
+        }
 
         direction.getPoints().setAll(
                 mapPointCentreFleche.getX() + coefficient * diffX,

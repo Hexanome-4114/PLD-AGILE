@@ -15,7 +15,7 @@ public final class GrapheTSP implements Graph {
 
     public GrapheTSP(final int nbVertices,
                      final int[][] cost,
-                     int minimumCost,
+                     final int minimumCost,
                      final Map<String, Integer> mapNomSommetVersIndex,
                      final Map<Integer, String> mapIndexVersNomSommet
     ) {

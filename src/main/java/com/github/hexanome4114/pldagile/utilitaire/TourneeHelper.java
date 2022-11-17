@@ -224,7 +224,8 @@ public final class TourneeHelper {
                 sommetOrigine = mapNomSommetVersIndex.get(unSommet.getNom());
                 sommetDest = mapNomSommetVersIndex.get(arc.getKey().getNom());
                 cost[sommetOrigine][sommetDest] = arc.getValue();
-                minimumCost = Math.min(cost[sommetOrigine][sommetDest], minimumCost);
+                minimumCost = Math.min(cost[sommetOrigine][sommetDest],
+                        minimumCost);
             }
         }
         return new GrapheTSP(
