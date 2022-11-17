@@ -1,17 +1,20 @@
 package com.github.hexanome4114.pldagile.controleur;
 
 
+/**
+ * Etat de l'application lorsque le plan à été chargé.
+ * Il est possible de passer à l'état livraison si l'on ajoute
+ * des livraisons ou si l'on en charge.
+ */
 public final class EtatPlanCharge implements Etat {
 
-    @Override
-    public void ajouterLivraison(final Controleur c) {
-        c.getSauvegarderLivraisonsBouton().setDisable(false);
-        c.getCalculerTourneeBouton().setDisable(false);
-        c.setEtatCourant(c.getEtatLivraison());
-    }
-
+    /**
+     * Réinitialise l'état plan chargé lorsque l'on charge un nouveau plan.
+     * @param c le controleur qui change d'état
+     */
     @Override
     public void chargerPlan(final Controleur c) {
+        c.reinitialiserLivraisons();
         c.getComboBoxLivreur().setValue(null);
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxAdresse().setValue(null);
@@ -30,5 +33,31 @@ public final class EtatPlanCharge implements Etat {
                         + " en cliquant sur la carte."
         );
         c.setEtatCourant(c.getEtatPlanCharge());
+    }
+
+    /**
+     * Passage de l'état plan chargé à l'état livraison
+     * lorsque l'on ajoute une livraison.
+     * @param c le controleur qui change d'état
+     */
+    @Override
+    public void ajouterLivraison(final Controleur c) {
+        c.getSauvegarderLivraisonsBouton().setDisable(false);
+        c.getCalculerTourneeBouton().setDisable(false);
+        c.setEtatCourant(c.getEtatLivraison());
+    }
+
+    /**
+     * Passage de l'état plan chargé à l'état livraison
+     * lorsque l'on charge des livraisons.
+     * @param c le controleur qui change d'état
+     */
+    @Override
+    public void chargerLivraison(final Controleur c) {
+        c.getSauvegarderLivraisonsBouton().setDisable(false);
+        c.getCalculerTourneeBouton().setDisable(false);
+        c.getListeDeCommandes().reinitialiser();
+        c.getAnnulerBouton().setDisable(true);
+        c.setEtatCourant(c.getEtatLivraison());
     }
 }

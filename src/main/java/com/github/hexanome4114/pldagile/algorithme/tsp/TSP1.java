@@ -8,9 +8,11 @@ public final class TSP1 extends TemplateTSP {
     @Override
     protected int bound(
             final Integer currentVertex,
-            final Collection<Integer> unvisited
+            final Collection<Integer> unvisited,
+            final int minCost
     ) {
-        return 0;
+        int numberUnvisited = unvisited.size();
+        return numberUnvisited * minCost;
     }
 
     @Override

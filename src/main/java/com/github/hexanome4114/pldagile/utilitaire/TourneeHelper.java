@@ -214,6 +214,7 @@ public final class TourneeHelper {
             iter++;
         }
         //on itère sur les sommets du graphe
+        int minimumCost = Integer.MAX_VALUE;
         for (Map.Entry entry : grapheEntrant.getSommets().entrySet()) {
             unSommet = (Sommet) entry.getValue();
             // Pour chaque sommet, on récupére les arc associés et les ajoute
@@ -223,11 +224,13 @@ public final class TourneeHelper {
                 sommetOrigine = mapNomSommetVersIndex.get(unSommet.getNom());
                 sommetDest = mapNomSommetVersIndex.get(arc.getKey().getNom());
                 cost[sommetOrigine][sommetDest] = arc.getValue();
+                minimumCost = Math.min(cost[sommetOrigine][sommetDest], minimumCost);
             }
         }
         return new GrapheTSP(
                 nbVertices,
                 cost,
+                minimumCost,
                 mapNomSommetVersIndex,
                 mapIndexVersNomSommet
         );
