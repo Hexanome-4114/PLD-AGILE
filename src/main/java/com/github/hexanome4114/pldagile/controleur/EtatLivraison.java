@@ -62,6 +62,7 @@ public final class EtatLivraison implements Etat {
      */
     @Override
     public void calculerTournee(final Controleur c) {
+        c.getTableauLivraison().refresh();
         c.getComboBoxLivreur().setValue(null);
         c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxFenetreDeLivraison().setValue(null);

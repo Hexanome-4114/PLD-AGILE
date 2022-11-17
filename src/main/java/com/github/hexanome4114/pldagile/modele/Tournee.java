@@ -15,20 +15,20 @@ import java.util.Map;
 public final class Tournee {
 
     /**
-     * @livreur livreur qui effectue les livraisons
+     * Le livreur qui effectue les livraisons.
      */
     private final Livreur livreur;
 
     private final int tempsParLivraison;
 
     /**
-     * @livraisons liste des livraison à effectuer, elles sont dans l'ordre du
-     * TSP une fois la tournée calculée
+     * La liste des livraison à effectuer, elles sont dans l'ordre du
+     * TSP une fois la tournée calculée.
      */
     private List<Livraison> livraisons;
 
     /**
-     * @itineraires liste des itinéraire à effectuer dans l'ordre des livraisons
+     * La liste des itinéraire à effectuer dans l'ordre des livraisons.
      * La première intersection du premier segment de chaque itinéraire
      * correspond à une intersection de livraison. Et inversement pour la
      * toute dernière.
@@ -75,7 +75,7 @@ public final class Tournee {
      * Calcule une Tournée qui part et revient sur la première livraison,
      * le livreur partira à l'heure de la première livraison.
      *
-     * @param fdlDepart   fenetre de livraison de départ
+     * @param fdlDepart fenetre de livraison de départ
      */
     public void calculerTournee(final FenetreDeLivraison fdlDepart) {
 
@@ -96,7 +96,7 @@ public final class Tournee {
 
         Pair<Graphe, Map<String, Itineraire>> resultCreationGrapheTSP =
                 TourneeHelper.creerGrapheTSP(livraisonsTemporaires,
-                this.plan.getIntersections(), graphe);
+                        this.plan.getIntersections(), graphe);
         Graphe grapheTSP = resultCreationGrapheTSP.getKey();
         Map<String, Itineraire> itineraireMap = resultCreationGrapheTSP
                 .getValue();
@@ -152,7 +152,7 @@ public final class Tournee {
     /**
      * Met à jour les heures de passage des livraisons de la tournée.
      */
-    public void calculerHeuresPassagesLivraisons() {
+    private void calculerHeuresPassagesLivraisons() {
 
         LocalTime heureCourante = LocalTime.of(8, 0);
         // Les livraisons et les itinéraires sont triés dans l'ordre de passage
@@ -191,6 +191,11 @@ public final class Tournee {
         }
     }
 
+    /**
+     * Supprime la livraison de la tournée et calcule l'itinéraire
+     * nécessaire pour afficher la tournée Recalcule l'heure de passage.
+     * @param livraison livraison à supprimer de la tournée
+     */
     public void supprimerLivraisonApresCalcul(final Livraison livraison) {
         if (!this.tourneeCalculee) {
             return;
@@ -214,20 +219,9 @@ public final class Tournee {
             this.itineraires.clear();
 
         } else {
-            if (indiceLivraison == 0) {
-                intersectionAvant = this.pointDepart;
-                intersectionApres = this.livraisons.get(indiceLivraison + 1)
-                        .getAdresse();
-            } else if (indiceLivraison == this.livraisons.size() - 1) {
-                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
-                        .getAdresse();
-                intersectionApres = this.pointDepart;
-            } else {
-                intersectionAvant = this.livraisons.get(indiceLivraison - 1)
-                        .getAdresse();
-                intersectionApres = this.livraisons.get(indiceLivraison + 1)
-                        .getAdresse();
-            }
+            intersectionAvant = getAdresseLivraisonAvant(indiceLivraison);
+            intersectionApres = getAdresseIntersectionApres(indiceLivraison);
+
             // On récupère l'itinéraire entre intersectionAvant et
             // intersectionApres
             Map<Intersection, Itineraire> itinerairesMap = this.plan
@@ -243,5 +237,145 @@ public final class Tournee {
 
             this.calculerHeuresPassagesLivraisons();
         }
+    }
+
+    /**
+     * Ajoute une livraison au rang passé en paramètre dans la tournée.
+     * Recalcule l'heure de passage.
+     *
+     * @param rang représente la x ième livraison que l'on souhaite effectuer.
+     * @param livraisonAAjouter la livraison à ajouter.
+     */
+    public void ajouterLivraisonApresCalcul(
+            final int rang,
+            final Livraison livraisonAAjouter
+    ) throws Exception {
+        if (!this.tourneeCalculee) {
+            return;
+        }
+        int indice = rang - 1;
+        Intersection intersectionAAjouter = livraisonAAjouter.getAdresse();
+        Intersection intersectionAvant = getAdresseLivraisonAvant(indice);
+        Intersection intersectionApres;
+        // Si on veut ajouter à la fin de la liste des livraison
+        if (indice == this.livraisons.size()) {
+            intersectionApres = this.getPointDepart();
+        } else {
+            intersectionApres = this.livraisons.get(indice).getAdresse();
+        }
+        // Calculer l'itinéraire entre intersectionAvant et intersectionAAjouter
+        Map<Intersection, Itineraire> itinerairesMap
+                = this.plan.getItineraire(intersectionAvant);
+        Itineraire itineraireAvantAAjouter
+                = itinerairesMap.get(intersectionAAjouter);
+        // Si il n'y a pas d'itinéraire entre les 2, throw une exception.
+        if (itineraireAvantAAjouter.getIntersections().isEmpty()) {
+            throw new Exception(
+                    "Il manque un itinéraire entre l'adresse précédente "
+                            + "et l'adresse de livraison."
+            );
+        }
+
+        // Calculer l'itinéraire entre intersectionAAjouter et intersectionApres
+        itinerairesMap = this.plan.getItineraire(intersectionAAjouter);
+        Itineraire itineraireAAjouterApres
+                = itinerairesMap.get(intersectionApres);
+        // Si il n'y a pas d'itinéraire entre les 2, throw une exception.
+        if (itineraireAAjouterApres.getIntersections().isEmpty()) {
+            throw new Exception(
+                    "Il manque un itinéraire entre l'adresse de livraison "
+                            + "et l'adresse."
+            );
+        }
+
+        // Ajouter la livraison dans la liste des livraisons
+        this.livraisons.add(indice, livraisonAAjouter);
+
+        // Remplacer l'itineraire entre intersectionAvant et intersectionApres
+        // par l'itineraire entre intersectionAvant et intersectionAAjouter
+        this.itineraires.set(indice, itineraireAvantAAjouter);
+
+        // Ajouter l'itinéraire entre intersectionAAjouter et intersectionApres
+        this.itineraires.add(indice + 1, itineraireAAjouterApres);
+
+        calculerHeuresPassagesLivraisons();
+    }
+
+    /**
+     * Retourne l'adresse de livraison précédente.
+     *
+     * Cette fonction requiert que la tournée ait été calculée.
+     * @param indice indice de la livraison dans la liste des livraisons
+     * @return <ul>
+     *     <li>
+     *         null si (
+     *         !this.tourneeCalculee
+     *         || indice < 0
+     *         || indice >= this.livraisons.size()
+     *         )
+     *     </li>
+     *     <li>
+     *         L'adresse de livraison précédent la livraison présente
+     *         à l'indice i
+     *     </li>
+     *     <li>
+     *         Le point de départ de la tournée si indice==0
+     *     </li></>
+     * </ul>
+     */
+    private Intersection getAdresseLivraisonAvant(final int indice) {
+        if (
+                !this.tourneeCalculee
+                || indice < 0
+                || indice >= this.livraisons.size()
+        ) {
+            return null;
+        }
+        Intersection result;
+        if (indice == 0) {
+            result = this.pointDepart;
+        } else {
+            result = this.livraisons.get(indice - 1).getAdresse();
+        }
+        return result;
+    }
+
+    /**
+     * Retourne l'adresse de livraison subséquente.
+     *
+     * Cette fonction requiert que la tournée ai été calculée.
+     * @param indice indice de la livraison dans la liste des livraisons
+     * @return <ul>
+     *     <li>
+     *         null si (
+     *         !this.tourneeCalculee
+     *         || indice < 0
+     *         || indice >= this.livraisons.size())
+     *     </li>
+     *     <li>
+     *         L'adresse de livraison subséquente de la livraison présente
+     *         à l'indice i
+     *     </li>
+     *     <li>
+     *         Le point de départ de la tournée
+     *         si indice==this.livraisons.size()-1
+     *     </li></>
+     * </ul>
+     */
+    private Intersection getAdresseIntersectionApres(final int indice) {
+        Intersection result;
+        if (
+                !this.tourneeCalculee
+                || indice < 0
+                || indice >= this.livraisons.size()
+        ) {
+            result = null;
+        }
+        if (indice == this.livraisons.size() - 1) {
+            result = this.pointDepart;
+        } else {
+            result = this.livraisons.get(indice + 1).getAdresse();
+        }
+        return result;
     }
 }

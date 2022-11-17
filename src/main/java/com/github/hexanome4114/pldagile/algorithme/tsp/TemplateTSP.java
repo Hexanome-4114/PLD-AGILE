@@ -78,7 +78,7 @@ public abstract class TemplateTSP implements TSP {
                 }
             }
         } else if (
-                currentCost + bound(currentVertex, unvisited,g.getMinCost())
+                currentCost + bound(currentVertex, unvisited, g.getMinCost())
                         < bestSolCost
         ) {
             Iterator<Integer> it = iterator(currentVertex, unvisited, g);
