@@ -69,6 +69,7 @@ public final class EtatLivraison implements Etat {
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getChargerLivraisonBouton().setDisable(true);
+        c.getGenererFeuillesDeRouteBouton().setDisable(false);
         c.getInstructionLabel().setText(
                 "Pour ajouter une livraison, veuillez sélectionner un livreur,"
                         + " une fenêtre horaire, une adresse de livraison"

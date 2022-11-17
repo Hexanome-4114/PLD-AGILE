@@ -4,10 +4,24 @@ import com.gluonhq.maps.MapPoint;
 import javafx.util.Pair;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public final class Intersection extends MapPoint {
 
     private final String id;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Intersection that = (Intersection) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     /**
      * @intersections correspond à la liste des intersections rejoignables

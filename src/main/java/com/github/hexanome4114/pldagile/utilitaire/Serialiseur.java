@@ -200,55 +200,62 @@ public final class Serialiseur {
                 + tournee.getLivreur().getNumero());
         ecrivain.println("Nombre de livraisons à effectuer : "
                 + tournee.getLivraisons().size() + '\n');
-        ecrivain.println("L'itinéraire à suivre est le suivant :");
+        ecrivain.println("L'itinéraire à suivre est le suivant :\n");
         // Départ
         ecrivain.println("Départ de l'entrepôt ");
-        for (int i = 0; i < tournee.getLivraisons().size(); ++i) {
-            Itineraire itineraire = tournee.getItineraires().get(i);
-            // Itinéraire entre deux livraisons
-            for (int j = 0; j < itineraire.getIntersections().size() - 1; ++j) {
-                Intersection intersectionCourante = itineraire
-                        .getIntersections().get(j);
-                Intersection intersectionSuivante = itineraire
-                        .getIntersections().get(j + 1);
-                String nomRue = intersectionCourante.getIntersections()
-                        .get(intersectionSuivante).getValue();
-                ecrivain.println("Prendre " + nomRue);
-                if (j != itineraire.getIntersections().size() - 2) {
-                    ecrivain.println(", puis");
-                }
-            }
 
+        String nomRuePrecedente = "";
+        for (int i = 0; i < tournee.getLivraisons().size(); ++i) {
             // Affichage de la livraison
             Livraison livraison = tournee.getLivraisons().get(i);
-            ecrivain.println("La livraison doit être livrée entre "
+            ecrivain.println("La prochaine livraison doit être livrée entre "
                     + livraison.getFenetreDeLivraison());
-            ecrivain.println("L'arrivée à la livraison numéro "
-                    + livraison.getNumero() + " est prévue à "
-                    + livraison.getHeurePassage());
+            ecrivain.println("L'arrivée est prévue à "
+                    + livraison.getHeureArrivee());
+            ecrivain.println();
+            Itineraire itineraire = tournee.getItineraires().get(i);
+            nomRuePrecedente = ecrireItineraire(ecrivain, itineraire,
+                    nomRuePrecedente);
 
             // Départ prochaine livraison
             ecrivain.println("Départ du point de livraison prévu à "
                     + livraison.getHeurePassage()
                     .plusMinutes(tournee.getTempsParLivraison()) + ".");
+            ecrivain.println('\n');
         }
         // Retour à l'entrepôt
         ecrivain.println("Retour à l'entrepôt.");
         Itineraire itineraire = tournee.getItineraires()
                 .get(tournee.getLivraisons().size());
-        // Itinéraire entre deux livraisons
-        for (int j = 0; j < itineraire.getIntersections().size() - 1; ++j) {
+        ecrireItineraire(ecrivain, itineraire, nomRuePrecedente);
+        ecrivain.println("Arrivée à l'entrepôt.");
+        ecrivain.close();
+    }
+
+    private static String ecrireItineraire(final PrintWriter ecrivain,
+                                         final Itineraire itineraire,
+                                         final String nomRuePrecedente) {
+        String nomRuePrecedenteReturn = nomRuePrecedente;
+        for (int i = 0; i < itineraire.getIntersections().size() - 1; ++i) {
             Intersection intersectionCourante = itineraire
-                    .getIntersections().get(j);
+                    .getIntersections().get(i);
             Intersection intersectionSuivante = itineraire
-                    .getIntersections().get(j + 1);
+                    .getIntersections().get(i + 1);
             String nomRue = intersectionCourante.getIntersections()
                     .get(intersectionSuivante).getValue();
-            ecrivain.println("Prendre " + nomRue);
-            if (j != itineraire.getIntersections().size() - 2) {
-                ecrivain.println(", puis");
+
+            if (!nomRuePrecedenteReturn.equals(nomRue)) {
+                ecrivain.print("Prendre " + nomRue);
+            } else {
+                ecrivain.print("continuez sur " + nomRue);
             }
+            if (i != itineraire.getIntersections().size() - 2) {
+                ecrivain.println(", puis");
+            } else {
+                ecrivain.println();
+            }
+            nomRuePrecedenteReturn = nomRue;
         }
-        ecrivain.println("Arrivée à l'entrepôt.");
+        return nomRuePrecedenteReturn;
     }
 }

@@ -29,6 +29,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -119,6 +120,9 @@ public final class Controleur {
 
     @FXML
     private Button calculerTourneeBouton;
+
+    @FXML
+    private Button genererFeuillesDeRouteBouton;
 
     @FXML
     private CheckBox afficherPointsCheckBox;
@@ -360,7 +364,16 @@ public void supprimerLivraisonApresCalcul() {
                         TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
                 tournee.calculerTournee(FenetreDeLivraison.H8_H9);
 
-                if (tournee.getItineraires() == null) {
+                boolean manqueItineraire = tournee.getItineraires() == null;
+                if (!manqueItineraire) {
+                    for (Itineraire itineraire : tournee.getItineraires()) {
+                        if (itineraire == null) {
+                            manqueItineraire = true;
+                            break;
+                        }
+                    }
+                }
+                if (manqueItineraire) {
                     this.afficherPopUp(
                             "Aucun itinéraire possible pour cette tournée.",
                             Alert.AlertType.ERROR
@@ -371,6 +384,45 @@ public void supprimerLivraisonApresCalcul() {
                     this.etatCourant.calculerTournee(this);
                 }
             }
+        }
+    }
+
+    public void genererFeuillesDeRoute() {
+        DirectoryChooser selecteurDossier = new DirectoryChooser();
+        selecteurDossier.setTitle("Sélectionner un dossier vide où enregistrer les feuilles de routes.");
+
+        // TODO dossier vide
+        File dossier = selecteurDossier.showDialog(this.stage);
+
+        if (dossier == null) { // aucun dossier sélectionné
+            return;
+        }
+
+        try {
+            List<CheckBox> checkBoxList = new ArrayList<>();
+            checkBoxList.add(this.afficherLivreur1CheckBox);
+            checkBoxList.add(this.afficherLivreur2CheckBox);
+            checkBoxList.add(this.afficherLivreur3CheckBox);
+            checkBoxList.add(this.afficherLivreur4CheckBox);
+            for(CheckBox checkBox : checkBoxList) {
+                Livreur livreur = (Livreur) checkBox.getUserData();
+                Tournee tournee = null;
+                for(Tournee tournee1 : this.tournees) {
+                    if(tournee1.getLivreur().equals(livreur)) {
+                        tournee = tournee1;
+                        break;
+                    }
+                }
+                if (tournee != null) {
+                    File feuilleDeRoute = new File(dossier.getPath() + "/feuille_de_route_" + livreur.getNumero() + ".txt");
+                    Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
+                }
+            }
+        } catch (Exception e) {
+            this.afficherPopUp(
+                    "Problème lors de la sauvegarde des livraisons.",
+                    Alert.AlertType.ERROR
+            );
         }
     }
 
@@ -668,6 +720,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public CheckBox getAfficherLivreur4CheckBox() {
         return this.afficherLivreur4CheckBox;
+    }
+
+    public Button getGenererFeuillesDeRouteBouton() {
+        return this.genererFeuillesDeRouteBouton;
     }
 
     public void setStage(final Stage stage) {
