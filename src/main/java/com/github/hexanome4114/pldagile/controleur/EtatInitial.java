@@ -3,7 +3,7 @@ package com.github.hexanome4114.pldagile.controleur;
 public final class EtatInitial implements Etat {
 
     /**
-    * Passage de l'état initial à l'état plan chargé
+     * Passage de l'état initial à l'état plan chargé
      * lorsque l'on charge un plan.
      * @param c le controleur qui change d'état
      */
