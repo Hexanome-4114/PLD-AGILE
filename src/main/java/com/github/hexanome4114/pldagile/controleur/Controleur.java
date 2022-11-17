@@ -323,7 +323,7 @@ public void supprimerLivraisonApresCalcul() {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(
                     fichier, this.plan);
 
-            this.reinitialiserTableauLivraison();
+            this.reinitialiserLivraisons();
             this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
@@ -389,8 +389,8 @@ public void supprimerLivraisonApresCalcul() {
 
         try {
             this.plan = Serialiseur.chargerPlan(fichier);
-            this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
+            this.afficherPlan(plan);
         } catch (Exception e) {
             this.afficherPopUp(
                     "Problème lors du chargement du plan.",
@@ -437,6 +437,7 @@ public void supprimerLivraisonApresCalcul() {
             }
         });
 
+        this.carte.getChildren().clear();
         this.carte.getChildren().add(carteVue);
     }
 
@@ -567,7 +568,7 @@ public void supprimerLivraisonApresCalcul() {
         this.calquePlan.enleverLivraison(l);
     }
 
-    private void reinitialiserTableauLivraison() {
+    public void reinitialiserLivraisons() {
         for (Livraison livraison : this.tableauLivraison.getItems()) {
             this.calquePlan.enleverLivraison(livraison);
         }
