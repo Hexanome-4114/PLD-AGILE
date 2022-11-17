@@ -275,22 +275,59 @@ public final class Controleur {
     public void ajouterLivraison() {
         int numero;
 
-        if (livraisons.isEmpty()) {
-            numero = 1;
-        } else { // le numéro de la dernière livraison + 1
-            numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
+        if (this.etatCourant instanceof EtatTournee) {
+            if (livraisons.isEmpty()) {
+                numero = 1;
+            } else { // le numéro de la dernière livraison + 1
+                numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
+            }
+
+            Livraison livraison = new Livraison(
+                    numero,
+                    this.comboBoxFenetreDeLivraison.getValue(),
+                    this.comboBoxLivreur.getValue(),
+                    this.comboBoxAdresse.getValue()
+            );
+
+            try {
+                for (Tournee tournee : this.tournees) {
+                    if (tournee.getLivreur().getNumero()
+                            == livraison.getLivreur().getNumero()) {
+                        this.supprimerAffichageTournee(tournee);
+                        tournee.ajouterLivraisonApresCalcul(
+                                this.comboBoxPlacementLivraison.getValue(),
+                                livraison
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            for (Tournee tournee : this.tournees) {
+                this.afficherTournee(tournee);
+            }
+
+            this.reinitialiserPointSelectionne();
+            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
+        } else {
+            if (livraisons.isEmpty()) {
+                numero = 1;
+            } else { // le numéro de la dernière livraison + 1
+                numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
+            }
+
+            Livraison livraison = new Livraison(
+                    numero,
+                    this.comboBoxFenetreDeLivraison.getValue(),
+                    this.comboBoxLivreur.getValue(),
+                    this.comboBoxAdresse.getValue()
+            );
+
+            this.reinitialiserPointSelectionne();
+            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
+            this.etatCourant.ajouterLivraison(this);
         }
-
-        Livraison livraison = new Livraison(
-                numero,
-                this.comboBoxFenetreDeLivraison.getValue(),
-                this.comboBoxLivreur.getValue(),
-                this.comboBoxAdresse.getValue()
-        );
-
-        this.reinitialiserPointSelectionne();
-        this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
-        this.etatCourant.ajouterLivraison(this);
     }
 
     public void supprimerLivraison() {
