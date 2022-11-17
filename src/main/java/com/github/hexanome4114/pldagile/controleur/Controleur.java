@@ -38,6 +38,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -357,7 +359,7 @@ public void supprimerLivraisonApresCalcul() {
         // Pour chaque livreur, on appelle "calculerTournee" pour calculer
         // la tournée qui lui est associée
         this.tournees = new ArrayList<>();
-        for (Livreur livreur : this.comboBoxLivreur.getItems()) {
+        for (Livreur livreur : Livreur.values()) {
 
             // on récupère les livraisons du livreur courant
             List<Livraison> livraisons = this.livraisons
@@ -384,6 +386,24 @@ public void supprimerLivraisonApresCalcul() {
                 }
             }
         }
+    }
+
+    public void trierTableauLivraison() {
+        // livraisons triées par livreur puis par heure de passage
+        // si pas d'heure de passage, livraison affichée en dernier
+        Collections.sort(livraisons, Comparator.comparing(Livraison::getLivreur)
+                .thenComparing((l1, l2) -> {
+                    int heure1 = l1.getHeurePassage() != null
+                            ? l1.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+                    int heure2 = l2.getHeurePassage() != null
+                            ? l2.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+
+                    return heure1 - heure2;
+                }));
+        this.tableauLivraison.getItems().clear();
+        this.tableauLivraison.getItems().addAll(livraisons);
     }
 
     @FXML
