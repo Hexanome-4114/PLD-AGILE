@@ -15,6 +15,7 @@ public final class EtatInitial implements Etat {
      */
     @Override
     public void chargerPlan(final Controleur c) {
+        c.reinitialiserLivraisons();
         c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxFenetreDeLivraison().setDisable(false);
         c.getChargerLivraisonBouton().setDisable(false);

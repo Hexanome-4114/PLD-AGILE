@@ -14,6 +14,7 @@ public final class EtatPlanCharge implements Etat {
      */
     @Override
     public void chargerPlan(final Controleur c) {
+        c.reinitialiserLivraisons();
         c.getComboBoxLivreur().setValue(null);
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxAdresse().setValue(null);

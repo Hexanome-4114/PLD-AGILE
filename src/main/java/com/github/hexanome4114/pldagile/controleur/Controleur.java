@@ -33,6 +33,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +51,8 @@ public final class Controleur {
     private Plan plan;
 
     private List<Tournee> tournees;
+
+    private List<Livraison> livraisons;
 
     private CalquePlan calquePlan;
 
@@ -121,9 +124,25 @@ public final class Controleur {
     private CheckBox afficherPointsCheckBox;
 
     @FXML
+    private CheckBox afficherLivreursCheckBox;
+
+    @FXML
+    private CheckBox afficherLivreur1CheckBox;
+
+    @FXML
+    private CheckBox afficherLivreur2CheckBox;
+
+    @FXML
+    private CheckBox afficherLivreur3CheckBox;
+
+    @FXML
+    private CheckBox afficherLivreur4CheckBox;
+
+    @FXML
     public void initialize() {
         System.setProperty("javafx.platform", "desktop");
 
+        this.livraisons = new ArrayList<>();
         this.listeDeCommandes = new ListDeCommandes();
 
         ObservableList<FenetreDeLivraison> oListFenetreDeLivraison =
@@ -149,6 +168,11 @@ public final class Controleur {
         this.fenetreDeLivraisonColonne.setCellValueFactory(
                 new PropertyValueFactory<>("fenetreDeLivraison"));
 
+        this.afficherLivreur1CheckBox.setUserData(Livreur.LIVREUR_1);
+        this.afficherLivreur2CheckBox.setUserData(Livreur.LIVREUR_2);
+        this.afficherLivreur3CheckBox.setUserData(Livreur.LIVREUR_3);
+        this.afficherLivreur4CheckBox.setUserData(Livreur.LIVREUR_4);
+
         // EventListener de la vue
         this.tableauLivraison.getSelectionModel().selectedItemProperty()
                 // bouton cliquable que lorsqu'une livraison est sélectionnée
@@ -172,6 +196,8 @@ public final class Controleur {
                             this.annulerBouton.setDisable(
                                     listeDeCommandes.getIndexCourant() == -1);
                             this.tableauLivraison.setDisable(tableauEstVide);
+                            this.afficherLivreursCheckBox.setDisable(
+                                    livraisons.isEmpty());
                         }
                 );
         this.comboBoxLivreur.valueProperty().
@@ -195,34 +221,24 @@ public final class Controleur {
     }
 
     public void ajouterLivraison() {
-        if (this.comboBoxLivreur.getValue() != null
-                && this.comboBoxFenetreDeLivraison.getValue() != null
-                && this.comboBoxAdresse.getValue() != null) {
+        int numero;
 
-            List<Livraison> livraisons = this.tableauLivraison.getItems();
-
-            int numero;
-
-            if (livraisons.isEmpty()) {
-                numero = 1;
-            } else { // le numéro de la dernière livraison + 1
-                numero = livraisons.get(livraisons.size() - 1)
-                        .getNumero() + 1;
-            }
-
-            Livraison livraison = new Livraison(
-                    numero,
-                    this.comboBoxFenetreDeLivraison.getValue(),
-                    this.comboBoxLivreur.getValue(),
-                    this.comboBoxAdresse.getValue()
-            );
-
-            this.reinitialiserPointSelectionne();
-            this.listeDeCommandes.ajouter(
-                    new AjouterCommande(this, livraison)
-            );
-            this.etatCourant.ajouterLivraison(this);
+        if (livraisons.isEmpty()) {
+            numero = 1;
+        } else { // le numéro de la dernière livraison + 1
+            numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
         }
+
+        Livraison livraison = new Livraison(
+                numero,
+                this.comboBoxFenetreDeLivraison.getValue(),
+                this.comboBoxLivreur.getValue(),
+                this.comboBoxAdresse.getValue()
+        );
+
+        this.reinitialiserPointSelectionne();
+        this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
+        this.etatCourant.ajouterLivraison(this);
     }
 
     public void supprimerLivraison() {
@@ -267,6 +283,7 @@ public void supprimerLivraisonApresCalcul() {
         }
 
         try {
+            // on sauvegarde que les livraisons affichées dans le tableau
             Serialiseur.sauvegarderLivraisons(
                     fichier, this.tableauLivraison.getItems());
         } catch (Exception e) {
@@ -278,7 +295,7 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void chargerLivraisons() {
-        if (!this.tableauLivraison.getItems().isEmpty()) {
+        if (!this.livraisons.isEmpty()) {
             // des livraisons sont déjà présentes, on avertit l'utilisateur
             Alert alerte = new Alert(Alert.AlertType.CONFIRMATION);
             alerte.setHeaderText("Les livraisons existantes seront écrasées,"
@@ -307,7 +324,7 @@ public void supprimerLivraisonApresCalcul() {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(
                     fichier, this.plan);
 
-            this.reinitialiserTableauLivraison();
+            this.reinitialiserLivraisons();
             this.reinitialiserPointSelectionne();
 
             for (Livraison livraison : livraisons) {
@@ -316,6 +333,7 @@ public void supprimerLivraisonApresCalcul() {
 
             this.etatCourant.chargerLivraison(this);
         } catch (Exception e) {
+            e.printStackTrace();
             this.afficherPopUp(
                     "Problème lors du chargement des livraisons.",
                     Alert.AlertType.ERROR
@@ -330,7 +348,7 @@ public void supprimerLivraisonApresCalcul() {
         for (Livreur livreur : this.comboBoxLivreur.getItems()) {
 
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.tableauLivraison.getItems()
+            List<Livraison> livraisons = this.livraisons
                     .stream().filter(
                             livraison -> livraison.getLivreur().equals(livreur))
                     .collect(Collectors.toList());
@@ -372,8 +390,8 @@ public void supprimerLivraisonApresCalcul() {
 
         try {
             this.plan = Serialiseur.chargerPlan(fichier);
-            this.afficherPlan(plan);
             this.etatCourant.chargerPlan(this);
+            this.afficherPlan(plan);
         } catch (Exception e) {
             this.afficherPopUp(
                     "Problème lors du chargement du plan.",
@@ -410,8 +428,8 @@ public void supprimerLivraisonApresCalcul() {
             // s'il n'y a pas de sélection en cours ou que l'adresse de celle-ci
             // est différente du point le plus proche
             if (calquePlan.getLivraisonSelectionnee() == null
-                    || !point.getId().equals(calquePlan
-                    .getLivraisonSelectionnee().getAdresse().getId())) {
+                    || !point.equals(calquePlan.getLivraisonSelectionnee()
+                    .getAdresse())) {
                 this.calquePlan.setPointSelectionne(point);
                 this.comboBoxAdresse.setValue(point);
             } else {
@@ -420,6 +438,7 @@ public void supprimerLivraisonApresCalcul() {
             }
         });
 
+        this.carte.getChildren().clear();
         this.carte.getChildren().add(carteVue);
     }
 
@@ -428,6 +447,69 @@ public void supprimerLivraisonApresCalcul() {
         this.calquePlan.afficherPoints(
                 this.afficherPointsCheckBox.isSelected()
         );
+    }
+
+    public void afficherDonneesLivreurs(final ActionEvent actionEvent) {
+        CheckBox checkBox = (CheckBox) actionEvent.getSource();
+
+        CheckBox[] checkBoxes = {
+                afficherLivreur1CheckBox, afficherLivreur2CheckBox,
+                afficherLivreur3CheckBox, afficherLivreur4CheckBox};
+
+        // gestion des états des checkBoxes
+        if (this.afficherLivreursCheckBox.isSelected()) {
+            for (CheckBox c : checkBoxes) {
+                c.setSelected(true);
+                c.setDisable(true);
+            }
+        } else if (checkBox == this.afficherLivreursCheckBox) {
+            for (CheckBox c : checkBoxes) {
+                c.setSelected(true);
+                c.setDisable(false);
+            }
+        }
+
+        // mise à jour du calque et du tableau
+        List<Livreur> livreurs = getLivreursSelectionnes();
+
+        this.calquePlan.afficherDonneesLivreurs(livreurs);
+        this.tableauLivraison.getItems().clear();
+
+        // on affiche toutes les livraisons
+        if (livreurs.size() == Livreur.values().length) {
+            this.tableauLivraison.getItems().addAll(
+                    FXCollections.observableArrayList(this.livraisons));
+        } else { // on filtre les livraisons selon les livreurs sélectionnés
+            this.tableauLivraison.getItems().addAll(FXCollections
+                    .observableArrayList(this.livraisons.stream().filter(
+                            livraison -> livreurs.contains(livraison
+                                    .getLivreur())).collect(Collectors.toList()
+                    )));
+        }
+    }
+
+    /**
+     * Retourne les livreurs dont la checkbox est sélectionnée.
+     * @return les livreurs dont la checkbox est sélectionnée.
+     */
+    private List<Livreur> getLivreursSelectionnes() {
+        if (afficherLivreursCheckBox.isSelected()) {
+            return Arrays.asList(Livreur.values());
+        }
+
+        List<Livreur> livreurs = new ArrayList<>();
+
+        CheckBox[] checkBoxes = {
+                afficherLivreur1CheckBox, afficherLivreur2CheckBox,
+                afficherLivreur3CheckBox, afficherLivreur4CheckBox};
+
+        for (CheckBox c : checkBoxes) {
+            if (c.isSelected()) {
+                livreurs.add((Livreur) c.getUserData());
+            }
+        }
+
+        return livreurs;
     }
 
     private void afficherTournee(final Tournee tournee) {
@@ -462,8 +544,19 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void ajouterLivraison(final Livraison l) {
-        this.tableauLivraison.getItems().add(l);
-        Node noeud = this.calquePlan.ajouterLivraison(l);
+        // si la checkbox du livreur n'est pas sélectionnée, on ajoute la
+        // livraison mais on ne l'affiche pas sur la carte
+
+        this.livraisons.add(l);
+
+        boolean afficherLivraison = this.getLivreursSelectionnes()
+                .contains(l.getLivreur());
+
+        if (afficherLivraison) {
+            this.tableauLivraison.getItems().add(l);
+        }
+
+        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison);
 
         noeud.setOnMouseClicked(e -> {
             this.tableauLivraison.getSelectionModel().select(l);
@@ -471,14 +564,16 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void supprimerLivraison(final Livraison l) {
+        this.livraisons.remove(l);
         this.tableauLivraison.getItems().remove(l);
         this.calquePlan.enleverLivraison(l);
     }
 
-    private void reinitialiserTableauLivraison() {
+    public void reinitialiserLivraisons() {
         for (Livraison livraison : this.tableauLivraison.getItems()) {
             this.calquePlan.enleverLivraison(livraison);
         }
+        this.livraisons.clear();
         this.tableauLivraison.getItems().clear();
     }
 
@@ -553,6 +648,26 @@ public void supprimerLivraisonApresCalcul() {
 
     public CheckBox getAfficherPointsCheckBox() {
         return this.afficherPointsCheckBox;
+    }
+
+    public CheckBox getAfficherLivreursCheckBox() {
+        return this.afficherLivreursCheckBox;
+    }
+
+    public CheckBox getAfficherLivreur1CheckBox() {
+        return this.afficherLivreur1CheckBox;
+    }
+
+    public CheckBox getAfficherLivreur2CheckBox() {
+        return this.afficherLivreur2CheckBox;
+    }
+
+    public CheckBox getAfficherLivreur3CheckBox() {
+        return this.afficherLivreur3CheckBox;
+    }
+
+    public CheckBox getAfficherLivreur4CheckBox() {
+        return this.afficherLivreur4CheckBox;
     }
 
     public void setStage(final Stage stage) {

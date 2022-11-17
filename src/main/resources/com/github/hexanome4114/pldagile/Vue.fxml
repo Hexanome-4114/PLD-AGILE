@@ -52,6 +52,34 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
+         <HBox prefHeight="31.0" prefWidth="630.0">
+            <children>
+               <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
+                  <HBox.margin>
+                     <Insets right="20.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
+                  <HBox.margin>
+                     <Insets right="10.0" />
+                  </HBox.margin>
+               </CheckBox>
+               <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
+            </children>
+            <VBox.margin>
+               <Insets top="30.0" />
+            </VBox.margin>
+         </HBox>
             <TableView fx:id="tableauLivraison" disable="true" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraisonColonne" prefWidth="213.3" text="Numéro de livraison" />
@@ -59,7 +87,7 @@
                     <TableColumn fx:id="fenetreDeLivraisonColonne" prefWidth="213.3" text="Fenêtre" />
                 </columns>
                 <VBox.margin>
-                   <Insets top="10.0" />
+                   <Insets />
                 </VBox.margin>
             </TableView>
             <HBox>
@@ -75,7 +103,7 @@
             </HBox>
             <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer les tournées">
                 <VBox.margin>
-                    <Insets top="10.0" />
+                    <Insets top="30.0" />
                 </VBox.margin>
             </Button>
             <HBox.margin>
@@ -83,5 +111,5 @@
             </HBox.margin>
         </VBox>
     </HBox>
-    <Button fx:id="chargerPlanBouton" onAction="#chargerPlan" text="Charger le plan" />
+    <Button fx:id="chargerPlanBouton" onAction="#chargerPlan" text="Charger un plan" />
 </VBox>
