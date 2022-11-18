@@ -275,59 +275,22 @@ public final class Controleur {
     public void ajouterLivraison() {
         int numero;
 
-        if (this.etatCourant instanceof EtatTournee) {
-            if (livraisons.isEmpty()) {
-                numero = 1;
-            } else { // le numéro de la dernière livraison + 1
-                numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
-            }
-
-            Livraison livraison = new Livraison(
-                    numero,
-                    this.comboBoxFenetreDeLivraison.getValue(),
-                    this.comboBoxLivreur.getValue(),
-                    this.comboBoxAdresse.getValue()
-            );
-
-            try {
-                for (Tournee tournee : this.tournees) {
-                    if (tournee.getLivreur().getNumero()
-                            == livraison.getLivreur().getNumero()) {
-                        this.supprimerAffichageTournee(tournee);
-                        tournee.ajouterLivraisonApresCalcul(
-                                this.comboBoxPlacementLivraison.getValue(),
-                                livraison
-                        );
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            for (Tournee tournee : this.tournees) {
-                this.afficherTournee(tournee);
-            }
-
-            this.reinitialiserPointSelectionne();
-            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
-        } else {
-            if (livraisons.isEmpty()) {
-                numero = 1;
-            } else { // le numéro de la dernière livraison + 1
-                numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
-            }
-
-            Livraison livraison = new Livraison(
-                    numero,
-                    this.comboBoxFenetreDeLivraison.getValue(),
-                    this.comboBoxLivreur.getValue(),
-                    this.comboBoxAdresse.getValue()
-            );
-
-            this.reinitialiserPointSelectionne();
-            this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
-            this.etatCourant.ajouterLivraison(this);
+        if (livraisons.isEmpty()) {
+            numero = 1;
+        } else { // le numéro de la dernière livraison + 1
+            numero = livraisons.get(livraisons.size() - 1).getNumero() + 1;
         }
+
+        Livraison livraison = new Livraison(
+                numero,
+                this.comboBoxFenetreDeLivraison.getValue(),
+                this.comboBoxLivreur.getValue(),
+                this.comboBoxAdresse.getValue()
+        );
+
+        this.reinitialiserPointSelectionne();
+        this.listeDeCommandes.ajouter(new AjouterCommande(this, livraison));
+        this.etatCourant.ajouterLivraison(this);
     }
 
     public void supprimerLivraison() {
@@ -338,33 +301,6 @@ public final class Controleur {
             this.listeDeCommandes.ajouter(
                     new AnnulerCommande(new AjouterCommande(this, livraison))
             );
-
-            for (Tournee tournee : this.tournees) {
-                if (tournee.getLivreur().getNumero()
-                        == livraison.getLivreur().getNumero()) {
-                    this.supprimerAffichageTournee(tournee);
-                    tournee.supprimerLivraisonApresCalcul(livraison);
-                }
-            }
-            for (Tournee tournee : this.tournees) {
-                this.afficherTournee(tournee);
-            }
-        } else {
-            Livraison livraison = this.tableauLivraison.getSelectionModel()
-                    .getSelectedItem();
-
-            this.listeDeCommandes.ajouter(
-                    new AnnulerCommande(new AjouterCommande(this, livraison))
-            );
-
-            for (Tournee tournee : this.tournees) {
-                if (tournee.getLivreur().getNumero()
-                        == livraison.getLivreur().getNumero()) {
-                    supprimerAffichageTournee(tournee);
-                    tournee.supprimerLivraisonApresCalcul(livraison);
-                    afficherTournee(tournee);
-                }
-            }
         }
     }
 
@@ -651,31 +587,67 @@ public final class Controleur {
         alerte.show();
     }
 
-    public void ajouterLivraison(final Livraison l) {
+    public void ajouterLivraison(final Livraison livraison) {
         // si la checkbox du livreur n'est pas sélectionnée, on ajoute la
         // livraison mais on ne l'affiche pas sur la carte
 
-        this.livraisons.add(l);
+        this.livraisons.add(livraison);
 
         boolean afficherLivraison = this.getLivreursSelectionnes()
-                .contains(l.getLivreur());
+                .contains(livraison.getLivreur());
 
         if (afficherLivraison) {
-            this.tableauLivraison.getItems().add(l);
+            this.tableauLivraison.getItems().add(livraison);
         }
 
-        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison,
-                false);
+        Node noeud = this.calquePlan.ajouterLivraison(
+                livraison,
+                afficherLivraison,
+                false
+        );
 
         noeud.setOnMouseClicked(e -> {
-            this.tableauLivraison.getSelectionModel().select(l);
+            this.tableauLivraison.getSelectionModel().select(livraison);
         });
+
+        if (this.etatCourant instanceof EtatTournee) {
+            for (Tournee tournee : this.tournees) {
+                if (tournee.getLivreur().getNumero()
+                        == livraison.getLivreur().getNumero()) {
+                    this.supprimerAffichageTournee(tournee);
+                    try {
+                        tournee.ajouterLivraisonApresCalcul(
+                                this.comboBoxPlacementLivraison.getValue(),
+                                livraison
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            for (Tournee tournee : this.tournees) {
+                this.afficherTournee(tournee);
+            }
+        }
     }
 
-    public void supprimerLivraison(final Livraison l) {
-        this.livraisons.remove(l);
-        this.tableauLivraison.getItems().remove(l);
-        this.calquePlan.enleverLivraison(l);
+    public void supprimerLivraison(final Livraison livraison) {
+        this.livraisons.remove(livraison);
+        this.tableauLivraison.getItems().remove(livraison);
+        this.calquePlan.enleverLivraison(livraison);
+
+        if (this.etatCourant instanceof EtatTournee) {
+            for (Tournee tournee : this.tournees) {
+                if (tournee.getLivreur().getNumero()
+                        == livraison.getLivreur().getNumero()) {
+                    this.supprimerAffichageTournee(tournee);
+                    tournee.supprimerLivraisonApresCalcul(livraison);
+                }
+            }
+            for (Tournee tournee : this.tournees) {
+                this.afficherTournee(tournee);
+            }
+        }
     }
 
     public void reinitialiserLivraisons() {

@@ -217,7 +217,6 @@ public final class Tournee {
         if (indiceLivraison == 0 && this.livraisons.size() == 1) {
             this.livraisons.remove(0);
             this.itineraires.clear();
-
         } else {
             intersectionAvant = getAdresseLivraisonAvant(indiceLivraison);
             intersectionApres = getAdresseIntersectionApres(indiceLivraison);
@@ -303,7 +302,6 @@ public final class Tournee {
 
     /**
      * Retourne l'adresse de livraison précédente.
-     *
      * Cette fonction requiert que la tournée ait été calculée.
      * @param indice indice de la livraison dans la liste des livraisons
      * @return <ul>
