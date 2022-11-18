@@ -435,19 +435,10 @@ public void supprimerLivraisonApresCalcul() {
 
         carteVue.setOnMouseClicked(e -> {
             Intersection point = calquePlan.
-                    trouverPointPlusProche(e.getX(), e.getY());
+                    trouverPointDisponiblePlusProche(e.getX(), e.getY());
 
-            // s'il n'y a pas de sélection en cours ou que l'adresse de celle-ci
-            // est différente du point le plus proche
-            if (calquePlan.getLivraisonSelectionnee() == null
-                    || !point.equals(calquePlan.getLivraisonSelectionnee()
-                    .getAdresse())) {
-                this.calquePlan.setPointSelectionne(point);
-                this.comboBoxAdresse.setValue(point);
-            } else {
-                this.calquePlan.setPointSelectionne(null);
-                this.comboBoxAdresse.setValue(null);
-            }
+            this.calquePlan.setPointSelectionne(point);
+            this.comboBoxAdresse.setValue(point);
         });
 
         this.carte.getChildren().clear();
@@ -578,6 +569,7 @@ public void supprimerLivraisonApresCalcul() {
                 false);
 
         noeud.setOnMouseClicked(e -> {
+            e.consume(); // évite l'appel du mouseClick de la carte
             this.tableauLivraison.getSelectionModel().select(l);
         });
     }
