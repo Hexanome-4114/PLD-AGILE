@@ -434,34 +434,23 @@ public void supprimerLivraisonApresCalcul() {
             return;
         }
 
+        List<Livreur> livreurs = this.getLivreursSelectionnes();
+
         try {
-            List<CheckBox> checkBoxList = new ArrayList<>();
-            checkBoxList.add(this.afficherLivreur1CheckBox);
-            checkBoxList.add(this.afficherLivreur2CheckBox);
-            checkBoxList.add(this.afficherLivreur3CheckBox);
-            checkBoxList.add(this.afficherLivreur4CheckBox);
-            for (CheckBox checkBox : checkBoxList) {
-                if (!checkBox.isSelected()) {
+            for (Tournee tournee : this.tournees) {
+                Livreur livreur = tournee.getLivreur();
+                if (!livreurs.contains(livreur)) {
                     continue;
                 }
-                Livreur livreur = (Livreur) checkBox.getUserData();
-                Tournee tournee = null;
-                for (Tournee tournee1 : this.tournees) {
-                    if (tournee1.getLivreur().equals(livreur)) {
-                        tournee = tournee1;
-                        break;
-                    }
-                }
-                if (tournee != null) {
-                    File feuilleDeRoute = new File(dossier.getPath()
-                            + "/feuille_de_route_" + livreur.getNumero()
-                            + ".txt");
-                    Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
-                }
+
+                File feuilleDeRoute = new File(dossier.getPath()
+                        + "/feuille_de_route_" + livreur.getNumero()
+                        + ".txt");
+                Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
             }
         } catch (Exception e) {
             this.afficherPopUp(
-                    "Problème lors de la generation de la feuille de route.",
+                    "Problème lors de la génération de la feuille de route.",
                     Alert.AlertType.ERROR
             );
         }
