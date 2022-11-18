@@ -34,7 +34,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
@@ -401,7 +400,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public void genererFeuillesDeRoute() {
         DirectoryChooser selecteurDossier = new DirectoryChooser();
-        selecteurDossier.setTitle("Sélectionner un dossier vide où enregistrer les feuilles de routes.");
+        selecteurDossier.setTitle(
+                "Sélectionner un dossier vide où enregistrer les "
+                + "feuilles de routes."
+        );
 
         // TODO dossier vide
         File dossier = selecteurDossier.showDialog(this.stage);
@@ -416,22 +418,22 @@ public void supprimerLivraisonApresCalcul() {
             checkBoxList.add(this.afficherLivreur2CheckBox);
             checkBoxList.add(this.afficherLivreur3CheckBox);
             checkBoxList.add(this.afficherLivreur4CheckBox);
-            for(CheckBox checkBox : checkBoxList) {
-                if(!checkBox.isSelected()){
+            for (CheckBox checkBox : checkBoxList) {
+                if (!checkBox.isSelected()) {
                     continue;
                 }
                 Livreur livreur = (Livreur) checkBox.getUserData();
                 Tournee tournee = null;
-                for(Tournee tournee1 : this.tournees) {
-                    if(tournee1.getLivreur().equals(livreur)) {
+                for (Tournee tournee1 : this.tournees) {
+                    if (tournee1.getLivreur().equals(livreur)) {
                         tournee = tournee1;
                         break;
                     }
                 }
                 if (tournee != null) {
-                    File feuilleDeRoute = new File(dossier.getPath() +
-                            "/feuille_de_route_" + livreur.getNumero() +
-                            ".txt");
+                    File feuilleDeRoute = new File(dossier.getPath()
+                            + "/feuille_de_route_" + livreur.getNumero()
+                            + ".txt");
                     Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
                 }
             }
