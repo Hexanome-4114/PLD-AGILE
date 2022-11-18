@@ -38,6 +38,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -354,36 +356,64 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void calculerLesTournees() {
-        // Pour chaque livreur, on appelle "calculerTournee" pour calculer
-        // la tournée qui lui est associée
         this.tournees = new ArrayList<>();
-        for (Livreur livreur : this.comboBoxLivreur.getItems()) {
+        List<Livreur> livreursSansTournee = new ArrayList<>();
 
+        for (Livreur livreur : Livreur.values()) {
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.livraisons
-                    .stream().filter(
-                            livraison -> livraison.getLivreur().equals(livreur))
-                    .collect(Collectors.toList());
+            List<Livraison> livraisons = this.getLivraisons(livreur);
 
-            // On ne crée pas de tournée s'il n'y a pas de livraison
-            // pour un livreur
-            if (!livraisons.isEmpty()) {
-                Tournee tournee = new Tournee(livreur, livraisons, this.plan,
-                        TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
-                tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+            // on ne crée pas de tournée s'il n'a pas de livraison
+            if (livraisons.isEmpty()) {
+                continue;
+            }
 
-                if (tournee.getItineraires() == null) {
-                    this.afficherPopUp(
-                            "Aucun itinéraire possible pour cette tournée.",
-                            Alert.AlertType.ERROR
-                    );
-                } else {
-                    this.tournees.add(tournee);
-                    afficherTournee(tournee);
-                    this.etatCourant.calculerTournee(this);
-                }
+            Tournee tournee = new Tournee(livreur, livraisons, this.plan,
+                    TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
+            tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+
+            if (tournee.getItineraires() != null) {
+                this.tournees.add(tournee);
+                afficherTournee(tournee);
+            } else {
+                livreursSansTournee.add(livreur);
             }
         }
+
+        if (!livreursSansTournee.isEmpty()) {
+            String texte = livreursSansTournee.size() > 1
+                    ? "les livreurs " : "le livreur ";
+
+            texte += livreursSansTournee.stream().map(Livreur::getNumero)
+                .map(String::valueOf).collect(Collectors.joining(", "));
+
+            this.afficherPopUp(
+                    "Aucun itinéraire possible pour " + texte + ".",
+                    Alert.AlertType.ERROR
+            );
+        }
+
+        if (!tournees.isEmpty()) {
+            this.etatCourant.calculerTournee(this);
+        }
+    }
+
+    public void trierTableauLivraison() {
+        // livraisons triées par livreur puis par heure de passage
+        // si pas d'heure de passage, livraison affichée en dernier
+        Collections.sort(livraisons, Comparator.comparing(Livraison::getLivreur)
+                .thenComparing((l1, l2) -> {
+                    int heure1 = l1.getHeurePassage() != null
+                            ? l1.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+                    int heure2 = l2.getHeurePassage() != null
+                            ? l2.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+
+                    return heure1 - heure2;
+                }));
+        this.tableauLivraison.getItems().clear();
+        this.tableauLivraison.getItems().addAll(livraisons);
     }
 
     @FXML
@@ -483,11 +513,9 @@ public void supprimerLivraisonApresCalcul() {
             this.tableauLivraison.getItems().addAll(
                     FXCollections.observableArrayList(this.livraisons));
         } else { // on filtre les livraisons selon les livreurs sélectionnés
-            this.tableauLivraison.getItems().addAll(FXCollections
-                    .observableArrayList(this.livraisons.stream().filter(
-                            livraison -> livreurs.contains(livraison
-                                    .getLivreur())).collect(Collectors.toList()
-                    )));
+            this.tableauLivraison.getItems().addAll(
+                    FXCollections.observableArrayList(getLivraisons(
+                            livreurs.toArray(new Livreur[0]))));
         }
     }
 
@@ -607,6 +635,19 @@ public void supprimerLivraisonApresCalcul() {
         }
 
         return texte;
+    }
+
+    /**
+     * Retourne les livraisons d'un ensemble de livreurs.
+     * @param l un ou plusieurs livreurs
+     * @return les livraisons du ou des livreurs
+     */
+    private List<Livraison> getLivraisons(final Livreur... l) {
+        List<Livreur> livreurs = new ArrayList<>(Arrays.asList(l));
+
+        return this.livraisons.stream().filter(
+                livraison -> livreurs.contains(livraison.getLivreur())
+        ).collect(Collectors.toList());
     }
 
     private void reinitialiserPointSelectionne() {

@@ -82,10 +82,10 @@
          </HBox>
             <TableView fx:id="tableauLivraison" disable="true" prefHeight="200.0" prefWidth="640.0">
                 <columns>
-                    <TableColumn fx:id="numeroLivraisonColonne" prefWidth="160" text="Numéro" />
-                    <TableColumn fx:id="livreurColonne" prefWidth="160" text="Livreur" />
-                    <TableColumn fx:id="fenetreDeLivraisonColonne" prefWidth="160" text="Fenêtre" />
-                    <TableColumn fx:id="horaireDeLivraisonColonne" prefWidth="160" text="Horaire" />
+                    <TableColumn fx:id="numeroLivraisonColonne" editable="false" prefWidth="160" sortable="false" text="Numéro" />
+                    <TableColumn fx:id="livreurColonne" editable="false" prefWidth="160" sortable="false" text="Livreur" />
+                    <TableColumn fx:id="fenetreDeLivraisonColonne" editable="false" prefWidth="160" sortable="false" text="Fenêtre" />
+                    <TableColumn fx:id="horaireDeLivraisonColonne" editable="false" prefWidth="160" sortable="false" text="Horaire" />
                 </columns>
                 <VBox.margin>
                    <Insets />
