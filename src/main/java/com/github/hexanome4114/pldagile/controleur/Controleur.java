@@ -393,7 +393,9 @@ public void supprimerLivraisonApresCalcul() {
             );
         }
 
-        this.etatCourant.calculerTournee(this);
+        if (!tournees.isEmpty()) {
+            this.etatCourant.calculerTournee(this);
+        }
     }
 
     public void trierTableauLivraison() {
