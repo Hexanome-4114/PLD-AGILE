@@ -5,12 +5,13 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GrapheTest {
 
     @Test
-    void calculerCheminplusCourtDepuisSource() {
+    void calculerCheminplusCourtDepuisSourceUnSeulSommet() {
         // Test 1 : Un seul sommet
         Graphe test1Graphe = new Graphe();
         Sommet test1Sommet1 = new Sommet("sommet1");
@@ -20,6 +21,16 @@ class GrapheTest {
 
         List<Sommet> test1Sommet1CheminsPlusCourt = new LinkedList();
 
+        assertAll(
+                // Test 1 : Un seul sommet
+                () -> assertEquals(0, test1Sommet1.getDistance()),
+                () -> assertEquals(test1Sommet1CheminsPlusCourt,
+                        test1Sommet1.getCheminPlusCourt())
+        );
+    }
+
+    @Test
+    void calculerCheminplusCourtDepuisSourceArbreSimple() {
         // Test 2 : Arbre simple
         Graphe test2Graphe = new Graphe();
         Sommet test2Sommet1 = new Sommet("sommet1");
@@ -61,7 +72,32 @@ class GrapheTest {
         test2Sommet6CheminsPlusCourt.add(test2Sommet1);
         test2Sommet6CheminsPlusCourt.add(test2Sommet5);
 
-        // Test 3 : Arbre simple
+        assertAll(
+                // Test 2 : Arbre simple
+                () -> assertEquals(0, test2Sommet1.getDistance()),
+                () -> assertEquals(1, test2Sommet2.getDistance()),
+                () -> assertEquals(2, test2Sommet3.getDistance()),
+                () -> assertEquals(1, test2Sommet4.getDistance()),
+                () -> assertEquals(1, test2Sommet5.getDistance()),
+                () -> assertEquals(2, test2Sommet6.getDistance()),
+                () -> assertEquals(test2Sommet1CheminsPlusCourt,
+                        test2Sommet1.getCheminPlusCourt()),
+                () -> assertEquals(test2Sommet2CheminsPlusCourt,
+                        test2Sommet2.getCheminPlusCourt()),
+                () -> assertEquals(test2Sommet3CheminsPlusCourt,
+                        test2Sommet3.getCheminPlusCourt()),
+                () -> assertEquals(test2Sommet4CheminsPlusCourt,
+                        test2Sommet4.getCheminPlusCourt()),
+                () -> assertEquals(test2Sommet5CheminsPlusCourt,
+                        test2Sommet5.getCheminPlusCourt()),
+                () -> assertEquals(test2Sommet6CheminsPlusCourt,
+                        test2Sommet6.getCheminPlusCourt())
+        );
+    }
+
+    @Test
+    void calculerCheminplusCourtDepuisSourceCycle() {
+        // Test 3 : Cycle
         Graphe test3Graphe = new Graphe();
         Sommet test3Sommet1 = new Sommet("sommet1");
         Sommet test3Sommet2 = new Sommet("sommet2");
@@ -93,13 +129,34 @@ class GrapheTest {
         List<Sommet> test3Sommet3CheminsPlusCourt = new LinkedList();
         List<Sommet> test3Sommet4CheminsPlusCourt = new LinkedList();
         List<Sommet> test3Sommet5CheminsPlusCourt = new LinkedList();
-        List<Sommet> test3Sommet6CheminsPlusCourt = new LinkedList();
         test3Sommet2CheminsPlusCourt.add(test3Sommet1);
         test3Sommet3CheminsPlusCourt.add(test3Sommet1);
         test3Sommet4CheminsPlusCourt.add(test3Sommet1);
-        test3Sommet4CheminsPlusCourt.add(test3Sommet3);
+        test3Sommet4CheminsPlusCourt.add(test3Sommet5);
         test3Sommet5CheminsPlusCourt.add(test3Sommet1);
 
+        assertAll(
+                // Test 3 : Cycle
+                () -> assertEquals(0, test3Sommet1.getDistance()),
+                () -> assertEquals(1, test3Sommet2.getDistance()),
+                () -> assertEquals(1, test3Sommet3.getDistance()),
+                () -> assertEquals(2, test3Sommet4.getDistance()),
+                () -> assertEquals(1, test3Sommet5.getDistance()),
+                () -> assertEquals(test3Sommet1CheminsPlusCourt,
+                        test3Sommet1.getCheminPlusCourt()),
+                () -> assertEquals(test3Sommet2CheminsPlusCourt,
+                        test3Sommet2.getCheminPlusCourt()),
+                () -> assertEquals(test3Sommet3CheminsPlusCourt,
+                        test3Sommet3.getCheminPlusCourt()),
+                () -> assertEquals(test3Sommet4CheminsPlusCourt,
+                        test3Sommet4.getCheminPlusCourt()),
+                () -> assertEquals(test3Sommet5CheminsPlusCourt,
+                        test3Sommet5.getCheminPlusCourt())
+        );
+    }
+
+    @Test
+    void calculerCheminplusCourtDepuisSourceSommetInnateignable() {
         // Test 4 : Sommet innateignable
         Graphe test4Graphe = new Graphe();
         Sommet test4Sommet1 = new Sommet("sommet1");
@@ -112,6 +169,20 @@ class GrapheTest {
         List<Sommet> test4Sommet1CheminsPlusCourt = new LinkedList();
         List<Sommet> test4Sommet2CheminsPlusCourt = new LinkedList();
 
+        assertAll(
+                // Test 4 : Innateignable
+                () -> assertEquals(0, test4Sommet1.getDistance()),
+                () -> assertEquals(Integer.MAX_VALUE,
+                        test4Sommet2.getDistance()),
+                () -> assertEquals(test4Sommet1CheminsPlusCourt,
+                        test4Sommet1.getCheminPlusCourt()),
+                () -> assertEquals(test4Sommet2CheminsPlusCourt,
+                        test4Sommet2.getCheminPlusCourt())
+        );
+    }
+
+    @Test
+    void calculerCheminplusCourtDepuisSourceAvecUneBoucle() {
         // Test 5 : Avec une boucle
         Graphe test5Graphe = new Graphe();
         Sommet test5Sommet1 = new Sommet("sommet1");
@@ -137,57 +208,6 @@ class GrapheTest {
         test5Sommet3CheminsPlusCourt.add(test5Sommet1);
 
         assertAll(
-                // Test 1 : Un seul sommet
-                () -> assertEquals(0, test1Sommet1.getDistance()),
-                () -> assertEquals(test1Sommet1CheminsPlusCourt,
-                        test1Sommet1.getCheminPlusCourt()),
-
-                // Test 2 : Arbre simple
-                () -> assertEquals(0, test2Sommet1.getDistance()),
-                () -> assertEquals(1, test2Sommet2.getDistance()),
-                () -> assertEquals(2, test2Sommet3.getDistance()),
-                () -> assertEquals(1, test2Sommet4.getDistance()),
-                () -> assertEquals(1, test2Sommet5.getDistance()),
-                () -> assertEquals(2, test2Sommet6.getDistance()),
-                () -> assertEquals(test2Sommet1CheminsPlusCourt,
-                        test2Sommet1.getCheminPlusCourt()),
-                () -> assertEquals(test2Sommet2CheminsPlusCourt,
-                        test2Sommet2.getCheminPlusCourt()),
-                () -> assertEquals(test2Sommet3CheminsPlusCourt,
-                        test2Sommet3.getCheminPlusCourt()),
-                () -> assertEquals(test2Sommet4CheminsPlusCourt,
-                        test2Sommet4.getCheminPlusCourt()),
-                () -> assertEquals(test2Sommet5CheminsPlusCourt,
-                        test2Sommet5.getCheminPlusCourt()),
-                () -> assertEquals(test2Sommet6CheminsPlusCourt,
-                        test2Sommet6.getCheminPlusCourt()),
-
-                // Test 3 : Cycle
-                () -> assertEquals(0, test2Sommet1.getDistance()),
-                () -> assertEquals(1, test3Sommet2.getDistance()),
-                () -> assertEquals(1, test3Sommet3.getDistance()),
-                () -> assertEquals(2, test3Sommet4.getDistance()),
-                () -> assertEquals(1, test3Sommet5.getDistance()),
-                () -> assertEquals(test3Sommet1CheminsPlusCourt,
-                        test3Sommet1.getCheminPlusCourt()),
-                () -> assertEquals(test3Sommet2CheminsPlusCourt,
-                        test3Sommet2.getCheminPlusCourt()),
-                () -> assertEquals(test3Sommet3CheminsPlusCourt,
-                        test3Sommet3.getCheminPlusCourt()),
-                () -> assertEquals(test3Sommet4CheminsPlusCourt,
-                        test3Sommet4.getCheminPlusCourt()),
-                () -> assertEquals(test3Sommet5CheminsPlusCourt,
-                        test3Sommet5.getCheminPlusCourt()),
-
-                // Test 4 : Innateignable
-                () -> assertEquals(0, test4Sommet1.getDistance()),
-                () -> assertEquals(Integer.MAX_VALUE,
-                        test4Sommet2.getDistance()),
-                () -> assertEquals(test4Sommet1CheminsPlusCourt,
-                        test4Sommet1.getCheminPlusCourt()),
-                () -> assertEquals(test4Sommet2CheminsPlusCourt,
-                        test4Sommet2.getCheminPlusCourt()),
-
                 // Test 5 : Innateignable
                 () -> assertEquals(0, test5Sommet1.getDistance()),
                 () -> assertEquals(1, test5Sommet2.getDistance()),
