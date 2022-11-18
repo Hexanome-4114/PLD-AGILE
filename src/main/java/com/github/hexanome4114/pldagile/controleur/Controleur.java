@@ -623,6 +623,7 @@ public final class Controleur {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             this.afficherPopUp(
                     "Calcul de l'itinéraire impossible",
                     Alert.AlertType.ERROR

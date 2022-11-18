@@ -331,7 +331,7 @@ public final class Tournee {
         if (
                 !this.tourneeCalculee
                 || indice < 0
-                || (indice >= this.livraisons.size()
+                || (indice > this.livraisons.size()
                 && !this.livraisons.isEmpty())
         ) {
             result = null;
