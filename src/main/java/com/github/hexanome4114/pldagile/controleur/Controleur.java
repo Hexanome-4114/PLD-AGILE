@@ -338,16 +338,22 @@ public void supprimerLivraisonApresCalcul() {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(
                     fichier, this.plan);
 
-            this.reinitialiserLivraisons();
-            this.reinitialiserPointSelectionne();
+            if (livraisons.isEmpty()) {
+                this.afficherPopUp(
+                        "Aucune livraison n'a été trouvée dans ce fichier.",
+                        Alert.AlertType.INFORMATION
+                );
+            } else {
+                this.reinitialiserLivraisons();
+                this.reinitialiserPointSelectionne();
 
-            for (Livraison livraison : livraisons) {
-                this.ajouterLivraison(livraison);
+                for (Livraison livraison : livraisons) {
+                    this.ajouterLivraison(livraison);
+                }
+
+                this.etatCourant.chargerLivraison(this);
             }
-
-            this.etatCourant.chargerLivraison(this);
         } catch (Exception e) {
-            e.printStackTrace();
             this.afficherPopUp(
                     "Problème lors du chargement des livraisons.",
                     Alert.AlertType.ERROR

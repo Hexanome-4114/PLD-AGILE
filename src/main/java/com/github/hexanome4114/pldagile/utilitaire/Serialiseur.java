@@ -162,7 +162,7 @@ public final class Serialiseur {
 
             if (!plan.getIntersections().containsKey(idAdresse)) {
                 throw new DocumentException("L'adresse de cette livraison"
-                        + "n'existe pas sur le plan.");
+                        + " n'existe pas sur le plan.");
             }
 
             if (!adresses.add(idAdresse)) {
