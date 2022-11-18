@@ -211,7 +211,7 @@ public final class Controleur {
                             tableauEstVide
                         );
                         this.calculerTourneeBouton.setDisable(
-                            tableauEstVide
+                            this.livraisons.isEmpty()
                             || etatCourant instanceof EtatTournee
                         );
                         this.annulerBouton.setDisable(
