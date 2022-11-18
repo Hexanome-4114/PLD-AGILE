@@ -328,12 +328,13 @@ public final class CalquePlan extends MapLayer {
     }
 
     /**
-     * Retourne le point du calque le plus proche d'un point donné.
+     * Retourne le point du calque le plus proche d'un point donné n'étant
+     * pas déjà associé à une livraison.
      * @param x
      * @param y
      * @return le point du calque le plus proche
      */
-    public Intersection trouverPointPlusProche(
+    public Intersection trouverPointDisponiblePlusProche(
             final double x, final double y) {
         if (points.isEmpty()) {
             return null;
@@ -348,6 +349,10 @@ public final class CalquePlan extends MapLayer {
 
         // calcul de la distance pour chaque point
         for (Map.Entry<Intersection, Circle> point : points.entrySet()) {
+            if (point.getValue().isDisable()) { // il y a déjà une livraison
+                continue;
+            }
+
             double distance = this.calculerDistanceEuclidienne(x, y,
                     point.getValue().getTranslateX(),
                     point.getValue().getTranslateY());
