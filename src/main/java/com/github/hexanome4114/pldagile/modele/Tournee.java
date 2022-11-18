@@ -19,6 +19,9 @@ public final class Tournee {
      */
     private final Livreur livreur;
 
+    /**
+     * Le temps que passe le livreur à chaque livraison en minutes.
+     */
     private final int tempsParLivraison;
 
     /**
@@ -38,6 +41,11 @@ public final class Tournee {
     private final Plan plan;
 
     private Intersection pointDepart;
+
+    public boolean isTourneeCalculee() {
+        return tourneeCalculee;
+    }
+
     private boolean tourneeCalculee = false;
 
 
@@ -69,6 +77,10 @@ public final class Tournee {
 
     public Plan getPlan() {
         return plan;
+    }
+
+    public int getTempsParLivraison() {
+        return tempsParLivraison;
     }
 
     /**
@@ -172,7 +184,12 @@ public final class Tournee {
             int debutFenetreLivraison = livraisonCourante
                     .getFenetreDeLivraison().getDebut();
             if (debutFenetreLivraison > heureCourante.getHour()) {
-                heureCourante = LocalTime.of(debutFenetreLivraison, 0);
+                // on met l'heure d'arrivée pour l'affichage lors de
+                // la feuille de route
+                livraisonCourante.setHeureArrivee(heureCourante);
+
+                heureCourante = LocalTime.of(
+                        debutFenetreLivraison, 0);
                 livraisonCourante.setHeurePassage(heureCourante);
             } else {
                 // Si la fenêtre de livraison est dépassée, on marque la
@@ -182,6 +199,7 @@ public final class Tournee {
                     livraisonCourante.setEnRetard(true);
                 }
                 livraisonCourante.setHeurePassage(heureCourante);
+                livraisonCourante.setHeureArrivee(heureCourante);
             }
 
             this.livraisons.set(i, livraisonCourante);

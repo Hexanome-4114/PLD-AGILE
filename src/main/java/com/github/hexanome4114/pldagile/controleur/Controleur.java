@@ -32,9 +32,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,6 +128,9 @@ public final class Controleur {
 
     @FXML
     private Button calculerTourneeBouton;
+
+    @FXML
+    private Button genererFeuillesDeRouteBouton;
 
     @FXML
     private CheckBox afficherPointsCheckBox;
@@ -378,7 +381,8 @@ public void supprimerLivraisonApresCalcul() {
                     TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
             tournee.calculerTournee(FenetreDeLivraison.H8_H9);
 
-            if (tournee.getItineraires() != null) {
+            if (tournee.getItineraires() != null
+                    && !tournee.getItineraires().contains(null)) {
                 this.tournees.add(tournee);
                 afficherTournee(tournee);
             } else {
@@ -420,6 +424,42 @@ public void supprimerLivraisonApresCalcul() {
                 }));
         this.tableauLivraison.getItems().clear();
         this.tableauLivraison.getItems().addAll(livraisons);
+    }
+
+    public void genererFeuillesDeRoute() {
+        DirectoryChooser selecteurDossier = new DirectoryChooser();
+        selecteurDossier.setTitle(
+                "Sélectionner un dossier vide où enregistrer les "
+                + "feuilles de routes."
+        );
+
+        // TODO dossier vide
+        File dossier = selecteurDossier.showDialog(this.stage);
+
+        if (dossier == null) { // aucun dossier sélectionné
+            return;
+        }
+
+        List<Livreur> livreurs = this.getLivreursSelectionnes();
+
+        try {
+            for (Tournee tournee : this.tournees) {
+                Livreur livreur = tournee.getLivreur();
+                if (!livreurs.contains(livreur)) {
+                    continue;
+                }
+
+                File feuilleDeRoute = new File(dossier.getPath()
+                        + "/feuille_de_route_" + livreur.getNumero()
+                        + ".txt");
+                Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
+            }
+        } catch (Exception e) {
+            this.afficherPopUp(
+                    "Problème lors de la génération de la feuille de route.",
+                    Alert.AlertType.ERROR
+            );
+        }
     }
 
     @FXML
@@ -747,6 +787,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public CheckBox getAfficherLivreur4CheckBox() {
         return this.afficherLivreur4CheckBox;
+    }
+
+    public Button getGenererFeuillesDeRouteBouton() {
+        return this.genererFeuillesDeRouteBouton;
     }
 
     public void setStage(final Stage stage) {
