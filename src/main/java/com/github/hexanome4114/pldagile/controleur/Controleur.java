@@ -379,13 +379,14 @@ public void supprimerLivraisonApresCalcul() {
                             "Aucun itinéraire possible pour cette tournée.",
                             Alert.AlertType.ERROR
                     );
+                    break;
                 } else {
                     this.tournees.add(tournee);
                     afficherTournee(tournee);
-                    this.etatCourant.calculerTournee(this);
                 }
             }
         }
+        this.etatCourant.calculerTournee(this);
     }
 
     public void trierTableauLivraison() {
