@@ -247,7 +247,7 @@ public final class Serialiseur {
             if (!nomRuePrecedenteReturn.equals(nomRue)) {
                 ecrivain.print("Prendre " + nomRue);
             } else {
-                ecrivain.print("continuez sur " + nomRue);
+                ecrivain.print("continuer sur " + nomRue);
             }
             if (i != itineraire.getIntersections().size() - 2) {
                 ecrivain.println(", puis");
