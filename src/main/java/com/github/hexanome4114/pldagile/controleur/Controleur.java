@@ -608,24 +608,25 @@ public final class Controleur {
             this.tableauLivraison.getSelectionModel().select(livraison);
         });
 
-        if (this.etatCourant instanceof EtatTournee) {
-            for (Tournee tournee : this.tournees) {
-                if (tournee.getLivreur().getNumero()
-                        == livraison.getLivreur().getNumero()) {
-                    this.supprimerAffichageTournee(tournee);
-                    try {
-                        tournee.ajouterLivraisonApresCalcul(
-                                this.comboBoxPlacementLivraison.getValue(),
-                                livraison
-                        );
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+        try {
+            if (this.etatCourant instanceof EtatTournee) {
+                for (Tournee tournee : this.tournees) {
+                    if (tournee.getLivreur().getNumero()
+                            == livraison.getLivreur().getNumero()) {
+                        this.supprimerAffichageTournee(tournee);
+                            tournee.ajouterLivraisonApresCalcul(
+                                    this.comboBoxPlacementLivraison.getValue(),
+                                    livraison
+                            );
+                        this.afficherTournee(tournee);
                     }
                 }
             }
-            for (Tournee tournee : this.tournees) {
-                this.afficherTournee(tournee);
-            }
+        } catch (Exception e) {
+            this.afficherPopUp(
+                    "Calcul de l'itinéraire impossible",
+                    Alert.AlertType.ERROR
+            );
         }
     }
 
@@ -640,10 +641,8 @@ public final class Controleur {
                         == livraison.getLivreur().getNumero()) {
                     this.supprimerAffichageTournee(tournee);
                     tournee.supprimerLivraisonApresCalcul(livraison);
+                    this.afficherTournee(tournee);
                 }
-            }
-            for (Tournee tournee : this.tournees) {
-                this.afficherTournee(tournee);
             }
         }
     }
