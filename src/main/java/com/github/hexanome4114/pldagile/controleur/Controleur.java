@@ -356,36 +356,43 @@ public void supprimerLivraisonApresCalcul() {
     }
 
     public void calculerLesTournees() {
-        // Pour chaque livreur, on appelle "calculerTournee" pour calculer
-        // la tournée qui lui est associée
         this.tournees = new ArrayList<>();
+        List<Livreur> livreursSansTournee = new ArrayList<>();
+
         for (Livreur livreur : Livreur.values()) {
-
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.livraisons
-                    .stream().filter(
-                            livraison -> livraison.getLivreur().equals(livreur))
-                    .collect(Collectors.toList());
+            List<Livraison> livraisons = this.getLivraisons(livreur);
 
-            // On ne crée pas de tournée s'il n'y a pas de livraison
-            // pour un livreur
-            if (!livraisons.isEmpty()) {
-                Tournee tournee = new Tournee(livreur, livraisons, this.plan,
-                        TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
-                tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+            // on ne crée pas de tournée s'il n'a pas de livraison
+            if (livraisons.isEmpty()) {
+                continue;
+            }
 
-                if (tournee.getItineraires() == null) {
-                    this.afficherPopUp(
-                            "Aucun itinéraire possible pour cette tournée.",
-                            Alert.AlertType.ERROR
-                    );
-                    break;
-                } else {
-                    this.tournees.add(tournee);
-                    afficherTournee(tournee);
-                }
+            Tournee tournee = new Tournee(livreur, livraisons, this.plan,
+                    TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
+            tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+
+            if (tournee.getItineraires() != null) {
+                this.tournees.add(tournee);
+                afficherTournee(tournee);
+            } else {
+                livreursSansTournee.add(livreur);
             }
         }
+
+        if (!livreursSansTournee.isEmpty()) {
+            String texte = livreursSansTournee.size() > 1
+                    ? "les livreurs " : "le livreur ";
+
+            texte += livreursSansTournee.stream().map(Livreur::getNumero)
+                .map(String::valueOf).collect(Collectors.joining(", "));
+
+            this.afficherPopUp(
+                    "Aucun itinéraire possible pour " + texte + ".",
+                    Alert.AlertType.ERROR
+            );
+        }
+
         this.etatCourant.calculerTournee(this);
     }
 
@@ -513,11 +520,9 @@ public void supprimerLivraisonApresCalcul() {
             this.tableauLivraison.getItems().addAll(
                     FXCollections.observableArrayList(this.livraisons));
         } else { // on filtre les livraisons selon les livreurs sélectionnés
-            this.tableauLivraison.getItems().addAll(FXCollections
-                    .observableArrayList(this.livraisons.stream().filter(
-                            livraison -> livreurs.contains(livraison
-                                    .getLivreur())).collect(Collectors.toList()
-                    )));
+            this.tableauLivraison.getItems().addAll(
+                    FXCollections.observableArrayList(getLivraisons(
+                            livreurs.toArray(new Livreur[0]))));
         }
     }
 
@@ -636,6 +641,19 @@ public void supprimerLivraisonApresCalcul() {
         }
 
         return texte;
+    }
+
+    /**
+     * Retourne les livraisons d'un ensemble de livreurs.
+     * @param l un ou plusieurs livreurs
+     * @return les livraisons du ou des livreurs
+     */
+    private List<Livraison> getLivraisons(final Livreur... l) {
+        List<Livreur> livreurs = new ArrayList<>(Arrays.asList(l));
+
+        return this.livraisons.stream().filter(
+                livraison -> livreurs.contains(livraison.getLivreur())
+        ).collect(Collectors.toList());
     }
 
     private void reinitialiserPointSelectionne() {
