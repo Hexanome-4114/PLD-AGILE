@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Contrôleur de l'application.
@@ -88,6 +89,9 @@ public final class Controleur {
 
     @FXML
     private ComboBox<Intersection> comboBoxAdresse;
+
+    @FXML
+    private ComboBox<Integer> comboBoxPlacementLivraison;
 
     @FXML
     private TableView<Livraison> tableauLivraison;
@@ -192,7 +196,6 @@ public final class Controleur {
         this.tableauLivraison.getSelectionModel().selectedItemProperty()
                 // bouton cliquable que lorsqu'une livraison est sélectionnée
                 .addListener((obs, ancienneSelection, nouvelleSelection) -> {
-
                             this.supprimerLivraisonBouton.setDisable(
                                     nouvelleSelection == null);
                             this.calquePlan.setLivraisonSelectionnee(
@@ -202,33 +205,73 @@ public final class Controleur {
         this.tableauLivraison.getItems()
                 // bouton cliquable que lorsqu'il y a des livraisons
                 .addListener((ListChangeListener<Livraison>) (obs) -> {
-                            boolean tableauEstVide = obs.getList().isEmpty();
+                        boolean tableauEstVide = obs.getList().isEmpty();
 
-                            this.sauvegarderLivraisonsBouton.setDisable(
-                                    tableauEstVide);
-                            this.calculerTourneeBouton.setDisable(
-                                    tableauEstVide);
-                            this.annulerBouton.setDisable(
-                                    listeDeCommandes.getIndexCourant() == -1);
-                            this.tableauLivraison.setDisable(tableauEstVide);
-                            this.afficherLivreursCheckBox.setDisable(
-                                    livraisons.isEmpty());
-                        }
+                        this.sauvegarderLivraisonsBouton.setDisable(
+                            tableauEstVide
+                        );
+                        this.calculerTourneeBouton.setDisable(
+                            this.livraisons.isEmpty()
+                            || etatCourant instanceof EtatTournee
+                        );
+                        this.annulerBouton.setDisable(
+                            listeDeCommandes.getIndexCourant() == -1
+                        );
+                        this.tableauLivraison.setDisable(tableauEstVide);
+                        this.afficherLivreursCheckBox.setDisable(
+                            livraisons.isEmpty()
+                        );
+                        this.comboBoxPlacementLivraison.setDisable(
+                            !(this.etatCourant instanceof EtatTournee)
+                        );
+                    }
                 );
-        this.comboBoxLivreur.valueProperty().
-                addListener((obs, ancienneSelection, nouvelleSelection) ->
+        this.comboBoxLivreur.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) -> {
+                        Livreur livreur = this.comboBoxLivreur.getValue();
+                        int nombreLivraison = (int) this.livraisons
+                                .stream().filter(
+                                        livraison -> livraison
+                                                .getLivreur().equals(livreur)
+                                ).count();
+                        List<Integer> placementLivraison
+                                = IntStream.range(1, nombreLivraison + 2)
+                                .boxed().collect(
+                                        Collectors.toList()
+                                );
+
                         this.ajouterLivraisonBouton.setDisable(
-                        this.comboBoxLivreur.getValue() == null
+                        (this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
-                        || this.comboBoxAdresse.getValue() == null));
-        this.comboBoxFenetreDeLivraison.valueProperty().
-                addListener((options, oldValue, newValue) ->
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null));
+                        this.comboBoxPlacementLivraison.setItems(
+                                FXCollections.observableArrayList(
+                                        placementLivraison
+                                )
+                        );
+                });
+        this.comboBoxFenetreDeLivraison.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
                         this.ajouterLivraisonBouton.setDisable(
-                        this.comboBoxLivreur.getValue() == null
+                        (this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
-                        || this.comboBoxAdresse.getValue() == null));
-        this.comboBoxAdresse.valueProperty().
-                addListener((options, oldValue, newValue) ->
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null))
+                );
+        this.comboBoxAdresse.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
+                        this.ajouterLivraisonBouton.setDisable(
+                        (this.comboBoxLivreur.getValue() == null
+                        || this.comboBoxFenetreDeLivraison.getValue() == null
+                        || this.comboBoxAdresse.getValue() == null)
+                        || (this.etatCourant instanceof EtatTournee
+                        && this.comboBoxPlacementLivraison.getValue() == null))
+                );
+        this.comboBoxPlacementLivraison.valueProperty()
+                .addListener((obs, ancienneSelection, nouvelleSelection) ->
                         this.ajouterLivraisonBouton.setDisable(
                         this.comboBoxLivreur.getValue() == null
                         || this.comboBoxFenetreDeLivraison.getValue() == null
@@ -263,24 +306,6 @@ public final class Controleur {
         this.listeDeCommandes.ajouter(
                 new AnnulerCommande(new AjouterCommande(this, livraison))
         );
-    }
-
-public void supprimerLivraisonApresCalcul() {
-        Livraison livraison = this.tableauLivraison.getSelectionModel()
-                .getSelectedItem();
-
-        this.listeDeCommandes.ajouter(
-                new AnnulerCommande(new AjouterCommande(this, livraison))
-        );
-
-        for (Tournee tournee : this.tournees) {
-            if (tournee.getLivreur().getNumero()
-                    == livraison.getLivreur().getNumero()) {
-                supprimerAffichageTournee(tournee);
-                tournee.supprimerLivraisonApresCalcul(livraison);
-                afficherTournee(tournee);
-            }
-        }
     }
 
     public void annuler() {
@@ -626,32 +651,70 @@ public void supprimerLivraisonApresCalcul() {
         alerte.show();
     }
 
-    public void ajouterLivraison(final Livraison l) {
+    public void ajouterLivraison(final Livraison livraison) {
         // si la checkbox du livreur n'est pas sélectionnée, on ajoute la
         // livraison mais on ne l'affiche pas sur la carte
 
-        this.livraisons.add(l);
+        this.livraisons.add(livraison);
 
         boolean afficherLivraison = this.getLivreursSelectionnes()
-                .contains(l.getLivreur());
+                .contains(livraison.getLivreur());
 
         if (afficherLivraison) {
-            this.tableauLivraison.getItems().add(l);
+            this.tableauLivraison.getItems().add(livraison);
         }
 
-        Node noeud = this.calquePlan.ajouterLivraison(l, afficherLivraison,
-                false);
+        Node noeud = this.calquePlan.ajouterLivraison(
+                livraison,
+                afficherLivraison,
+                false
+        );
 
         noeud.setOnMouseClicked(e -> {
             e.consume(); // évite l'appel du mouseClick de la carte
-            this.tableauLivraison.getSelectionModel().select(l);
+            this.tableauLivraison.getSelectionModel().select(livraison);
         });
+
+        try {
+            if (this.etatCourant instanceof EtatTournee) {
+                for (Tournee tournee : this.tournees) {
+                    if (tournee.getLivreur().getNumero()
+                            == livraison.getLivreur().getNumero()) {
+                        this.supprimerAffichageTournee(tournee);
+                            tournee.ajouterLivraisonApresCalcul(
+                                    this.comboBoxPlacementLivraison.getValue(),
+                                    livraison
+                            );
+                        this.afficherTournee(tournee);
+                    }
+                }
+                this.trierTableauLivraison();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.afficherPopUp(
+                    "Calcul de l'itinéraire impossible",
+                    Alert.AlertType.ERROR
+            );
+        }
     }
 
-    public void supprimerLivraison(final Livraison l) {
-        this.livraisons.remove(l);
-        this.tableauLivraison.getItems().remove(l);
-        this.calquePlan.enleverLivraison(l);
+    public void supprimerLivraison(final Livraison livraison) {
+        this.livraisons.remove(livraison);
+        this.tableauLivraison.getItems().remove(livraison);
+        this.calquePlan.enleverLivraison(livraison);
+
+        if (this.etatCourant instanceof EtatTournee) {
+            for (Tournee tournee : this.tournees) {
+                if (tournee.getLivreur().getNumero()
+                        == livraison.getLivreur().getNumero()) {
+                    this.supprimerAffichageTournee(tournee);
+                    tournee.supprimerLivraisonApresCalcul(livraison);
+                    this.afficherTournee(tournee);
+                }
+            }
+            this.trierTableauLivraison();
+        }
     }
 
     public void reinitialiserLivraisons() {
@@ -711,6 +774,10 @@ public void supprimerLivraisonApresCalcul() {
 
     public ComboBox<FenetreDeLivraison> getComboBoxFenetreDeLivraison() {
         return this.comboBoxFenetreDeLivraison;
+    }
+
+    public ComboBox<Integer> getComboBoxPlacementLivraison() {
+        return this.comboBoxPlacementLivraison;
     }
 
     public Button getAjouterLivraisonBouton() {

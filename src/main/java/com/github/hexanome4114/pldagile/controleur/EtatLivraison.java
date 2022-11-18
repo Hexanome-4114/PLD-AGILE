@@ -68,6 +68,7 @@ public final class EtatLivraison implements Etat {
         c.getComboBoxLivreur().setDisable(false);
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxFenetreDeLivraison().setDisable(false);
+        c.getComboBoxPlacementLivraison().setDisable(false);
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getCalculerTourneeBouton().setDisable(true);
         c.getChargerLivraisonBouton().setDisable(true);

@@ -22,6 +22,7 @@ public final class EtatTournee implements Etat {
         c.getComboBoxFenetreDeLivraison().setValue(null);
         c.getComboBoxAdresse().setValue(null);
         c.getTableauLivraison().getItems().clear();
+        c.getComboBoxPlacementLivraison().setDisable(true);
         c.getTableauLivraison().getSelectionModel().clearSelection();
         c.getAjouterLivraisonBouton().setDisable(true);
         c.getSupprimerLivraisonBouton().setDisable(true);

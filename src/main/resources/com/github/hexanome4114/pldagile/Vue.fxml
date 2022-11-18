@@ -42,6 +42,11 @@
                         <Insets right="10.0" />
                     </HBox.margin>
                 </Button>
+                <ComboBox fx:id="comboBoxPlacementLivraison" disable="true" prefWidth="150.0" promptText="Placement dans la tournée">
+                   <HBox.margin>
+                      <Insets right="10.0" />
+                   </HBox.margin>
+                </ComboBox>
                 <Button fx:id="supprimerLivraisonBouton" disable="true" mnemonicParsing="false" onAction="#supprimerLivraison" text="Supprimer une livraison" />
                 <Button fx:id="annulerBouton" disable="true" mnemonicParsing="false" onAction="#annuler">
                    <HBox.margin>
@@ -85,9 +90,6 @@
                     <TableColumn fx:id="fenetreDeLivraisonColonne" editable="false" prefWidth="160" sortable="false" text="Fenêtre" />
                     <TableColumn fx:id="horaireDeLivraisonColonne" editable="false" prefWidth="160" sortable="false" text="Horaire" />
                 </columns>
-                <VBox.margin>
-                   <Insets />
-                </VBox.margin>
             </TableView>
             <HBox>
                 <Button fx:id="sauvegarderLivraisonsBouton" disable="true" onAction="#sauvegarderLivraisons" text="Sauvegarder les livraisons">
