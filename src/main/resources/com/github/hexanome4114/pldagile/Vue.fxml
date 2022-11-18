@@ -52,34 +52,32 @@
                    <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
-         <HBox prefHeight="31.0" prefWidth="630.0">
-            <children>
-               <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
+            <HBox prefHeight="31.0" prefWidth="630.0">
+                <CheckBox fx:id="afficherLivreursCheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Tous les livreurs">
                   <HBox.margin>
                      <Insets right="20.0" />
                   </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
+                </CheckBox>
+                <CheckBox fx:id="afficherLivreur1CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 1">
                   <HBox.margin>
                      <Insets right="10.0" />
                   </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
+                </CheckBox>
+                <CheckBox fx:id="afficherLivreur2CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 2">
                   <HBox.margin>
                      <Insets right="10.0" />
                   </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
+                </CheckBox>
+                <CheckBox fx:id="afficherLivreur3CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 3">
                   <HBox.margin>
                      <Insets right="10.0" />
                   </HBox.margin>
-               </CheckBox>
-               <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
-            </children>
-            <VBox.margin>
-               <Insets top="30.0" />
-            </VBox.margin>
-         </HBox>
+                </CheckBox>
+                <CheckBox fx:id="afficherLivreur4CheckBox" disable="true" mnemonicParsing="false" onAction="#afficherDonneesLivreurs" selected="true" text="Livreur 4" />
+                <VBox.margin>
+                   <Insets top="30.0" />
+                </VBox.margin>
+            </HBox>
             <TableView fx:id="tableauLivraison" disable="true" prefHeight="200.0" prefWidth="640.0">
                 <columns>
                     <TableColumn fx:id="numeroLivraisonColonne" prefWidth="160" text="Numéro" />
@@ -102,12 +100,17 @@
                     <Insets top="10.0" />
                 </VBox.margin>
             </HBox>
-            <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer les tournées">
+            <HBox>
+                <Button fx:id="calculerTourneeBouton" disable="true" onAction="#calculerLesTournees" text="Calculer les tournées" />
+                <Button fx:id="genererFeuillesDeRouteBouton" disable="true" onAction="#genererFeuillesDeRoute" text="Génerer les feuilles de routes">
+                   <HBox.margin>
+                      <Insets left="10.0" />
+                   </HBox.margin>
+                </Button>
                 <VBox.margin>
-                    <Insets top="30.0" />
+                   <Insets top="30.0" />
                 </VBox.margin>
-            </Button>
-         <Button fx:id="genererFeuillesDeRouteBouton" disable="true" onAction="#genererFeuillesDeRoute" text="Génerer les feuilles de routes" />
+            </HBox>
             <HBox.margin>
                 <Insets left="20.0" />
             </HBox.margin>
