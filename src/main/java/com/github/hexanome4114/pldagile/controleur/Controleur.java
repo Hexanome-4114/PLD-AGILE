@@ -294,14 +294,12 @@ public final class Controleur {
     }
 
     public void supprimerLivraison() {
-        if (this.etatCourant instanceof EtatTournee) {
-            Livraison livraison = this.tableauLivraison.getSelectionModel()
-                    .getSelectedItem();
+        Livraison livraison = this.tableauLivraison.getSelectionModel()
+                .getSelectedItem();
 
-            this.listeDeCommandes.ajouter(
-                    new AnnulerCommande(new AjouterCommande(this, livraison))
-            );
-        }
+        this.listeDeCommandes.ajouter(
+                new AnnulerCommande(new AjouterCommande(this, livraison))
+        );
     }
 
     public void annuler() {
