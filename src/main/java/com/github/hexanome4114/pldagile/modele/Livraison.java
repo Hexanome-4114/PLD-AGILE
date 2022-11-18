@@ -9,6 +9,7 @@ public final class Livraison {
     private final Livreur livreur;
     private final Intersection adresse;
     private LocalTime heurePassage;
+    private LocalTime heureArrivee;
     private boolean enRetard;
 
     public Livraison(final int numero,
@@ -28,9 +29,16 @@ public final class Livraison {
     public LocalTime getHeurePassage() {
         return heurePassage;
     }
+    public LocalTime getHeureArrivee() {
+        return heureArrivee;
+    }
 
     public void setHeurePassage(final LocalTime heurePassage) {
         this.heurePassage = heurePassage;
+    }
+
+    public void setHeureArrivee(final LocalTime heureArrivee) {
+        this.heureArrivee = heureArrivee;
     }
 
     public boolean isEnRetard() {

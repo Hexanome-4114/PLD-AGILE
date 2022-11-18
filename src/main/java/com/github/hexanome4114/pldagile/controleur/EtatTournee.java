@@ -32,6 +32,7 @@ public final class EtatTournee implements Etat {
         c.getAfficherPointsCheckBox().setSelected(false);
         c.getListeDeCommandes().reinitialiser();
         c.getAnnulerBouton().setDisable(true);
+        c.getGenererFeuillesDeRouteBouton().setDisable(true);
         c.getInstructionLabel().setText(
                 "Pour ajouter une livraison, veuillez sélectionner un livreur,"
                         + " une fenêtre horaire et une adresse de livraison"

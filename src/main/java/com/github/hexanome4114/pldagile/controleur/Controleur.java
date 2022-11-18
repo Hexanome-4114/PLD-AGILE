@@ -32,11 +32,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -129,6 +132,9 @@ public final class Controleur {
 
     @FXML
     private Button calculerTourneeBouton;
+
+    @FXML
+    private Button genererFeuillesDeRouteBouton;
 
     @FXML
     private CheckBox afficherPointsCheckBox;
@@ -360,16 +366,22 @@ public final class Controleur {
             List<Livraison> livraisons = Serialiseur.chargerLivraisons(
                     fichier, this.plan);
 
-            this.reinitialiserLivraisons();
-            this.reinitialiserPointSelectionne();
+            if (livraisons.isEmpty()) {
+                this.afficherPopUp(
+                        "Aucune livraison n'a été trouvée dans ce fichier.",
+                        Alert.AlertType.INFORMATION
+                );
+            } else {
+                this.reinitialiserLivraisons();
+                this.reinitialiserPointSelectionne();
 
-            for (Livraison livraison : livraisons) {
-                this.ajouterLivraison(livraison);
+                for (Livraison livraison : livraisons) {
+                    this.ajouterLivraison(livraison);
+                }
+
+                this.etatCourant.chargerLivraison(this);
             }
-
-            this.etatCourant.chargerLivraison(this);
         } catch (Exception e) {
-            e.printStackTrace();
             this.afficherPopUp(
                     "Problème lors du chargement des livraisons.",
                     Alert.AlertType.ERROR
@@ -378,35 +390,100 @@ public final class Controleur {
     }
 
     public void calculerLesTournees() {
-        // Pour chaque livreur, on appelle "calculerTournee" pour calculer
-        // la tournée qui lui est associée
         this.tournees = new ArrayList<>();
-        for (Livreur livreur : this.comboBoxLivreur.getItems()) {
+        List<Livreur> livreursSansTournee = new ArrayList<>();
 
+        for (Livreur livreur : Livreur.values()) {
             // on récupère les livraisons du livreur courant
-            List<Livraison> livraisons = this.livraisons
-                    .stream().filter(
-                            livraison -> livraison.getLivreur().equals(livreur))
-                    .collect(Collectors.toList());
+            List<Livraison> livraisons = this.getLivraisons(livreur);
 
-            // On ne crée pas de tournée s'il n'y a pas de livraison
-            // pour un livreur
-            if (!livraisons.isEmpty()) {
-                Tournee tournee = new Tournee(livreur, livraisons, this.plan,
-                        TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
-                tournee.calculerTournee(FenetreDeLivraison.H8_H9);
-
-                if (tournee.getItineraires() == null) {
-                    this.afficherPopUp(
-                            "Aucun itinéraire possible pour cette tournée.",
-                            Alert.AlertType.ERROR
-                    );
-                } else {
-                    this.tournees.add(tournee);
-                    this.afficherTournee(tournee);
-                    this.etatCourant.calculerTournee(this);
-                }
+            // on ne crée pas de tournée s'il n'a pas de livraison
+            if (livraisons.isEmpty()) {
+                continue;
             }
+
+            Tournee tournee = new Tournee(livreur, livraisons, this.plan,
+                    TEMPS_PAR_LIVRAISON, this.plan.getEntrepot());
+            tournee.calculerTournee(FenetreDeLivraison.H8_H9);
+
+            if (tournee.getItineraires() != null
+                    && !tournee.getItineraires().contains(null)) {
+                this.tournees.add(tournee);
+                afficherTournee(tournee);
+            } else {
+                livreursSansTournee.add(livreur);
+            }
+        }
+
+        if (!livreursSansTournee.isEmpty()) {
+            String texte = livreursSansTournee.size() > 1
+                    ? "les livreurs " : "le livreur ";
+
+            texte += livreursSansTournee.stream().map(Livreur::getNumero)
+                .map(String::valueOf).collect(Collectors.joining(", "));
+
+            this.afficherPopUp(
+                    "Aucun itinéraire possible pour " + texte + ".",
+                    Alert.AlertType.ERROR
+            );
+        }
+
+        if (!tournees.isEmpty()) {
+            this.etatCourant.calculerTournee(this);
+        }
+    }
+
+    public void trierTableauLivraison() {
+        // livraisons triées par livreur puis par heure de passage
+        // si pas d'heure de passage, livraison affichée en dernier
+        Collections.sort(livraisons, Comparator.comparing(Livraison::getLivreur)
+                .thenComparing((l1, l2) -> {
+                    int heure1 = l1.getHeurePassage() != null
+                            ? l1.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+                    int heure2 = l2.getHeurePassage() != null
+                            ? l2.getHeurePassage().toSecondOfDay()
+                            : Integer.MAX_VALUE;
+
+                    return heure1 - heure2;
+                }));
+        this.tableauLivraison.getItems().clear();
+        this.tableauLivraison.getItems().addAll(livraisons);
+    }
+
+    public void genererFeuillesDeRoute() {
+        DirectoryChooser selecteurDossier = new DirectoryChooser();
+        selecteurDossier.setTitle(
+                "Sélectionner un dossier vide où enregistrer les "
+                + "feuilles de routes."
+        );
+
+        // TODO dossier vide
+        File dossier = selecteurDossier.showDialog(this.stage);
+
+        if (dossier == null) { // aucun dossier sélectionné
+            return;
+        }
+
+        List<Livreur> livreurs = this.getLivreursSelectionnes();
+
+        try {
+            for (Tournee tournee : this.tournees) {
+                Livreur livreur = tournee.getLivreur();
+                if (!livreurs.contains(livreur)) {
+                    continue;
+                }
+
+                File feuilleDeRoute = new File(dossier.getPath()
+                        + "/feuille_de_route_" + livreur.getNumero()
+                        + ".txt");
+                Serialiseur.genererFeuilleDeRoute(feuilleDeRoute, tournee);
+            }
+        } catch (Exception e) {
+            this.afficherPopUp(
+                    "Problème lors de la génération de la feuille de route.",
+                    Alert.AlertType.ERROR
+            );
         }
     }
 
@@ -459,19 +536,10 @@ public final class Controleur {
 
         carteVue.setOnMouseClicked(e -> {
             Intersection point = calquePlan.
-                    trouverPointPlusProche(e.getX(), e.getY());
+                    trouverPointDisponiblePlusProche(e.getX(), e.getY());
 
-            // s'il n'y a pas de sélection en cours ou que l'adresse de celle-ci
-            // est différente du point le plus proche
-            if (calquePlan.getLivraisonSelectionnee() == null
-                    || !point.equals(calquePlan.getLivraisonSelectionnee()
-                    .getAdresse())) {
-                this.calquePlan.setPointSelectionne(point);
-                this.comboBoxAdresse.setValue(point);
-            } else {
-                this.calquePlan.setPointSelectionne(null);
-                this.comboBoxAdresse.setValue(null);
-            }
+            this.calquePlan.setPointSelectionne(point);
+            this.comboBoxAdresse.setValue(point);
         });
 
         this.carte.getChildren().clear();
@@ -516,11 +584,9 @@ public final class Controleur {
             this.tableauLivraison.getItems().addAll(
                     FXCollections.observableArrayList(this.livraisons));
         } else { // on filtre les livraisons selon les livreurs sélectionnés
-            this.tableauLivraison.getItems().addAll(FXCollections
-                    .observableArrayList(this.livraisons.stream().filter(
-                            livraison -> livreurs.contains(livraison
-                                    .getLivreur())).collect(Collectors.toList()
-                    )));
+            this.tableauLivraison.getItems().addAll(
+                    FXCollections.observableArrayList(getLivraisons(
+                            livreurs.toArray(new Livreur[0]))));
         }
     }
 
@@ -605,6 +671,7 @@ public final class Controleur {
         );
 
         noeud.setOnMouseClicked(e -> {
+            e.consume(); // évite l'appel du mouseClick de la carte
             this.tableauLivraison.getSelectionModel().select(livraison);
         });
 
@@ -621,6 +688,7 @@ public final class Controleur {
                         this.afficherTournee(tournee);
                     }
                 }
+                this.trierTableauLivraison();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -645,6 +713,7 @@ public final class Controleur {
                     this.afficherTournee(tournee);
                 }
             }
+            this.trierTableauLivraison();
         }
     }
 
@@ -675,6 +744,19 @@ public final class Controleur {
         }
 
         return texte;
+    }
+
+    /**
+     * Retourne les livraisons d'un ensemble de livreurs.
+     * @param l un ou plusieurs livreurs
+     * @return les livraisons du ou des livreurs
+     */
+    private List<Livraison> getLivraisons(final Livreur... l) {
+        List<Livreur> livreurs = new ArrayList<>(Arrays.asList(l));
+
+        return this.livraisons.stream().filter(
+                livraison -> livreurs.contains(livraison.getLivreur())
+        ).collect(Collectors.toList());
     }
 
     private void reinitialiserPointSelectionne() {
@@ -772,6 +854,10 @@ public final class Controleur {
 
     public CheckBox getAfficherLivreur4CheckBox() {
         return this.afficherLivreur4CheckBox;
+    }
+
+    public Button getGenererFeuillesDeRouteBouton() {
+        return this.genererFeuillesDeRouteBouton;
     }
 
     public void setStage(final Stage stage) {

@@ -1,10 +1,12 @@
 package com.github.hexanome4114.pldagile.utilitaire;
 
-import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
-import com.github.hexanome4114.pldagile.modele.Intersection;
-import com.github.hexanome4114.pldagile.modele.Livraison;
-import com.github.hexanome4114.pldagile.modele.Livreur;
 import com.github.hexanome4114.pldagile.modele.Plan;
+import com.github.hexanome4114.pldagile.modele.Intersection;
+import com.github.hexanome4114.pldagile.modele.Livreur;
+import com.github.hexanome4114.pldagile.modele.Livraison;
+import com.github.hexanome4114.pldagile.modele.FenetreDeLivraison;
+import com.github.hexanome4114.pldagile.modele.Tournee;
+import com.github.hexanome4114.pldagile.modele.Itineraire;
 import javafx.util.Pair;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -16,8 +18,10 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -162,7 +166,7 @@ public final class Serialiseur {
 
             if (!plan.getIntersections().containsKey(idAdresse)) {
                 throw new DocumentException("L'adresse de cette livraison"
-                        + "n'existe pas sur le plan.");
+                        + " n'existe pas sur le plan.");
             }
 
             if (!adresses.add(idAdresse)) {
@@ -176,5 +180,82 @@ public final class Serialiseur {
         }
 
         return livraisons;
+    }
+
+    public static void genererFeuilleDeRoute(final File file,
+                                             final Tournee tournee) {
+        if (!tournee.isTourneeCalculee()) {
+            return;
+        }
+
+        PrintWriter ecrivain;
+        try {
+            ecrivain = new PrintWriter(file, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // HEADER
+        ecrivain.println("Tournée pour le livreur numéro "
+                + tournee.getLivreur().getNumero());
+        ecrivain.println("Nombre de livraisons à effectuer : "
+                + tournee.getLivraisons().size() + '\n');
+        ecrivain.println("L'itinéraire à suivre est le suivant :\n");
+        // Départ
+        ecrivain.println("Départ de l'entrepôt ");
+
+        String nomRuePrecedente = "";
+        for (int i = 0; i < tournee.getLivraisons().size(); ++i) {
+            // Affichage de la livraison
+            Livraison livraison = tournee.getLivraisons().get(i);
+            ecrivain.println("La prochaine livraison doit être livrée entre "
+                    + livraison.getFenetreDeLivraison());
+            ecrivain.println("L'arrivée est prévue à "
+                    + livraison.getHeureArrivee());
+            ecrivain.println();
+            Itineraire itineraire = tournee.getItineraires().get(i);
+            nomRuePrecedente = ecrireItineraire(ecrivain, itineraire,
+                    nomRuePrecedente);
+
+            // Départ prochaine livraison
+            ecrivain.println("Départ du point de livraison prévu à "
+                    + livraison.getHeurePassage()
+                    .plusMinutes(tournee.getTempsParLivraison()) + ".");
+            ecrivain.println('\n');
+        }
+        // Retour à l'entrepôt
+        ecrivain.println("Retour à l'entrepôt.");
+        Itineraire itineraire = tournee.getItineraires()
+                .get(tournee.getLivraisons().size());
+        ecrireItineraire(ecrivain, itineraire, nomRuePrecedente);
+        ecrivain.println("Arrivée à l'entrepôt.");
+        ecrivain.close();
+    }
+
+    private static String ecrireItineraire(final PrintWriter ecrivain,
+                                         final Itineraire itineraire,
+                                         final String nomRuePrecedente) {
+        String nomRuePrecedenteReturn = nomRuePrecedente;
+        for (int i = 0; i < itineraire.getIntersections().size() - 1; ++i) {
+            Intersection intersectionCourante = itineraire
+                    .getIntersections().get(i);
+            Intersection intersectionSuivante = itineraire
+                    .getIntersections().get(i + 1);
+            String nomRue = intersectionCourante.getIntersections()
+                    .get(intersectionSuivante).getValue();
+
+            if (!nomRuePrecedenteReturn.equals(nomRue)) {
+                ecrivain.print("Prendre " + nomRue);
+            } else {
+                ecrivain.print("continuer sur " + nomRue);
+            }
+            if (i != itineraire.getIntersections().size() - 2) {
+                ecrivain.println(", puis");
+            } else {
+                ecrivain.println();
+            }
+            nomRuePrecedenteReturn = nomRue;
+        }
+        return nomRuePrecedenteReturn;
     }
 }
