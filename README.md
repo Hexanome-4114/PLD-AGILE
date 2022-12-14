@@ -15,7 +15,7 @@ Ce projet a été réalisé lors du projet longue durée Agile de l'INSA Lyon.
 
 Le but de ce projet est de réaliser une application client lourd permettant de gérer des itinéraires de livraison. L'application doit permettre de créer des itinéraires, de les modifier, de les supprimer, de les exporter et de les importer. L'application doit également permettre de visualiser les itinéraires sur une carte. L'application est réalisée en Java et utilise la librairie JavaFX.
 
-![Screenshot]()
+![Screenshot](https://imgur.com/a/QsAOhUG)
 
 ## Utilisation
 
